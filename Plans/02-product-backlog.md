@@ -12,14 +12,15 @@ Each item below has a full issue body in `Plans/issues/<id>.md`.
 
 ---
 
-## M0 · Foundations  (repo: VirtualWardrobe)
+## M0 · Foundations  (repo: VirtualWardrobe) — ✅ Complete
 
-| ID   | Title                                                        | Labels           |
-|------|--------------------------------------------------------------|------------------|
-| M0-1 | Initialize Expo + TS strict + Expo Router + lint/format        | feat, M0, feat   |
-| M0-2 | Define PoseProvider + Compositor interfaces (abstraction)     | feat, ml, M0     |
-| M0-3 | Local storage: expo-sqlite + Item/BodyPhoto/TryOn/StoreItem   | feat, M0         |
-| M0-4 | Permissions onboarding flow (camera, photos, storage)         | ux, M0           |
+| ID    | Title                                                          | Labels      | Status     |
+|------|--------------------------------------------------------------|-----------|------------|
+| M0-1 | Initialize Expo + TS strict + Expo Router + lint/format       | feat, M0   | ✅ DONE     |
+| M0-2 | Define PoseProvider + Compositor interfaces (abstraction)     | ml, M0     | ✅ DONE     |
+| M0-3 | Local storage: expo-sqlite + Item/BodyPhoto/TryOn/StoreItem   | feat, M0   | ✅ DONE     |
+| M0-4 | Permissions onboarding flow (camera, photos, storage)         | ux, M0     | ✅ DONE     |
+| M0-5 | Studio route + pose→garment demo (manual fallback)            | feat, ux, ml, M0 | ⏸ PLAN  |
 
 ## M1 · Wardrobe (vertical slice, no try-on yet)
 

@@ -1,0 +1,16 @@
+{
+  "extends": "expo/tsconfig.base",
+   "compilerOptions": {
+    "strict": true,
+    "paths": {
+      "@/store": ["./src/store/index.ts"],
+      "@/store/*": ["./src/store/*"],
+      "@/pose": ["./src/pose/index.ts"],
+      "@/pose/*": ["./src/pose/*"],
+      "@/composer": ["./src/composer/index.ts"],
+      "@/composer/*": ["./src/composer/*"]
+    }
+  },
+   "include": ["**/*.ts", "**/*.tsx", ".expo/types/**/*.ts", "expo-env.d.ts"],
+   "exclude": ["node_modules", "jest.config.mjs", "tests"]
+}
