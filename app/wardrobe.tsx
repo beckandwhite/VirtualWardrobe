@@ -6,6 +6,7 @@ import {
    TouchableOpacity,
 } from 'react-native';
 import { useCallback, useState, useEffect } from 'react';
+import { router } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { r, type Item } from '@/store';
 
@@ -76,11 +77,18 @@ export default function WardrobeScreen() {
                     ) : null
                   }
               ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
-             renderItem={({ item }) => (
-                   <View key={String(item.id)} style={styles.thumb}>
-                           <Text style={styles.itemName}>{item.name}</Text>
-                               <Text style={styles.itemColor}>{item.color}</Text>
-                              </View>
+              renderItem={({ item }) => (
+                    <View key={String(item.id)} style={styles.thumb}>
+                            <Text style={styles.itemName}>{item.name}</Text>
+                                <Text style={styles.itemColor}>{item.color}</Text>
+                                <TouchableOpacity
+                                 style={styles.tryOn}
+                                 activeOpacity={0.8}
+                                 onPress={() =>
+                                    router.push(`/studio?id=${item.id}`)}>
+                                   <Text style={styles.tryOnText}>Try on</Text>
+                                </TouchableOpacity>
+                            </View>
                      )}
             />
 
@@ -116,16 +124,29 @@ const styles = StyleSheet.create({
       justifyContent: 'flex-end',
       padding: 10,
      },
-   itemName: {
-      fontSize: 13,
-      fontWeight: '600',
-      color: '#333',
-   },
-   itemColor: {
-      fontSize: 11,
-      color: '#888',
-      textTransform: 'capitalize',
-   },
+    itemName: {
+       fontSize: 13,
+       fontWeight: '600',
+       color: '#333',
+    },
+    itemColor: {
+       fontSize: 11,
+       color: '#888',
+       textTransform: 'capitalize',
+    },
+    tryOn: {
+       marginTop: 8,
+       backgroundColor: '#111',
+       paddingVertical: 6,
+       paddingHorizontal: 12,
+       borderRadius: 8,
+       alignSelf: 'flex-start',
+    },
+    tryOnText: {
+       color: '#fff',
+       fontSize: 12,
+       fontWeight: '700',
+    },
    empty: {
       textAlign: 'center',
       color: '#888',

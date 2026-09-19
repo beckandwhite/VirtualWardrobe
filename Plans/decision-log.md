@@ -71,4 +71,31 @@ in-flight, build-time choices.
  standard `useEffect → async load() → setState` pattern used for initial loads
  in `catalog.tsx`, `looks.tsx`, and `wardrobe.tsx`. For MVP scaffolding this
  is a known false positive. Disabling in `eslint.config.js` with a comment;
- revisit when a proper async-loading hook lands.
+  revisit when a proper async-loading hook lands.
+
+## 2026-09-18 — M0-5 grilling + design lock
+
+- **D16: M0-5 design locked via the `grilling` workflow** (7 Q&A, all settled):
+   - **Purpose:** minimal end-to-end proof gate; "ugly-but-proves-it", polish deferred to M2.
+   - **Garment imagery:** *both* — bundled sample set (Q5 = generate placeholder PNGs) **+ user
+    upload**. M0-5 seeds a bundled sample; the capture/typing of a user's own garment is M1-1.
+   - **Body photo:** default to a **bundled sample body photo**, allow "pick your own" via
+    `expo-image-picker`. Always viewable, zero-permission, reproducible.
+   - **Auto-box demo:** inject a hardcoded `SAMPLE_KEYPPOINTS` fixture via a
+    `SamplePoseProvider` so the `computeGarmentBox` auto-placement branch runs *visibly* now;
+    `MoveNetPoseProvider` lands in M2-1 (same interface, drop-in).
+   - **Rendering:** garment overlays a body photo as a real image, positioned by the `Transform`.
+   - **Editor:** position via drag, plus scale/rotation/opacity + Reset, all state-driven;
+    no Reanimated (Reanimated stays gated per D9 until M2-2).
+   - **Pose fixture:** standing, straight-on, arms slightly out (shoulder/hip/ankle).
+- **D17: M0-5 status → BUILT** in the same session the design was locked, after the user's go.
+   `createPoseProvider()` returns `SamplePoseProvider` (web/M0-5) / `ManualPoseProvider` (native);
+   the web TFJS branch is a documented future swap. `app/studio.tsx` added; `wardrobe`/`looks`
+   deep-link in; `SamplePoseProvider` + fixture unit-tested.
+- **D18: `grill-me`/`grilling` skills installed from the public ecosystem**
+    (`npx skills add mattpocock/skills@grill-me` + `@grilling` → `~/.agents/skills/`). The
+    `skill` tool's registration list is cached from session start, so `grilling` was executed
+    by reading its `SKILL.md` directly this session; it will appear in the tool list in future
+    sessions. The `grill-me` global install printed a harmless
+    "PromptScript does not support global skill installation" note — the universal variant
+    (OpenCode/agent-agnostic) is the one that matters and it installed.
