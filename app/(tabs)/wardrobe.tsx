@@ -7,7 +7,6 @@ import {
 } from 'react-native';
 import { useCallback, useState, useEffect } from 'react';
 import { router } from 'expo-router';
-import * as ImagePicker from 'expo-image-picker';
 import { r, type Item } from '@/store';
 
 export default function WardrobeScreen() {
@@ -23,39 +22,15 @@ export default function WardrobeScreen() {
        load().catch((e) => console.error('wardrobe load', e));
        }, [load]);
 
-  const onRefresh = useCallback(async () => {
-       setRefreshing(true);
+   const onRefresh = useCallback(async () => {
+        setRefreshing(true);
          try {
            await load();
-          } catch (e) {
+           } catch (e) {
             console.error('refresh failed', e);
              }
         setRefreshing(false);
-       }, [load]);
-
-   const capture = useCallback(async () => {
-       try {
-          const perm = await ImagePicker.requestCameraPermissionsAsync();
-          if (perm.status !== 'granted') {
-            console.warn('camera permission not granted');
-            return;
-             }
-          const photo = await ImagePicker.launchCameraAsync({
-             allowsEditing: true,
-             quality: 0.7,
-             });
-   if (photo.canceled || !photo.assets?.[0]) return;
-    await r.insertItem({
-      type: 'top',
-      name: 'New item',
-      color: 'unknown',
-      imagePath: photo.assets[0].uri,
-       });
-    await load();
-       } catch (e) {
-         console.error('capture failed', e);
-         }
-       }, [load]);
+        }, [load]);
 
     return (
          <View style={styles.screen}>
@@ -95,7 +70,7 @@ export default function WardrobeScreen() {
             <TouchableOpacity
                 style={styles.fab}
             activeOpacity={0.8}
-            onPress={capture}>
+             onPress={() => router.push('/capture')}>
                  <Text style={styles.fabText}>+</Text>
            </TouchableOpacity>
         </View>

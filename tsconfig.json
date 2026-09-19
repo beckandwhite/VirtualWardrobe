@@ -8,7 +8,9 @@
       "@/pose": ["./src/pose/index.ts"],
       "@/pose/*": ["./src/pose/*"],
       "@/composer": ["./src/composer/index.ts"],
-      "@/composer/*": ["./src/composer/*"]
+      "@/composer/*": ["./src/composer/*"],
+      "@/capture": ["./src/capture/index.ts"],
+      "@/capture/*": ["./src/capture/*"]
     }
   },
    "include": ["**/*.ts", "**/*.tsx", ".expo/types/**/*.ts", "expo-env.d.ts"],
