@@ -99,3 +99,44 @@ in-flight, build-time choices.
     sessions. The `grill-me` global install printed a harmless
     "PromptScript does not support global skill installation" note — the universal variant
     (OpenCode/agent-agnostic) is the one that matters and it installed.
+
+## 2026-09-19 — M1/M2 grilling (D19)
+
+Grilled the M1-1…M2-4 issues against the *built* M0 code; several written plans contradicted
+what M0 shipped. Locked outcomes below; the issue docs are amended to match.
+
+- **D19.1 — deep-link param canonical = `?id=`.** The built studio (`app/studio.tsx`) reads
+  `useLocalSearchParams<{id}>` and `wardrobe.tsx` pushes `/studio?id=<id>`, but M1-3/M0-5 text
+  said `?item=`. Mismatch = silent "first wardrobe item" fallback with no crash. **Standardize on
+  `?id=`**; amend M1-3 to match the built code. (One source of truth: the code.)
+- **D19.2 — M1-before-M2.** M2's "wow" needs a *believable* garment+body image, which only M1-1/M1-2
+  produce (M0-5 ships flat placeholder PNGs). **Land M1 (image work) before M2.** M2-1 (web pose) is
+  the exception — it's independent (depends only on M0-2) and can proceed in parallel.
+- **D19.3 — M2-1 vs ADR-004: *vendor* the model, stay local.** `@tensorflow-models/pose-detection`
+  fetches the model by URL and `@tensorflow/tfjs` may JIT — a direct conflict with ADR-004
+  ("fully local / no network"). **Resolution: vendor `model.json`+weights via `expo-asset` (a
+  one-time local cache, no runtime network) and point `modelUrl` at the local asset.** Accept the
+  higher effort vs "npm i two packages"; amend M2-1 to add the vendor+cache task.
+- **D19.4 — adopt a tab layout; routing restructure.** M1/M2 issues assume a `(wardroute)` group but
+  the app is flat. **Decision: tab-based layout** — 3 tabs [Wardrobe `(wardrobe)/index`, `catalog`,
+  `looks`]; studio stays **flat** `app/studio.tsx` (a modal, not a tab — M2-2's `app/studio/StudioScreen.tsx`
+  is amended to flat). Catalog/looks become real tabs (not "More"). This is a refactor touching
+  `_layout.tsx` + every deep-link; it is part of M1-1's scope as the routing baseline.
+- **D19.5 — M1-1 draft = `type='other'` + default color, no migration.** The `items` table has no
+  draft/status column (`type`/`color` are NOT NULL). A draft is an `Item` row with
+  `type='other'` and a placeholder color until typed in M1-2. M1-1 documents this; no schema change.
+- **D19.6 — M1-4 replaces the in-code seed.** M0-4's `onboarding.ts` calls `r.seedCatalog()`, which
+  upserts a hardcoded `CATALOG` array with empty `imagePaths` (gated by `catalog_ingested`). M1-4
+  supersedes this: manifest `assets/store.json` + `src/catalog/ingest.ts`, still gated by the same
+  flag. The in-code seed is removed when M1-4 lands.
+- **D19.7 — M2-2 re-enables Reanimated.** `babel.config.js` omits
+  `react-native-reanimated/plugin` because it broke web Metro while unused (M2-1 handoff note, D9).
+  For M2-2 the plugin is re-enabled and **web + native builds are re-verified** (known regression
+  risk, accepted).
+- **D19.8 — M2-3 adds `expo-sharing` + `export.ts`.** `exportTryOn` flattens body+garment at the
+  final transform: web = `<canvas>` `toBlob`; native = `expo-image-manipulator` composite. Result
+  path → `TryOn.outputPath` (existing column, no migration). `expo-sharing` added as a dependency.
+- **D19.9 — M2-4 polishes the fallback banner.** M0-5 ships plain "adjusting manually" text; M2-4
+  makes it a **dismissible, polished** affordance (native shipping path, not a throwaway — ADR-005).
+- **D19.10 — build order:** `M1-1 → M1-2 → M1-3 → M1-4`, then `M2-1 (vendor) ∥ M2-2`, then `M2-4`,
+  then `M2-3`. Topologically sound (M1-3→M1-4, M1-2→M2-2, M2-2→M2-3/M2-4).
