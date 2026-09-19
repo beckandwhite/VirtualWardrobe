@@ -4,6 +4,7 @@ import {
    StyleSheet,
    FlatList,
    TouchableOpacity,
+   Image,
 } from 'react-native';
 import { useCallback, useState, useEffect } from 'react';
 import { router } from 'expo-router';
@@ -53,18 +54,28 @@ export default function WardrobeScreen() {
                   }
               ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
               renderItem={({ item }) => (
-                    <View key={String(item.id)} style={styles.thumb}>
-                            <Text style={styles.itemName}>{item.name}</Text>
-                                <Text style={styles.itemColor}>{item.color}</Text>
-                                <TouchableOpacity
-                                 style={styles.tryOn}
-                                 activeOpacity={0.8}
-                                 onPress={() =>
-                                    router.push(`/studio?id=${item.id}`)}>
-                                   <Text style={styles.tryOnText}>Try on</Text>
-                                </TouchableOpacity>
-                            </View>
-                     )}
+                     <TouchableOpacity
+                      key={String(item.id)}
+                      activeOpacity={0.85}
+                      style={styles.thumb}
+                      onPress={() => router.push(`/item?id=${item.id}`)}>
+                          <Image
+                          source={{ uri: item.thumbnailPath ?? item.imagePath }}
+                          style={styles.thumbImg}
+                          resizeMode="cover"
+                          fadeDuration={0}
+                          />
+                          <Text style={styles.itemName}>{item.name}</Text>
+                          <Text style={styles.itemColor}>{item.color}</Text>
+                          <TouchableOpacity
+                          style={styles.tryOn}
+                          activeOpacity={0.8}
+                          onPress={() =>
+                            router.push(`/studio?id=${item.id}`)}>
+                            <Text style={styles.tryOnText}>Try on</Text>
+                          </TouchableOpacity>
+                         </TouchableOpacity>
+                       )}
             />
 
             <TouchableOpacity
@@ -91,14 +102,24 @@ const styles = StyleSheet.create({
       marginTop: 8,
       marginBottom: 12,
    },
-   thumb: {
-      height: 140,
-      borderRadius: 14,
-      backgroundColor: '#eee',
-      alignItems: 'flex-end',
-      justifyContent: 'flex-end',
-      padding: 10,
-     },
+    thumb: {
+       height: 140,
+       borderRadius: 14,
+       backgroundColor: '#eee',
+       alignItems: 'flex-end',
+       justifyContent: 'flex-end',
+       padding: 10,
+        },
+    thumbImg: {
+       position: 'absolute',
+       top: 0,
+       left: 0,
+       right: 0,
+       height: 90,
+       borderTopLeftRadius: 14,
+       borderTopRightRadius: 14,
+       backgroundColor: '#f5f5f5',
+        },
     itemName: {
        fontSize: 13,
        fontWeight: '600',

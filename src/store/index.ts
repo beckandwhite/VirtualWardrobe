@@ -14,3 +14,5 @@ export type {
    NewItem,
 } from './repo';
 export * from './onboarding';
+export * from './useItem';
+export { makeThumbnail, THUMB_SIZE } from './thumbnail';
