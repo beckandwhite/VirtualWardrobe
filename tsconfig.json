@@ -10,7 +10,9 @@
       "@/composer": ["./src/composer/index.ts"],
       "@/composer/*": ["./src/composer/*"],
       "@/capture": ["./src/capture/index.ts"],
-      "@/capture/*": ["./src/capture/*"]
+        "@/capture/*": ["./src/capture/*"],
+        "@/wardrobe": ["./src/wardrobe/index.ts"],
+        "@/wardrobe/*": ["./src/wardrobe/*"]
     }
   },
    "include": ["**/*.ts", "**/*.tsx", ".expo/types/**/*.ts", "expo-env.d.ts"],
