@@ -83,16 +83,34 @@ npx eslint . --max-warnings 0
 ingestion into SQLite happens at boot and is idempotent under `catalog_ingested`
 flag (see `src/catalog/ingest.ts`).
 
-## 7. Dev environment limitations
+## 7. Dev environment limitations (M3-5)
 
 The current dev setup can't:
-- Render a web UI (no browser in the sandbox) — M2-1's "attach a screenshot"
-  DoD is therefore not runnable here. Tracked in
-  `Plans/issues/M3-5-dev-env-playwright.md`.
-- Run the iOS/Android simulator — same story.
-- Talk to the canonical tfhub.dev URL (the endpoint is dead).
+- Render a web UI (no browser in the sandbox). `@playwright/test` is not installed,
+   and even if it were, the harness below is designed to be **skippable** when the
+   model bytes are absent, so CI stays green in a clean checkout.
+- Run the iOS/Android simulator — same story; native E2E (Expo Go / Detox) is out
+    of scope for M3-5.
+- Talk to the canonical `tfhub.dev` MoveNet URL (302→Kaggle; see §2). The
+   `fetch:pose` script has a fallback; a model-absent run still produces a PNG of
+    the manual-fallback path.
 
-The **M3-5** issue proposes a Playwright-based harness that runs the web
-build, loads a fixture body photo, runs MoveNet, and screenshots the result.
-Until M3-5 lands, the M2-1 screenshot DoD is waived per user request; a one-run
-demo note can be attached when the model is manually fetched.
+### M3-5 harness (`npm run e2e:pose`)
+- **Script:** `scripts/pose-smoke.mjs` — a thin Playwright runner that drives
+   `expo start --web` through a fixture body photo + catalog garment, waits for
+   MoveNet auto-place *or* the "Auto-drape unavailable — adjusting manually"
+    banner (assert on the status text), and captures a PNG to
+   `docs/screenshots/studio-<ts>.png`.
+- **Skip logic:** the harness detects `process.env.MOVENET_MODEL_URL` *and* the
+    presence of `public/pose/movenet-singlepose-lite/`. When either is missing,
+    the run asserts the **manual-fallback** path instead of failing, so CI is
+    green on a clean machine (ADR-004: the model is an enhancement, not a gate).
+- **Pure decision, jest-testable:** `scripts/pose-smoke-path.mjs` exports
+   `decidePath({ modelUrl, modelDir })` — a pure function returning `'auto'` or
+   `'manual'`. That's the one thing we can unit-test in the sandbox; the actual
+    `e2e:pose` run is a one-line `node scripts/pose-smoke.mjs` and is deferred
+   to a browser-available machine (M3-5 AC1 deferred for the same reason as
+    M2-1's screenshot DoD; no `@playwright/test` installed yet).
+- **Demo note auto-gen:** after a run, the script writes
+   `docs/screenshots/last-run.md` with the path + the captured PNG filename.
+

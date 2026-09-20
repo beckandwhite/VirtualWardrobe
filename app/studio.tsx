@@ -10,7 +10,6 @@ import {
     StyleSheet,
     TouchableOpacity,
     ScrollView,
-    Platform,
     type ImageSourcePropType,
     type StyleProp,
     type ViewStyle,
@@ -18,7 +17,6 @@ import {
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocalSearchParams } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
-import * as Sharing from 'expo-sharing';
 import {
     useSharedValue,
     useAnimatedStyle,
@@ -32,13 +30,17 @@ import {
     autoTransformFor,
     clampTransform,
     IDENTITY_TRANSFORM,
-    serializeTransform,
     SCALE_MIN,
     SCALE_MAX,
     ROTATION_MIN,
     ROTATION_MAX,
 } from '@/composer';
-import { exportTryOn, downloadDataUri } from '@/composer/export';
+import {
+    shareLook,
+    persistLook,
+    reopenTransform,
+    type ShareResult,
+} from '@/composer/share';
 import type { Keypoint, Transform } from '@/pose';
 import sampleBody from '../../assets/sample/body.png'; // eslint-disable-line import/no-unresolved
 import sampleGarment from '../../assets/sample/garment.png'; // eslint-disable-line import/no-unresolved
@@ -281,93 +283,64 @@ export default function StudioScreen() {
           }
      }, []);
 
-      // Export the current composite to an image file (web: canvas composite,
-      // native: garment image — see export.ts / D21.3), then persist the TryOn
-      // row with the exact final transform + output path so the look reopens.
-      const persistLook = useCallback(
-           async (): Promise<TryOn | null> => {
-             if (!garment) return null;
-             setSaving(true);
-             try {
-                let itemId = garment.id;
-                if (!garment.inWardrobe) {
-                   const inserted = await r.insertItem({
-                       type: garment.type,
-                       name: garment.name,
-                       color: 'unknown',
-                       tags: ['catalog'],
-                       imagePath: garment.imagePath,
-                     });
-                   itemId = inserted.id;
-                 }
-                const out = await exportTryOn(
-                     {
-                        bodyUri: bodyPath ?? 'sample://body',
-                        garmentSource: resolveGarmentSource(garment),
-                        transform: mirror,
-                     },
-                     { w: Math.max(dims.w, 720), h: Math.max(dims.h, 960) },
-                 );
-                if (out.error || !out.outputPath) {
-                   throw new Error(out.error ?? 'export produced no image');
-                 }
-                const body = await r.insertBodyPhoto(bodyPath ?? 'sample://body');
-                const row = await r.insertTryOn(
-                     body.id,
-                     itemId,
-                     serializeTransform(mirror),
-                     out.outputPath,
-                 );
-                await refreshRecent();
-                return row;
-             } catch (e) {
-             // M2-3: a failed export surfaces visibly, never silent.
-              console.error('studio: export/save failed', e);
-              setNotice({ kind: 'error', text: 'Export failed — try again.' });
-              return null;
-             } finally {
-              setSaving(false);
-             }
-           },
-           [garment, bodyPath, mirror, dims.w, dims.h, refreshRecent],
-       );
-
-       // Share the just-exported look: native share sheet (iOS/Android saves to
-       // the media library) or a web download of the data URI.
-      const share = useCallback(async () => {
-           const row = await persistLook();
-           if (!row) return;
-           const out = row.outputPath;
-           if (!out) return;
-           if (Platform.OS === 'web') {
-             downloadDataUri(out);
-             setNotice({ kind: 'info', text: 'Look saved — downloaded image.' });
-            return;
-           }
-           try {
-             await Sharing.shareAsync(out);
-             setNotice({ kind: 'info', text: 'Look saved.' });
-          } catch (e) {
-             if ((e as { code?: string })?.code === 'SHARING_CANCELLED') return;
-             console.error('studio: share failed', e);
-             setNotice({ kind: 'error', text: 'Share failed.' });
+        // Persist the current composite: export + write the TryOn row via the
+        // M2-3 composer pipeline (web composite / native garment degrade, D21.3).
+        // Stateful wrapper that keeps the error surface + the recent strip fresh.
+       const persist = useCallback(async (): Promise<TryOn | null> => {
+            if (!garment) return null;
+            setSaving(true);
+            try {
+                const row = await persistLook({
+                   garment,
+                   bodyPath: bodyPath ?? 'sample://body',
+                   transform: mirror,
+                   dims: { w: Math.max(dims.w, 720), h: Math.max(dims.h, 960) },
+                   });
+              await refreshRecent();
+             return row;
+           } catch (e) {
+            // M2-3: a failed export surfaces visibly, never silent.
+            console.error('studio: export/save failed', e);
+            setNotice({ kind: 'error', text: 'Export failed — try again.' });
+            return null;
+          } finally {
+            setSaving(false);
           }
-       }, [persistLook]);
-
-       // Open an existing saved look back into the editor (reconstruct from the
-       // stored transform — M2-3 reopen / M3-2 gallery).
-      const reopen = useCallback(
-          async (look: TryOn) => {
-            const item = await r.getItem(look.itemId);
-            if (!item) return;
-            const t = JSON.parse(look.transform) as Transform;
-            applyTransform(t, false);
-            setGarment(toGarment(item));
-            setBodySource({ uri: look.outputPath ?? undefined });
-            setBodyPath(look.outputPath ?? null);
-            setNotice({ kind: 'info', text: `Reopened look #${look.id}` });
           },
-          [applyTransform],
+          [garment, bodyPath, mirror, dims.w, dims.h, refreshRecent],
+      );
+
+        // Share the just-exported look through the M3-2 unified share sheet (the
+        // same function the Looks gallery calls — no duplicated share code).
+       const share = useCallback(async () => {
+          const row = await persist();
+          if (!row) return;
+          const result: ShareResult = await shareLook(row);
+          if (result.kind === 'error') {
+             setNotice({ kind: 'error', text: 'Share failed.' });
+             return;
+            }
+          setNotice({
+             kind: 'info',
+             text: result.kind === 'downloaded'
+                     ? 'Look saved — downloaded image.'
+                     : 'Look saved.',
+            });
+      }, [persist]);
+
+         // Open an existing saved look back into the editor (reconstruct from the
+         // stored transform — M2-3 reopen / M3-2 gallery).
+       const reopen = useCallback(
+            async (look: TryOn) => {
+              const item = await r.getItem(look.itemId);
+              if (!item) return;
+              applyTransform(reopenTransform(look.transform), false);
+              setGarment(toGarment(item));
+              setBodySource({ uri: look.outputPath ?? undefined });
+              setBodyPath(look.outputPath ?? null);
+              setNotice({ kind: 'info', text: `Reopened look #${look.id}` });
+             },
+             [applyTransform],
        );
 
      // Overlay layer: a faint skeleton the user can toggle so they see *why* the
