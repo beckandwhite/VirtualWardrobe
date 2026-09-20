@@ -30,6 +30,17 @@ export interface StoreItem {
    createdAt: string;
 }
 
+// Catalog entry as it is persisted into `store_items`. Mirrors the bundled
+// `assets/store.json` shape minus the manifest slug `id` (the row gets its own
+// autoincrement `id`); `specs` is optional on the manifest, coerced to null.
+export interface NewStoreEntry {
+   name: string;
+   category: ItemCategory;
+   color: string;
+   imagePaths: string[];
+   specs?: string | null;
+}
+
 export interface BodyPhoto {
    id: number;
    path: string;

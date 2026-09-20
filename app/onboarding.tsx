@@ -29,7 +29,6 @@ export default function OnboardingScreen() {
 
    const finish = useCallback(async () => {
       await r.setOnboarded();
-      await r.seedCatalog();
       router.replace('/wardrobe');
        }, []);
 

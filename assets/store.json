@@ -1,0 +1,20 @@
+[
+  { "id": "tee-white", "name": "Classic White Tee", "category": "top", "color": "white", "imagePaths": ["assets/store/placeholder-top.png"], "specs": "100% cotton crew-neck." },
+  { "id": "tee-black", "name": "Black Crew Tee", "category": "top", "color": "black", "imagePaths": ["assets/store/placeholder-top.png"], "specs": "100% cotton crew-neck." },
+  { "id": "stripe-shirt", "name": "Striped Shirt", "category": "top", "color": "white", "imagePaths": ["assets/store/placeholder-top.png"], "specs": "Breathable stripe, button-front." },
+  { "id": "grey-hoodie", "name": "Grey Hoodie", "category": "top", "color": "grey", "imagePaths": ["assets/store/placeholder-top.png"], "specs": "Fleece-lined hood." },
+  { "id": "denim-jacket", "name": "Denim Jacket", "category": "outerwear", "color": "blue", "imagePaths": ["assets/store/placeholder-outerwear.png"], "specs": "Classic 5-pocket denim." },
+  { "id": "leather-jacket", "name": "Leather Jacket", "category": "outerwear", "color": "black", "imagePaths": ["assets/store/placeholder-outerwear.png"], "specs": "Full-grain leather." },
+  { "id": "puffer-jacket", "name": "Puffer Jacket", "category": "outerwear", "color": "grey", "imagePaths": ["assets/store/placeholder-outerwear.png"], "specs": "Quilted, down-fill." },
+  { "id": "black-chinos", "name": "Black Chinos", "category": "bottom", "color": "black", "imagePaths": ["assets/store/placeholder-bottom.png"], "specs": "Stretch cotton chino." },
+  { "id": "tapered-jeans", "name": "Tapered Jeans", "category": "bottom", "color": "blue", "imagePaths": ["assets/store/placeholder-bottom.png"], "specs": "Tapered selvedge denim." },
+  { "id": "cargo-pants", "name": "Cargo Pants", "category": "bottom", "color": "khaki", "imagePaths": ["assets/store/placeholder-bottom.png"], "specs": "Utility pockets." },
+  { "id": "chinos-navy", "name": "Navy Chinos", "category": "bottom", "color": "navy", "imagePaths": ["assets/store/placeholder-bottom.png"], "specs": "Stretch cotton chino." },
+  { "id": "summer-dress", "name": "Summer Dress", "category": "dress", "color": "red", "imagePaths": ["assets/store/placeholder-dress.png"], "specs": "Lightweight A-line." },
+  { "id": "sundress", "name": "Floral Sundress", "category": "dress", "color": "white", "imagePaths": ["assets/store/placeholder-dress.png"], "specs": "Floral print, midi." },
+  { "id": "cocktail-dress", "name": "Cocktail Dress", "category": "dress", "color": "black", "imagePaths": ["assets/store/placeholder-dress.png"], "specs": "Slim fit, midi." },
+  { "id": "leather-boots", "name": "Leather Boots", "category": "shoes", "color": "brown", "imagePaths": ["assets/store/placeholder-shoes.png"], "specs": "Lace-up leather." },
+  { "id": "white-sneakers", "name": "White Sneakers", "category": "shoes", "color": "white", "imagePaths": ["assets/store/placeholder-shoes.png"], "specs": "Low-top canvas." },
+  { "id": "running-shoes", "name": "Running Shoes", "category": "shoes", "color": "grey", "imagePaths": ["assets/store/placeholder-shoes.png"], "specs": "Cushioned trainers." },
+  { "id": "wool-scarf", "name": "Wool Scarf", "category": "other", "color": "grey", "imagePaths": ["assets/store/placeholder-other.png"], "specs": "Merino blend." }
+]

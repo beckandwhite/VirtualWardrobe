@@ -2,6 +2,7 @@ export { initStore, getDb } from './db';
 export type {
    Item,
    StoreItem,
+   NewStoreEntry,
    BodyPhoto,
    TryOn,
    ItemCategory,

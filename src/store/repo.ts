@@ -1,6 +1,6 @@
 // Repository / CRUD layer over the SQLite store.
 // UI never touches db.ts directly — it only uses the exported `r`.
-import { getDb, type Item, type StoreItem, type BodyPhoto, type TryOn, type ItemCategory } from './db';
+import { getDb, type Item, type StoreItem, type NewStoreEntry, type BodyPhoto, type TryOn, type ItemCategory } from './db';
 
 function nowIso(): string {
    return new Date().toISOString();
@@ -50,14 +50,6 @@ export interface NewItem {
    thumbnailPath?: string | null;
 }
 
-const CATALOG = [
-   { name: 'Classic White Tee', category: 'top' as ItemCategory, color: 'white', imagePaths: [] },
-   { name: 'Denim Jacket', category: 'outerwear' as ItemCategory, color: 'blue', imagePaths: [] },
-   { name: 'Black Chinos', category: 'bottom' as ItemCategory, color: 'black', imagePaths: [] },
-   { name: 'Summer Dress', category: 'dress' as ItemCategory, color: 'red', imagePaths: [] },
-   { name: 'Leather Boots', category: 'shoes' as ItemCategory, color: 'brown', imagePaths: [] },
-];
-
 export interface Repo {
    getSetting(key: string): Promise<string | undefined>;
    setSetting(key: string, value: string): Promise<void>;
@@ -67,8 +59,8 @@ export interface Repo {
    deleteItem(id: number): Promise<void>;
    listItems(): Promise<Item[]>;
    getItem(id: number): Promise<Item | undefined>;
-   listStoreItems(): Promise<StoreItem[]>;
-   seedCatalog(): Promise<void>;
+    listStoreItems(): Promise<StoreItem[]>;
+    insertStoreItem(input: NewStoreEntry): Promise<StoreItem>;
    insertBodyPhoto(path: string): Promise<BodyPhoto>;
    insertTryOn(bodyPhotoId: number, itemId: number, transform: string, outputPath?: string | null): Promise<TryOn>;
    listTryOns(): Promise<TryOn[]>;
@@ -149,17 +141,25 @@ function build(): Repo {
         }));
       }
 
-   async function seedCatalog(): Promise<void> {
+   async function insertStoreItem(input: NewStoreEntry): Promise<StoreItem> {
       const db = await getDb();
-      for (const entry of CATALOG) {
-        const exists = await db.getFirstAsync<{ x: number }>('SELECT 1 AS x FROM store_items WHERE name = ? AND source = ?', [entry.name, 'catalog']);
-        if (exists) continue;
-        await db.runAsync(
-        'INSERT INTO store_items (source, name, category, color, image_paths, specs, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
-        ['catalog', entry.name, entry.category, entry.color, pathsToRow(entry.imagePaths), null, nowIso()],
-        );
-        }
-      await setSetting('catalog_ingested', '1');
+      const res = await db.runAsync(
+       'INSERT INTO store_items (source, name, category, color, image_paths, specs, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
+       ['catalog', input.name, input.category, input.color, pathsToRow(input.imagePaths), input.specs ?? null, nowIso()],
+       );
+      const id = res.lastInsertRowId;
+      const row = await db.getFirstAsync<StoreItemRow>('SELECT * FROM store_items WHERE id = ?', [id]);
+      if (!row) throw new Error('insertStoreItem: row missing after insert');
+      return {
+        id,
+        source: 'catalog',
+        name: row.name,
+        category: row.category,
+        color: row.color,
+        imagePaths: rowToPaths(row.image_paths),
+        specs: row.specs,
+        createdAt: row.created_at,
+       };
       }
 
    async function insertBodyPhoto(path: string): Promise<BodyPhoto> {
@@ -217,7 +217,7 @@ function build(): Repo {
       listItems,
       getItem,
       listStoreItems,
-      seedCatalog,
+      insertStoreItem,
       insertBodyPhoto,
       insertTryOn,
       listTryOns,

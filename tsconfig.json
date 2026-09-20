@@ -11,8 +11,10 @@
       "@/composer/*": ["./src/composer/*"],
       "@/capture": ["./src/capture/index.ts"],
         "@/capture/*": ["./src/capture/*"],
-        "@/wardrobe": ["./src/wardrobe/index.ts"],
-        "@/wardrobe/*": ["./src/wardrobe/*"]
+   "@/wardrobe": ["./src/wardrobe/index.ts"],
+   "@/wardrobe/*": ["./src/wardrobe/*"],
+   "@/catalog": ["./src/catalog/index.ts"],
+   "@/catalog/*": ["./src/catalog/*"]
     }
   },
    "include": ["**/*.ts", "**/*.tsx", ".expo/types/**/*.ts", "expo-env.d.ts"],
