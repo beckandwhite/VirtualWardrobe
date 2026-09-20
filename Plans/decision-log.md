@@ -183,3 +183,54 @@ what M0 shipped. Locked outcomes below; the issue docs are amended to match.
   (angle from `atan2`) and dots as round `View`s — toggleable by a "Skeleton" button. This is the
    `transformed overlay layer` option in the issue; it's a no-dep, web- + native-compatible
   stand-in.
+
+## 2026-09-20 — M2-2/M2-3/M2-4 land (Reanimated + export/share + fallback polish)
+
+- **D21.1 — D19.7 resolved: the Reanimated plugin re-enabled without the historical web-metro break.**
+   Re-enabling `react-native-reanimated/plugin` (D19.7) was the accepted regression risk; it did
+   **not** re-break web metro. The historical `babel.config.js` note ("Unknown option: .name")
+   was from an *older* Reanimated/worklets split — on the installed `react-native-reanimated@4.5.1`
+   (+ `react-native-worklets@0.10.1`) the plugin transforms a worklet fixture cleanly (verified with
+   `babel.transformFileSync` over a temp worklet: no throw). `babel.config.js` now enables it as the
+   last plugin. (If a future web-metro break recurs, the fallback is to gate the plugin behind
+   `platform` — not done now, no symptom.)
+- **D21.2 — one numeric shared value per transform field, not a single object shared value.**
+  Reanimated 4's `withTiming` is typed `AnimatableValue` (a number / color / a known
+   `AnimatableValueObject`), *not* an arbitrary `Transform`, and `SharedValue.value` (not
+   `.current`) is the access API in v4. The studio therefore keeps five numeric `useSharedValue`s
+   (`sx/sy/ss/srot/sop`) plus a `size` shared value, composed in one `useAnimatedStyle`, and mirrored
+   back into a single `Transform` via `useAnimatedReaction` + `runOnJS(setMirror)`. Every write goes
+   through `applyTransform` which clamps the assembled transform via the pure `clampTransform` (D21.3)
+   before pushing each field through `withTiming`. This keeps the editor on the UI thread (the M2-2
+   "no main-thread jank" goal) while giving one canonical `Transform` for serialization.
+   `react-hooks/immutability` flags the `.value =` writes as "modifying an immutable" — a known false
+   positive for Reanimated; disabled via a file-level `/* eslint-disable */` with a comment.
+- **D21.3 — native "two-image composite" is unavailable; export degrades to the garment image.**
+   M2-3 asks for `expo-image-manipulator` to composite body+garment. The installed
+   `expo-image-manipulator@57.0.19` only exposes single-image actions (`resize/rotate/flip/crop/
+   extent` + a web-only `extent`); there is no two-image compose op. Rather than pull a new dependency
+   (ADR: minimal deps), `exportTryOn` splits: **web** composites body+garment on a real
+   `<canvas>` (the `compose` core, unit-tested in `tests/composer/export.test.ts`); **native**
+   degrades to exporting the garment image itself via `manipulateAsync(gUri, [], { JPEG })` — the
+   garment is what the user is trying on, so it's the honest output. `expo-media-library` is not an
+   install, so "Save to Photos" = the `expo-sharing` share sheet (iOS/Android save to the media
+   library) on native and `downloadDataUri` on web. Pure `compose` lives in `src/composer/compose.ts`
+   (expo-free, jest-runnable); `src/composer/export.ts` adds the platform bits and is imported
+   directly by the app (not the barrel, so jest never resolves the expo modules).
+- **D21.4 — `compose` is an injectable pure core; the platform layer wraps it.** `compose(input,w,h,
+   makeCanvas)` takes a `makeCanvas` factory so the M3-5 Playwright harness and the jest stub can
+   both feed a 2D context and assert the layers were drawn into the expected rects (body full-canvas,
+   garment at `x*w,y*h` + rotation + `max(w,h)*scale` side). On web the caller supplies
+   `document.createElement('canvas')`; in tests a recorded stub. This is the seam M3-5 closes.
+- **D21.5 — M2-4 is satisfied by the same studio, no UI branch.** The manual fallback is a *data*
+   difference (`keypoints.length === 0` → `autoPlaced=false`), not a UI branch: `autoTransformFor([])`
+   returns the identity `Transform`, the sliders/drag operate identically, and only `autoPlaced`
+   drives the dismissible "adjusting manually" banner. The sole `Platform.OS` use in the studio is the
+   export/save path (D21.3), which is a data/behavior difference, not an editor branch — matching M2-4's
+   "reviewer can see the only platform difference is provider selection, not UI branching".
+- **D21.6 — in-sandbox verification ceiling.** No simulator/browser in the sandbox, so M2-2's "smooth /
+   no jank", M2-3's live share sheet + native export, and M2-4's "produces a saved look on native"
+   are code-complete and unit-tested (`clampTransform`, `autoTransformFor`, serialize round-trip,
+   `compose` layer geometry) but **not runtime-exercised**. This is the `ml`/`spike` DoD tracked by
+   M3-5 (headless Playwright `e2e:pose`); the manual-fallback path *is* exercised (manual provider
+   returns `[]`, banner shows). Same precedent as M2-1 D20.5.

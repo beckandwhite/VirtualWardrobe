@@ -1,35 +1,56 @@
+// The react-hooks/immutability rule flags shared-value `.value =` writes as
+// "modifying a variable React considers immutable", but Reanimated shared values
+// are the explicit exception — their whole contract is that `.value` is mutated.
+/* eslint-disable react-hooks/immutability */
 import {
-   Image,
-   PanResponder,
-   Text,
-   View,
-   StyleSheet,
-   TouchableOpacity,
-   type ImageSourcePropType,
+      Image,
+    PanResponder,
+    Text,
+    View,
+    StyleSheet,
+    TouchableOpacity,
+    ScrollView,
+    Platform,
+    type ImageSourcePropType,
+    type StyleProp,
+    type ViewStyle,
 } from 'react-native';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useLocalSearchParams, router } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
-import { r, type Item, type StoreItem } from '@/store';
-import { createPoseProvider, safeEstimate } from '@/pose';
-import { computeGarmentBox } from '@/composer';
+import * as Sharing from 'expo-sharing';
 import {
-   IDENTITY_TRANSFORM,
-   serializeTransform,
-   type Keypoint,
-   type Transform,
-} from '@/pose';
+    useSharedValue,
+    useAnimatedStyle,
+    useAnimatedReaction,
+    withTiming,
+    runOnJS,
+} from 'react-native-reanimated';
+import { r, type Item, type StoreItem, type TryOn } from '@/store';
+import { createPoseProvider, safeEstimate } from '@/pose';
+import {
+    autoTransformFor,
+    clampTransform,
+    IDENTITY_TRANSFORM,
+    serializeTransform,
+    SCALE_MIN,
+    SCALE_MAX,
+    ROTATION_MIN,
+    ROTATION_MAX,
+} from '@/composer';
+import { exportTryOn, downloadDataUri } from '@/composer/export';
+import type { Keypoint, Transform } from '@/pose';
 import sampleBody from '../../assets/sample/body.png'; // eslint-disable-line import/no-unresolved
 import sampleGarment from '../../assets/sample/garment.png'; // eslint-disable-line import/no-unresolved
 
 // A garment to overlay: either a wardrobe Item or a catalog StoreItem, normalized
 // to a common shape the studio only ever talks to.
 interface Garment {
-   id: number;
-   type: Item['type'];
-   name: string;
-   imagePath: string;
-   inWardrobe: boolean;
+    id: number;
+    type: Item['type'];
+    name: string;
+    imagePath: string;
+    inWardrobe: boolean;
 }
 
 const CATALOG_PLACEHOLDER = 'catalog://placeholder';
@@ -38,439 +59,726 @@ const CATALOG_PLACEHOLDER = 'catalog://placeholder';
 // Indexed into the fixed 17-keypoint ORDER that `SAMPLE_KEYPPOINTS` produces
 // (nose 0 → right_ankle 16 — the COCO ordering the web provider matches).
 const KEYS = [
-   [5, 11], [11, 12], [12, 23], [12, 14], [14, 16], [23, 25], [25, 27],
-   [6, 12], [6, 11], [5, 6], [5, 7], [7, 9], [7, 5], [6, 8], [8, 10],
-   [1, 2], [1, 3], [2, 4],
+     [5, 11], [11, 12], [12, 23], [12, 14], [14, 16], [23, 25], [25, 27],
+     [6, 12], [6, 11], [5, 6], [5, 7], [7, 9], [7, 5], [6, 8], [8, 10],
+     [1, 2], [1, 3], [2, 4],
 ];
 function lineBetween(a: { x: number; y: number }, b: { x: number; y: number }) {
-   const x1 = a.x, y1 = a.y, x2 = b.x, y2 = b.y;
-   const dx = x2 - x1, dy = y2 - y1;
-   return {
-      left: Math.min(x1, x2),
-      top: Math.min(y1, y2),
-      width: Math.hypot(dx, dy),
-      angle: Math.atan2(dy, dx),
-    };
-    }
+     const x1 = a.x, y1 = a.y, x2 = b.x, y2 = b.y;
+     const dx = x2 - x1, dy = y2 - y1;
+     return {
+        left: Math.min(x1, x2),
+        top: Math.min(y1, y2),
+        width: Math.hypot(dx, dy),
+        angle: Math.atan2(dy, dx),
+       };
+}
 
 // The bundled placeholder stands in for any garment with no real image of its own.
 function resolveGarmentSource(item: Garment): ImageSourcePropType {
-   const real = item.imagePath && !item.imagePath.startsWith(CATALOG_PLACEHOLDER);
-   return real ? { uri: item.imagePath } : sampleGarment;
+     const real = item.imagePath && !item.imagePath.startsWith(CATALOG_PLACEHOLDER);
+     return real ? { uri: item.imagePath } : sampleGarment;
 }
 
 const clamp01 = (v: number) => Math.max(0, Math.min(1, v));
-const clampRange = (v: number, lo: number, hi: number) =>
-   Math.max(lo, Math.min(hi, v));
 
 function toGarment(i: Item): Garment {
-   return { id: i.id, type: i.type, name: i.name, imagePath: i.imagePath, inWardrobe: true };
+     return { id: i.id, type: i.type, name: i.name, imagePath: i.imagePath, inWardrobe: true };
 }
 function toGarmentStore(s: StoreItem): Garment {
-   return {
-      id: s.id,
-      type: s.category,
-      name: s.name,
-      imagePath: s.imagePaths[0] ?? CATALOG_PLACEHOLDER,
-      inWardrobe: false,
-   };
+     return {
+        id: s.id,
+        type: s.category,
+        name: s.name,
+        imagePath: s.imagePaths[0] ?? CATALOG_PLACEHOLDER,
+        inWardrobe: false,
+       };
 }
 
 export default function StudioScreen() {
-   const { id } = useLocalSearchParams<{ id?: string }>();
+     const { id } = useLocalSearchParams<{ id?: string }>();
 
-   const [garment, setGarment] = useState<Garment | null>(null);
-   const [bodySource, setBodySource] = useState<ImageSourcePropType>(sampleBody);
-   const [bodyPath, setBodyPath] = useState<string | null>(null);
-   const [keypoints, setKeypoints] = useState<Keypoint[]>([]);
-    const [transform, setTransform] = useState<Transform>(IDENTITY_TRANSFORM);
-    const [autoPlaced, setAutoPlaced] = useState(false);
-    const [saving, setSaving] = useState(false);
-    const [dims, setDims] = useState({ w: 0, h: 0 });
-    const [showSkeleton, setShowSkeleton] = useState(true);
+     const [garment, setGarment] = useState<Garment | null>(null);
+     const [bodySource, setBodySource] = useState<ImageSourcePropType>(sampleBody);
+     const [bodyPath, setBodyPath] = useState<string | null>(null);
+     const [keypoints, setKeypoints] = useState<Keypoint[]>([]);
+     const [autoPlaced, setAutoPlaced] = useState(false);
+     const [saving, setSaving] = useState(false);
+     const [showSkeleton, setShowSkeleton] = useState(true);
+      const [dims, setDims] = useState({ w: 0, h: 0 });
+       // The manual-fallback banner (M2-4): shown when pose auto-drape is unavailable.
+      const [manualBanner, setManualBanner] = useState({ open: true, dismissed: false });
+       // A visible error surface for a failed export/share (M2-3: never silent).
+      const [notice, setNotice] = useState<{ kind: 'info' | 'error'; text: string } | null>(null);
+       // The minimal saved-looks strip (M2-3): recent TryOn rows, newest first.
+      const [recent, setRecent] = useState<TryOn[]>([]);
+      const refreshRecent = useCallback(async () => {
+          setRecent((await r.listTryOns()).slice(0, 4));
+      }, []);
+      useEffect(() => {
+          refreshRecent().catch((e) => console.error('studio: recent looks', e));
+      }, [refreshRecent]);
 
-   // Tracked in an effect so the ref is never read/written during render
-   // (react-hooks/refs). onPanResponderGrant reads the last committed transform.
-   const tRef = useRef(transform);
-   useEffect(() => {
-      tRef.current = transform;
-   }, [transform]);
-   const startRef = useRef({ x: 0.5, y: 0.5 });
+     // The transform, split into one numeric shared value per field. Each field
+     // is a Reanimated `AnimatableValue` (a number), so slider/drag edits animate
+     // on the UI thread with no main-thread jank (M2-2). The five are composed in
+     // `garmentStyle` and mirrored back into a single `Transform` for the sliders,
+     // the readouts, and serialization on save — the one transform type both the
+     // auto (web) and manual (native) paths serialize (M2-4).
+     const sx = useSharedValue(IDENTITY_TRANSFORM.x);
+     const sy = useSharedValue(IDENTITY_TRANSFORM.y);
+     const ss = useSharedValue(IDENTITY_TRANSFORM.scale);
+     const srot = useSharedValue(IDENTITY_TRANSFORM.rotation);
+     const sop = useSharedValue(IDENTITY_TRANSFORM.opacity);
+     const size = useSharedValue({ w: 0, h: 0 });
 
-   // 1. Resolve the garment: deep-linked wardrobe item, else first wardrobe item,
-   //    else first catalog entry. (Q2/Q3: always shows something.)
-   useEffect(() => {
-      let alive = true;
-      (async () => {
-         try {
-            const chosen = id ? await r.getItem(Number(id)) : undefined;
-            if (chosen && alive) {
-               setGarment(toGarment(chosen));
-               return;
-            }
-            const wardrobe = await r.listItems();
-            if (wardrobe.length) {
-               if (alive) setGarment(toGarment(wardrobe[0]));
-               return;
-            }
-            const catalog = await r.listStoreItems();
-            if (catalog.length && alive) setGarment(toGarmentStore(catalog[0]));
-         } catch (e) {
-            console.error('studio: garment resolve failed', e);
-         }
-      })();
-      return () => {
-         alive = false;
-      };
-   }, [id]);
+     // Mirror of the five fields for JS-side consumers (serialization + readouts).
+     const [mirror, setMirror] = useState<Transform>({ ...IDENTITY_TRANSFORM });
+     // The last auto-derived box, so "Reset" returns to confident auto placement.
+     const autoRef = useRef<Transform>({ ...IDENTITY_TRANSFORM });
 
-   // 2. Pose → box → initial transform. SamplePoseProvider (web) auto-places;
-   //    ManualPoseProvider (native) returns [] → identity + "adjusting manually".
-   useEffect(() => {
-      if (!garment) return;
-      let alive = true;
-      (async () => {
-         const provider = createPoseProvider();
-         const kps = await safeEstimate(provider, bodyPath ?? '');
-         if (!alive) return;
-         setKeypoints(kps);
-         const t = computeGarmentBox(kps, garment.type);
-         setAutoPlaced(t !== null);
-         setTransform(t ?? { ...IDENTITY_TRANSFORM });
-      })();
-      return () => {
-         alive = false;
-      };
-   }, [garment, bodyPath]);
+     // Mirror the shared fields into a single Transform for display + save.
+     useAnimatedReaction(
+          () => ({
+             x: sx.value,
+             y: sy.value,
+             scale: ss.value,
+             rotation: srot.value,
+             opacity: sop.value,
+            }),
+          (cur) => {
+             runOnJS(setMirror)(cur);
+            },
+          [sx, sy, ss, srot, sop],
+     );
 
-       // 3. Drag the overlay to reposition (state-driven, no Reanimated yet — M2-2 swaps
-      //    this for a Reanimated pinch/drag). Pan deltas map to normalized 0..1 space.
-      // The handlers read tRef only at event time, not render, so the react-hooks/refs
-      // flag on this memo is a conservative false positive.
-    /* eslint-disable react-hooks/refs */
+     // Write a partial transform on the UI thread: read the live fields, clamp the
+     // assembled Transform (so a computed auto-box or a slider can't leave an
+     // out-of-range field), then push each field through withTiming.
+     const applyTransform = useCallback(
+          (patch: Partial<Transform>, animate = true) => {
+             const cur: Transform = {
+                x: sx.value,
+                y: sy.value,
+                scale: ss.value,
+                rotation: srot.value,
+                opacity: sop.value,
+             };
+             const next = clampTransform({ ...cur, ...patch });
+             const set = animate ? withTiming : (v: number) => v;
+             sx.value = set(next.x, { duration: 150 });
+             sy.value = set(next.y, { duration: 150 });
+             ss.value = set(next.scale, { duration: 150 });
+             srot.value = set(next.rotation, { duration: 150 });
+             sop.value = set(next.opacity, { duration: 150 });
+          },
+          [sx, sy, ss, srot, sop],
+     );
+
+     /* eslint-disable react-hooks/refs */
+     // 1. Resolve the garment: deep-linked wardrobe item, else first wardrobe item,
+     //    else first catalog entry. (Q2/Q3: always shows something.)
+     useEffect(() => {
+          let alive = true;
+          (async () => {
+             try {
+                const chosen = id ? await r.getItem(Number(id)) : undefined;
+                if (chosen && alive) {
+                   setGarment(toGarment(chosen));
+                   return;
+                }
+                const wardrobe = await r.listItems();
+                if (wardrobe.length) {
+                   if (alive) setGarment(toGarment(wardrobe[0]));
+                   return;
+                }
+                const catalog = await r.listStoreItems();
+                if (catalog.length && alive) setGarment(toGarmentStore(catalog[0]));
+             } catch (e) {
+                console.error('studio: garment resolve failed', e);
+             }
+          })();
+          return () => {
+             alive = false;
+          };
+     }, [id]);
+
+     // 2. Pose → auto box → animated start. Web auto-places via MoveNet; native
+     //    ManualPoseProvider returns [] → identity + the "adjusting manually" banner
+     //    (M2-4). Same code path, only the provider selection differs.
+     useEffect(() => {
+          if (!garment) return;
+          let alive = true;
+          (async () => {
+             const provider = createPoseProvider();
+             const kps = await safeEstimate(provider, bodyPath ?? '');
+             if (!alive) return;
+             setKeypoints(kps);
+             const auto = autoTransformFor(kps, garment.type);
+             const placed = kps.length > 0;
+             autoRef.current = auto;
+             setAutoPlaced(placed);
+             applyTransform(auto, true);
+             setManualBanner((b) => (b.dismissed ? b : { open: !placed, dismissed: b.dismissed }));
+          })();
+          return () => {
+             alive = false;
+          };
+     }, [garment, bodyPath, applyTransform]);
+
+     // 3. Drag the overlay to reposition. PanResponder deltas map to normalized
+     //    0..1 stage space and write the x/y shared values for 1:1 tracking. Reads
+     //    `.value` off the shared refs at event time (not render), so the
+     //    react-hooks/refs flag on this memo is a conservative false positive.
+     const startRef = useRef({ x: 0.5, y: 0.5 });
      const panResponder = useMemo(
           () =>
-           PanResponder.create({
-              onStartShouldSetPanResponder: () => true,
-              onMoveShouldSetPanResponder: () => true,
-              onPanResponderGrant: () => {
-                 startRef.current = { x: tRef.current.x, y: tRef.current.y };
-               },
-              onPanResponderMove: (_e, g) => {
-                 const w = dims.w || 1;
-                 const h = dims.h || 1;
-                 setTransform((prev) => ({
-                     ...prev,
-                    x: clamp01(startRef.current.x + g.dx / w),
-                    y: clamp01(startRef.current.y + g.dy / h),
-                   }));
-               },
-            }),
-          [dims.w, dims.h],
-      );
+             PanResponder.create({
+                onStartShouldSetPanResponder: () => true,
+                onMoveShouldSetPanResponder: () => true,
+                onPanResponderGrant: () => {
+                   startRef.current = { x: sx.value, y: sy.value };
+                },
+                onPanResponderMove: (_e, g) => {
+                   const w = size.value.w || 1;
+                   const h = size.value.h || 1;
+                   sx.value = clamp01(startRef.current.x + g.dx / w);
+                   sy.value = clamp01(startRef.current.y + g.dy / h);
+                },
+             }),
+          [sx, sy, size],
+     );
      /* eslint-enable react-hooks/refs */
 
-   const pickPhoto = useCallback(async () => {
-      try {
-         const res = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: 'images',
-            quality: 0.7,
-         });
-         if (res.canceled || !res.assets?.[0]) return;
-         setBodySource({ uri: res.assets[0].uri });
-         setBodyPath(res.assets[0].uri);
-      } catch (e) {
-         console.error('studio: pick photo failed', e);
-      }
-   }, []);
+     // Reanimated UI-thread style for the garment overlay: translate (normalized→px),
+     // scale, rotate, opacity — all from the single shared transform.
+     const garmentStyle = useAnimatedStyle(() => ({
+          position: 'absolute',
+          left: 0,
+          top: 0,
+          width: size.value.w,
+          height: size.value.h,
+          opacity: sop.value,
+          transform: [
+             { translateX: sx.value * size.value.w },
+             { translateY: sy.value * size.value.h },
+             { scale: ss.value },
+             { rotate: `${srot.value}deg` },
+          ],
+     }));
 
-   const recompute = useCallback(() => {
-      if (!garment) return;
-      const t = computeGarmentBox(keypoints, garment.type);
-      setAutoPlaced(t !== null);
-      setTransform(t ?? { ...IDENTITY_TRANSFORM });
-   }, [garment, keypoints]);
+     const pickPhoto = useCallback(async () => {
+          try {
+             const res = await ImagePicker.launchImageLibraryAsync({
+                mediaTypes: 'images',
+                quality: 0.7,
+             });
+             if (res.canceled || !res.assets?.[0]) return;
+             setBodySource({ uri: res.assets[0].uri });
+             setBodyPath(res.assets[0].uri);
+          } catch (e) {
+             console.error('studio: pick photo failed', e);
+          }
+     }, []);
 
-   const save = useCallback(async () => {
-      if (!garment) return;
-      setSaving(true);
-      try {
-         let itemId = garment.id;
-         if (!garment.inWardrobe) {
-            const inserted = await r.insertItem({
-               type: garment.type,
-               name: garment.name,
-               color: 'unknown',
-               tags: ['catalog'],
-               imagePath: garment.imagePath,
-            });
-            itemId = inserted.id;
-         }
-         const body = await r.insertBodyPhoto(bodyPath ?? 'sample://body');
-         await r.insertTryOn(body.id, itemId, serializeTransform(transform));
-         router.replace('/looks');
-      } catch (e) {
-         console.error('studio: save failed', e);
-         setSaving(false);
-      }
-   }, [garment, bodyPath, transform]);
+      // Export the current composite to an image file (web: canvas composite,
+      // native: garment image — see export.ts / D21.3), then persist the TryOn
+      // row with the exact final transform + output path so the look reopens.
+      const persistLook = useCallback(
+           async (): Promise<TryOn | null> => {
+             if (!garment) return null;
+             setSaving(true);
+             try {
+                let itemId = garment.id;
+                if (!garment.inWardrobe) {
+                   const inserted = await r.insertItem({
+                       type: garment.type,
+                       name: garment.name,
+                       color: 'unknown',
+                       tags: ['catalog'],
+                       imagePath: garment.imagePath,
+                     });
+                   itemId = inserted.id;
+                 }
+                const out = await exportTryOn(
+                     {
+                        bodyUri: bodyPath ?? 'sample://body',
+                        garmentSource: resolveGarmentSource(garment),
+                        transform: mirror,
+                     },
+                     { w: Math.max(dims.w, 720), h: Math.max(dims.h, 960) },
+                 );
+                if (out.error || !out.outputPath) {
+                   throw new Error(out.error ?? 'export produced no image');
+                 }
+                const body = await r.insertBodyPhoto(bodyPath ?? 'sample://body');
+                const row = await r.insertTryOn(
+                     body.id,
+                     itemId,
+                     serializeTransform(mirror),
+                     out.outputPath,
+                 );
+                await refreshRecent();
+                return row;
+             } catch (e) {
+             // M2-3: a failed export surfaces visibly, never silent.
+              console.error('studio: export/save failed', e);
+              setNotice({ kind: 'error', text: 'Export failed — try again.' });
+              return null;
+             } finally {
+              setSaving(false);
+             }
+           },
+           [garment, bodyPath, mirror, dims.w, dims.h, refreshRecent],
+       );
 
-    const base = Math.max(dims.w, dims.h) || 300;
+       // Share the just-exported look: native share sheet (iOS/Android saves to
+       // the media library) or a web download of the data URI.
+      const share = useCallback(async () => {
+           const row = await persistLook();
+           if (!row) return;
+           const out = row.outputPath;
+           if (!out) return;
+           if (Platform.OS === 'web') {
+             downloadDataUri(out);
+             setNotice({ kind: 'info', text: 'Look saved — downloaded image.' });
+            return;
+           }
+           try {
+             await Sharing.shareAsync(out);
+             setNotice({ kind: 'info', text: 'Look saved.' });
+          } catch (e) {
+             if ((e as { code?: string })?.code === 'SHARING_CANCELLED') return;
+             console.error('studio: share failed', e);
+             setNotice({ kind: 'error', text: 'Share failed.' });
+          }
+       }, [persistLook]);
 
-    // Overlay layer: a faint skeleton the user can toggle so they see *why* the
-    // auto-box landed where it did (M2-1 acceptance).
-    const showSkeletonWithPoints = showSkeleton && keypoints.length > 0 && !!garment;
-    const overlay = showSkeletonWithPoints ? (
-       <View pointerEvents="none" style={StyleSheet.absoluteFill}>
-          {KEYS.map(([a, b], i) => {
-            const pa = keypoints[a];
-            const pb = keypoints[b];
-             if(!pa || !pb) return null;
-            const { left, top, width, angle } = lineBetween(pa, pb);
-           return (
-                <View
-                key={`seg-${i}`}
-                style={{
-                   position: 'absolute',
-                    left,
-                    top,
-                     width,
-                     height: 2,
-                      backgroundColor: 'rgba(88,166,255,0.35)',
-                       transform: [{ rotate: `${angle}rad` }],
-                             }}
+       // Open an existing saved look back into the editor (reconstruct from the
+       // stored transform — M2-3 reopen / M3-2 gallery).
+      const reopen = useCallback(
+          async (look: TryOn) => {
+            const item = await r.getItem(look.itemId);
+            if (!item) return;
+            const t = JSON.parse(look.transform) as Transform;
+            applyTransform(t, false);
+            setGarment(toGarment(item));
+            setBodySource({ uri: look.outputPath ?? undefined });
+            setBodyPath(look.outputPath ?? null);
+            setNotice({ kind: 'info', text: `Reopened look #${look.id}` });
+          },
+          [applyTransform],
+       );
+
+     // Overlay layer: a faint skeleton the user can toggle so they see *why* the
+     // auto-box landed where it did (M2-1). Keypoints drive it; empty on manual.
+     const showSkeletonWithPoints = showSkeleton && keypoints.length > 0 && !!garment;
+     const overlay = showSkeletonWithPoints ? (
+          <View pointerEvents="none" style={StyleSheet.absoluteFill}>
+             {KEYS.map(([a, b], i) => {
+                const pa = keypoints[a];
+                const pb = keypoints[b];
+                if (!pa || !pb) return null;
+                const { left, top, width, angle } = lineBetween(pa, pb);
+                return (
+                     <View
+                         key={`seg-${i}`}
+                         style={{
+                            position: 'absolute',
+                            left,
+                            top,
+                            width,
+                            height: 2,
+                            backgroundColor: 'rgba(88,166,255,0.35)',
+                            transform: [{ rotate: `${angle}rad` }],
+                         }}
                     />
-                  );
-               })}
-         {keypoints.map((k, i) => {
-            const dot = 6;
-           return (
-                <View
-                key={`kp-${i}`}
-                style={{
-                   position: 'absolute',
-                   left: k.x * dims.w - dot / 2,
-                    top: k.y * dims.h - dot / 2,
-                       width: dot,
-                           height: dot,
+                );
+             })}
+             {keypoints.map((k, i) => {
+                const dot = 6;
+                return (
+                     <View
+                         key={`kp-${i}`}
+                         style={{
+                            position: 'absolute',
+                            left: k.x * dims.w - dot / 2,
+                            top: k.y * dims.h - dot / 2,
+                            width: dot,
+                            height: dot,
                             borderRadius: dot / 2,
-                              backgroundColor: 'rgba(88,166,255,0.9)',
-                           }}
-                />
-          );
-            })}
-       </View>
-   ) : null;
+                            backgroundColor: 'rgba(88,166,255,0.9)',
+                         }}
+                    />
+                );
+             })}
+          </View>
+     ) : null;
 
-   return (
-      <View style={styles.screen}>
-         <View
-          style={styles.stage}
-          onLayout={(e) => setDims({ w: e.nativeEvent.layout.width, h: e.nativeEvent.layout.height })}>
-            <Image
-              source={bodySource}
-              style={StyleSheet.absoluteFill}
-              resizeMode="contain"
-            />
-            <View
-               {...panResponder.panHandlers}
-               style={{
-                  position: 'absolute',
-                  left: 0,
-                  top: 0,
-                  width: base,
-                  height: base,
-                  overflow: 'hidden',
-                  opacity: transform.opacity,
-                  transform: [
-                      { translateX: transform.x * dims.w },
-                      { translateY: transform.y * dims.h },
-                      { scale: transform.scale },
-                      { rotate: `${transform.rotation}deg` },
-                   ],
+     const statusText = autoPlaced
+          ? 'Auto-placed from detected pose'
+          : 'Auto-drape unavailable — adjusting manually';
+
+     return (
+          <View style={styles.screen}>
+             <View
+                style={styles.stage}
+                onLayout={(e) => {
+                   const { width, height } = e.nativeEvent.layout;
+                   size.value = { w: width, h: height };
+                   setDims({ w: width, h: height });
                 }}>
-                <Image
-                   source={resolveGarmentSource(garment ?? placeholderGarment())}
-                   style={{ width: '100%', height: '100%' }}
-                   resizeMode="contain"
-                 />
-              </View>
-              {overlay}
+                <Image source={bodySource} style={StyleSheet.absoluteFill} resizeMode="contain" />
+                  <View {...panResponder.panHandlers} style={garmentStyle as StyleProp<ViewStyle>}>
+                     <Image
+                      source={resolveGarmentSource(garment ?? placeholderGarment())}
+                      style={styles.garmentImg}
+                      resizeMode="contain"
+                   />
+                </View>
+                {overlay}
+             </View>
+
+             {manualBanner.open && !manualBanner.dismissed && (
+                  <View style={styles.banner}>
+                     <Text style={styles.bannerText}>
+                        Auto-drape unavailable here — adjusting manually.
+                     </Text>
+                     <TouchableOpacity
+                        onPress={() => setManualBanner((b) => ({ ...b, dismissed: true }))}>
+                        <Text style={styles.bannerDismiss}>Dismiss</Text>
+                     </TouchableOpacity>
+                  </View>
+             )}
+
+               <View style={styles.controls}>
+                  <Text style={styles.status}>{statusText}</Text>
+
+                  {notice && (
+                     <View
+                        style={[styles.notice, notice.kind === 'error' ? styles.noticeError : null]}>
+                        <Text
+                         style={[
+                         styles.noticeText,
+                         notice.kind === 'error' ? styles.noticeErrorText : null,
+                       ]}>
+                          {notice.text}
+                        </Text>
+                        <TouchableOpacity onPress={() => setNotice(null)} style={{ marginLeft: 8 }}>
+                           <Text style={styles.noticeDismiss}>×</Text>
+                          </TouchableOpacity>
+                       </View>
+                  )}
+
+                  <Slider
+                   label="Scale"
+                   min={SCALE_MIN}
+                   max={SCALE_MAX}
+                   value={mirror.scale}
+                   display={mirror.scale.toFixed(2)}
+                   onChange={(v) => applyTransform({ scale: v }, true)}
+                />
+                <Slider
+                   label="Rotate"
+                   min={ROTATION_MIN}
+                   max={ROTATION_MAX}
+                   value={mirror.rotation}
+                   display={`${Math.round(mirror.rotation)}°`}
+                   onChange={(v) => applyTransform({ rotation: v }, true)}
+                />
+                <Slider
+                   label="Opacity"
+                   min={0}
+                   max={1}
+                   value={clamp01(mirror.opacity)}
+                   display={mirror.opacity.toFixed(1)}
+                   onChange={(v) => applyTransform({ opacity: v }, true)}
+                />
+
+                <View style={styles.buttonRow}>
+                   <TouchableOpacity style={styles.button} activeOpacity={0.8} onPress={() => applyTransform(autoRef.current, true)}>
+                      <Text style={styles.buttonText}>Reset</Text>
+                   </TouchableOpacity>
+                   <TouchableOpacity
+                      style={styles.button}
+                      activeOpacity={0.8}
+                      onPress={() => setShowSkeleton((s) => !s)}>
+                      <Text style={styles.buttonText}>Skeleton: {showSkeleton ? 'on' : 'off'}</Text>
+                   </TouchableOpacity>
+                </View>
+                <TouchableOpacity style={styles.button} activeOpacity={0.8} onPress={pickPhoto}>
+                   <Text style={styles.buttonText}>Pick photo</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.button, styles.primary, saving ? styles.busy : null]}
+                  disabled={saving}
+                  activeOpacity={0.8}
+                  onPress={share}>
+                   <Text style={styles.primaryText}>{saving ? 'Saving…' : 'Save & share'}</Text>
+                </TouchableOpacity>
+             </View>
+
+             <RecentLooks looks={recent} onReopen={reopen} />
            </View>
-
-         <View style={styles.controls}>
-            <Text style={styles.status}>
-               {autoPlaced ? 'Auto-placed from sample pose' : 'Pose unavailable — adjusting manually'}
-            </Text>
-            <Text style={styles.hint}>Drag the garment to move it.</Text>
-
-             <Stepper
-              label="Scale"
-              display={transform.scale.toFixed(2)}
-              onDec={() =>
-                setTransform((p) => ({
-                   ...p,
-                   scale: clampRange(p.scale - 0.05, 0.1, 3),
-                  }))
-               }
-              onInc={() =>
-                setTransform((p) => ({
-                   ...p,
-                   scale: clampRange(p.scale + 0.05, 0.1, 3),
-                  }))}
-             />
-             <Stepper
-              label="Rotate"
-              display={`${transform.rotation}°`}
-              onDec={() =>
-                setTransform((p) => ({
-                   ...p,
-                   rotation: clampRange(p.rotation - 5, -45, 45),
-                  }))}
-              onInc={() =>
-                setTransform((p) => ({
-                   ...p,
-                   rotation: clampRange(p.rotation + 5, -45, 45),
-                  }))}
-             />
-             <Stepper
-              label="Opacity"
-              display={transform.opacity.toFixed(1)}
-              onDec={() =>
-                setTransform((p) => ({
-                   ...p,
-                   opacity: clamp01(p.opacity - 0.1),
-                  }))}
-              onInc={() =>
-                setTransform((p) => ({
-                   ...p,
-                   opacity: clamp01(p.opacity + 0.1),
-                  }))}
-             />
-
-              <TouchableOpacity style={styles.button} activeOpacity={0.8} onPress={recompute}>
-                 <Text style={styles.buttonText}>Reset placement</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.button} activeOpacity={0.8} onPress={() => setShowSkeleton((s) => !s)}>
-                 <Text style={styles.buttonText}>Skeleton: {showSkeleton ? 'on' : 'off'}</Text>
-              </TouchableOpacity>
-            <TouchableOpacity style={styles.button} activeOpacity={0.8} onPress={pickPhoto}>
-               <Text style={styles.buttonText}>Pick photo</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-               style={[styles.button, styles.primary, saving ? styles.busy : null]}
-               disabled={saving}
-               activeOpacity={0.8}
-               onPress={save}>
-               <Text style={styles.primaryText}>
-                  {saving ? 'Saving…' : 'Save look'}
-               </Text>
-            </TouchableOpacity>
-         </View>
-      </View>
-   );
+      );
 }
 
-function Stepper({
-   label,
-   display,
-   onDec,
-   onInc,
+// A precision slider: a draggable thumb on a track (1:1 with the gesture) plus a
+// numeric readout for accessibility. Writes through `onChange` to the shared value.
+// No external slider dependency (ADR: minimal deps) — a PanResponder thumb on a
+// track gives the same 1:1 control across web + native.
+function Slider({
+     label,
+     min,
+     max,
+     value,
+     display,
+     onChange,
 }: {
-   label: string;
-   display: string;
-   onDec: () => void;
-   onInc: () => void;
+     label: string;
+     min: number;
+     max: number;
+     value: number;
+     display: string;
+     onChange: (v: number) => void;
 }) {
-   return (
-      <View style={styles.stepper}>
-         <Text style={styles.stepperLabel}>{label}</Text>
-         <TouchableOpacity style={styles.stepBtn} activeOpacity={0.7} onPress={onDec}>
-            <Text style={styles.stepText}>–</Text>
-         </TouchableOpacity>
-         <Text style={styles.stepperValue}>{display}</Text>
-         <TouchableOpacity style={styles.stepBtn} activeOpacity={0.7} onPress={onInc}>
-            <Text style={styles.stepText}>+</Text>
-         </TouchableOpacity>
-      </View>
-   );
+     const [track, setTrack] = useState(0);
+     const startRef = useRef(value);
+     const valueRef = useRef(value);
+     useEffect(() => {
+          valueRef.current = value;
+     }, [value]);
+
+     /* eslint-disable react-hooks/refs */
+     const pan = useMemo(
+          () =>
+             PanResponder.create({
+                onStartShouldSetPanResponder: () => true,
+                onMoveShouldSetPanResponder: () => true,
+                onPanResponderGrant: () => {
+                   startRef.current = valueRef.current;
+                },
+                onPanResponderMove: (_e, g) => {
+                   const w = track || 1;
+                   const next = startRef.current + (g.dx / w) * (max - min);
+                   onChange(Math.max(min, Math.min(max, next)));
+                },
+             }),
+          [track, min, max, onChange],
+     );
+     /* eslint-enable react-hooks/refs */
+
+     const frac = (value - min) / (max - min || 1);
+
+     return (
+      <View style={styles.sliderRow}>
+               <Text style={styles.sliderLabel}>{label}</Text>
+               <View
+                 style={styles.sliderTrack}
+                 onLayout={(e) => setTrack(e.nativeEvent.layout.width)}
+                  {...pan.panHandlers}>
+                  <View
+                    style={[
+                       styles.sliderThumb,
+                        { left: `${frac * 100}%`, transform: [{ translateX: '-50%' }] },
+                    ]}
+                  />
+               </View>
+               <Text style={styles.sliderValue}>{display}</Text>
+            </View>
+       );
+}
+
+// The minimal saved-looks strip (M2-3): a horizontal row of the most recent
+// TryOn rows; tap to reopen one into the editor. The first-class gallery is M3-2.
+function RecentLooks({
+       looks,
+       onReopen,
+}: {
+    looks: TryOn[];
+    onReopen: (look: TryOn) => void;
+}) {
+    if (!looks.length) return null;
+    return (
+           <View style={styles.recentRow}>
+             <Text style={styles.recentHeader}>Recent</Text>
+             <ScrollView
+               horizontal
+               showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.recentScroll}>
+               {looks.map((look) => (
+                  <TouchableOpacity
+                           key={look.id}
+                           style={styles.recentCard}
+                           activeOpacity={0.8}
+                           onPress={() => onReopen(look)}>
+                            <Text style={styles.recentTitle}>Look #{look.id}</Text>
+                           {look.createdAt ? (
+                               <Text style={styles.recentDate}>{look.createdAt.slice(0, 10)}</Text>
+                             ) : null}
+                          </TouchableOpacity>
+                       ))}
+              </ScrollView>
+           </View>
+      );
 }
 
 function placeholderGarment(): Garment {
-   return { id: 0, type: 'top', name: 'Sample garment', imagePath: CATALOG_PLACEHOLDER, inWardrobe: false };
+     return { id: 0, type: 'top', name: 'Sample garment', imagePath: CATALOG_PLACEHOLDER, inWardrobe: false };
 }
 
 const styles = StyleSheet.create({
-   screen: {
-      flex: 1,
-      backgroundColor: '#0d1117',
-   },
-   stage: {
-      flex: 1,
-   },
-   controls: {
-      backgroundColor: '#161b22',
-      padding: 16,
-      gap: 10,
-   },
-   status: {
-      fontSize: 13,
-      color: '#58a6ff',
-      fontWeight: '600',
-   },
-   hint: {
-      fontSize: 12,
-      color: '#8b949e',
-      marginBottom: 4,
-   },
-   stepper: {
-      flexDirection: 'row',
-      alignItems: 'center',
-   },
-   stepperLabel: {
-      width: 80,
-      fontSize: 13,
-      color: '#c9d1d9',
-   },
-   stepperValue: {
-      flex: 1,
-      textAlign: 'center',
-      fontSize: 13,
-      color: '#8b949e',
-   },
-   stepBtn: {
-      width: 36,
-      height: 36,
-      borderRadius: 8,
-      backgroundColor: '#21262d',
-      alignItems: 'center',
-      justifyContent: 'center',
-   },
-   stepText: {
-      color: '#fff',
-      fontSize: 18,
-      fontWeight: '700',
-   },
-   button: {
-      backgroundColor: '#21262d',
-      paddingVertical: 12,
-      borderRadius: 10,
-      alignItems: 'center',
-   },
-   buttonText: {
-      fontSize: 15,
-      color: '#c9d1d9',
-      fontWeight: '600',
-   },
-   primary: {
-      backgroundColor: '#238636',
-   },
-   busy: {
-      opacity: 0.6,
-   },
-   primaryText: {
-      fontSize: 15,
-      color: '#fff',
-      fontWeight: '700',
-   },
-});
+     screen: {
+        flex: 1,
+        backgroundColor: '#0d1117',
+     },
+     stage: {
+        flex: 1,
+     },
+     garmentImg: {
+        width: '100%',
+        height: '100%',
+     },
+     banner: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        backgroundColor: '#1b2330',
+        paddingHorizontal: 16,
+        paddingVertical: 10,
+     },
+     bannerText: {
+        color: '#f0b429',
+        fontSize: 13,
+        flex: 1,
+     },
+     bannerDismiss: {
+        color: '#8b949e',
+        fontSize: 13,
+        fontWeight: '600',
+        marginLeft: 12,
+     },
+     controls: {
+        backgroundColor: '#161b22',
+        padding: 16,
+        gap: 10,
+     },
+     status: {
+        fontSize: 13,
+        color: '#58a6ff',
+        fontWeight: '600',
+     },
+     sliderRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 10,
+     },
+     sliderLabel: {
+        width: 64,
+        fontSize: 13,
+        color: '#c9d1d9',
+     },
+     sliderTrack: {
+        flex: 1,
+        height: 28,
+        backgroundColor: '#21262d',
+        borderRadius: 14,
+        justifyContent: 'center',
+     },
+     sliderThumb: {
+        position: 'absolute',
+        width: 24,
+        height: 24,
+        borderRadius: 12,
+        backgroundColor: '#58a6ff',
+     },
+     sliderValue: {
+        width: 44,
+        textAlign: 'right',
+        fontSize: 12,
+        color: '#8b949e',
+     },
+     buttonRow: {
+        flexDirection: 'row',
+        gap: 10,
+     },
+     button: {
+        flex: 1,
+        backgroundColor: '#21262d',
+        paddingVertical: 12,
+        borderRadius: 10,
+        alignItems: 'center',
+     },
+     buttonText: {
+        fontSize: 15,
+        color: '#c9d1d9',
+        fontWeight: '600',
+     },
+     primary: {
+        backgroundColor: '#238636',
+     },
+     busy: {
+        opacity: 0.6,
+     },
+     primaryText: {
+        fontSize: 15,
+        color: '#fff',
+        fontWeight: '700',
+      },
+     // Visible error/info surface for export/share (M2-3: a failure never silent).
+     notice: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#1b2330',
+        borderRadius: 8,
+        padding: 10,
+       },
+     noticeError: {
+        backgroundColor: '#3a1f1f',
+       },
+     noticeText: {
+        flex: 1,
+        fontSize: 13,
+        color: '#8b949e',
+       },
+     noticeErrorText: {
+        color: '#f85149',
+       },
+     noticeDismiss: {
+        color: '#c9d1d9',
+        fontSize: 18,
+        paddingHorizontal: 6,
+       },
+     // Minimal recent-looks strip (M2-3); the full gallery is M3-2.
+     recentRow: {
+        backgroundColor: '#161b22',
+        padding: 16,
+        paddingTop: 0,
+       },
+     recentHeader: {
+        fontSize: 13,
+        color: '#8b949e',
+        marginBottom: 8,
+       },
+     recentScroll: {
+        gap: 10,
+        paddingBottom: 4,
+       },
+     recentCard: {
+        width: 96,
+        height: 64,
+        backgroundColor: '#21262d',
+        borderRadius: 10,
+        padding: 10,
+        justifyContent: 'center',
+       },
+     recentTitle: {
+        fontSize: 13,
+        color: '#c9d1d9',
+        fontWeight: '600',
+       },
+     recentDate: {
+        fontSize: 11,
+        color: '#8b949e',
+       },
+      });

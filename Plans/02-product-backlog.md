@@ -31,14 +31,14 @@ Each item below has a full issue body in `Plans/issues/<id>.md`.
 | M1-3 | Gallery grid + filter/search (category / color / tag)           | feat, ux, M1   | ✅ DONE      |
 | M1-4 | Bundled store.json catalog + ingester                           | feat, M1       | ✅ DONE      |
 
-## M2 · Try-On Studio — 🚧 In progress
+## M2 · Try-On Studio — ✅ Complete (2026-09-20, code-complete + gate-green; native runtime not exercised in-sandbox → M3-5)
 
-| ID    | Title                                                        | Labels           | Status      |
+| ID     | Title                                                         | Labels            | Status       |
 |------|-------------------------------------------------------------|-----------------|------------|
-| M2-1 | Web MoveNet pose integration                                 | ml, M2           | 🚧 BUILT*   |
-| M2-2 | Auto-scaled garment box from keypoints + manual fine-tune     | feat, ux, M2     | ⏸ TODO      |
-| M2-3 | Save/share output to Photos (expo-image-manipulator)         | feat, M2         | ⏸ TODO      |
-| M2-4 | Manual-overlay fallback (no ML) so native is usable pre-ML    | feat, ux, M2     | ⏸ TODO      |
+| M2-1 | Web MoveNet pose integration                                  | ml, M2            | 🚧 BUILT*    |
+| M2-2 | Auto-scaled garment box from keypoints + manual fine-tune      | feat, ux, M2      | ✅ BUILT      |
+| M2-3 | Save/share output to Photos (expo-image-manipulator)          | feat, M2          | ✅ BUILT      |
+| M2-4 | Manual-overlay fallback (no ML) so native is usable pre-ML     | feat, ux, M2      | ✅ BUILT      |
 
 > *M2-1 is **code-complete and gate-green** (providers/loader/provider/factory +
   skeleton overlay + unit tests). Its `ml`-doD screenshot is waived this session

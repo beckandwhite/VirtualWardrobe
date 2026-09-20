@@ -2,9 +2,9 @@ module.exports = function (api) {
    api.cache(true);
    return {
       presets: ['babel-preset-expo'],
-      // react-native-reanimated/plugin added in M2 when the composer uses animated values.
-      // Omitted in M0 because no M0 code uses Reanimated, and the worklets babel plugin
-      // currently fails the web Metro bundler ("Unknown option: .name"). Re-enable for M2.
-      plugins: [],
-     };
+       // M2-2 re-enables the Reanimated/worklets plugin: the studio now drives the
+       // garment overlay through useSharedValue + useAnimatedStyle on the UI thread
+       // (D19.7). Must be the last plugin.
+      plugins: ['react-native-reanimated/plugin'],
+      };
 };
