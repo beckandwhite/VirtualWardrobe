@@ -1,8 +1,10 @@
 // Shared geometry + garment types for the pose-aware try-on.
 
-// A normalized keypoint in 0..1 image space, as returned by a PoseProvider.
+// A normalized keypoint in 0..1 image space, as returned by a PoseProvider. The
+// `name` is `KeypointName` on the pure/native path and a raw COCO keypoint index
+// or name on the web MoveNet path, so it is typed `string | number`.
 export interface Keypoint {
-   name: string;
+   name: string | number;
    x: number;
    y: number;
    score?: number;

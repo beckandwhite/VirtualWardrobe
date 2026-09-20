@@ -44,10 +44,10 @@ describe('computeGarmentBox', () => {
     expect(dress!.scale).toBeGreaterThan(top!.scale);
    });
 
-  it('returns null for bottom when hips are missing', () => {
-    const withoutHips = Object.values(fig).filter((k) => !k.name.includes('hip'));
-    expect(computeGarmentBox(withoutHips, 'bottom' as GarmentType)).toBeNull();
-   });
+   it('returns null for bottom when hips are missing', () => {
+     const withoutHips = Object.values(fig).filter((k) => !String(k.name).includes('hip'));
+     expect(computeGarmentBox(withoutHips, 'bottom' as GarmentType)).toBeNull();
+     });
 
   it('boxToTransform produces an identity-usable transform', () => {
     const box = computeBoxForKeypoints(Object.values(fig), 'top' as GarmentType)!;

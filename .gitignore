@@ -24,3 +24,11 @@ android/app/build/
 # env / secrets
 .env
 .env.local
+
+# ML model bytes — fetched with `npm run fetch:pose`, not committed (ADR-004
+# keeps the *app* local, but the ~MB weights are gitignored & regenerable).
+public/pose/**/*.json
+public/pose/**/*.bin
+public/pose/**/*.pb
+public/pose/**/weights*
+!public/pose/**/.gitkeep

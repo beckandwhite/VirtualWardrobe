@@ -34,6 +34,25 @@ interface Garment {
 
 const CATALOG_PLACEHOLDER = 'catalog://placeholder';
 
+// Skeleton segments to render so the user sees *where* the auto-box came from.
+// Indexed into the fixed 17-keypoint ORDER that `SAMPLE_KEYPPOINTS` produces
+// (nose 0 → right_ankle 16 — the COCO ordering the web provider matches).
+const KEYS = [
+   [5, 11], [11, 12], [12, 23], [12, 14], [14, 16], [23, 25], [25, 27],
+   [6, 12], [6, 11], [5, 6], [5, 7], [7, 9], [7, 5], [6, 8], [8, 10],
+   [1, 2], [1, 3], [2, 4],
+];
+function lineBetween(a: { x: number; y: number }, b: { x: number; y: number }) {
+   const x1 = a.x, y1 = a.y, x2 = b.x, y2 = b.y;
+   const dx = x2 - x1, dy = y2 - y1;
+   return {
+      left: Math.min(x1, x2),
+      top: Math.min(y1, y2),
+      width: Math.hypot(dx, dy),
+      angle: Math.atan2(dy, dx),
+    };
+    }
+
 // The bundled placeholder stands in for any garment with no real image of its own.
 function resolveGarmentSource(item: Garment): ImageSourcePropType {
    const real = item.imagePath && !item.imagePath.startsWith(CATALOG_PLACEHOLDER);
@@ -64,10 +83,11 @@ export default function StudioScreen() {
    const [bodySource, setBodySource] = useState<ImageSourcePropType>(sampleBody);
    const [bodyPath, setBodyPath] = useState<string | null>(null);
    const [keypoints, setKeypoints] = useState<Keypoint[]>([]);
-   const [transform, setTransform] = useState<Transform>(IDENTITY_TRANSFORM);
-   const [autoPlaced, setAutoPlaced] = useState(false);
-   const [saving, setSaving] = useState(false);
-   const [dims, setDims] = useState({ w: 0, h: 0 });
+    const [transform, setTransform] = useState<Transform>(IDENTITY_TRANSFORM);
+    const [autoPlaced, setAutoPlaced] = useState(false);
+    const [saving, setSaving] = useState(false);
+    const [dims, setDims] = useState({ w: 0, h: 0 });
+    const [showSkeleton, setShowSkeleton] = useState(true);
 
    // Tracked in an effect so the ref is never read/written during render
    // (react-hooks/refs). onPanResponderGrant reads the last committed transform.
@@ -195,7 +215,52 @@ export default function StudioScreen() {
       }
    }, [garment, bodyPath, transform]);
 
-   const base = Math.max(dims.w, dims.h) || 300;
+    const base = Math.max(dims.w, dims.h) || 300;
+
+    // Overlay layer: a faint skeleton the user can toggle so they see *why* the
+    // auto-box landed where it did (M2-1 acceptance).
+    const showSkeletonWithPoints = showSkeleton && keypoints.length > 0 && !!garment;
+    const overlay = showSkeletonWithPoints ? (
+       <View pointerEvents="none" style={StyleSheet.absoluteFill}>
+          {KEYS.map(([a, b], i) => {
+            const pa = keypoints[a];
+            const pb = keypoints[b];
+             if(!pa || !pb) return null;
+            const { left, top, width, angle } = lineBetween(pa, pb);
+           return (
+                <View
+                key={`seg-${i}`}
+                style={{
+                   position: 'absolute',
+                    left,
+                    top,
+                     width,
+                     height: 2,
+                      backgroundColor: 'rgba(88,166,255,0.35)',
+                       transform: [{ rotate: `${angle}rad` }],
+                             }}
+                    />
+                  );
+               })}
+         {keypoints.map((k, i) => {
+            const dot = 6;
+           return (
+                <View
+                key={`kp-${i}`}
+                style={{
+                   position: 'absolute',
+                   left: k.x * dims.w - dot / 2,
+                    top: k.y * dims.h - dot / 2,
+                       width: dot,
+                           height: dot,
+                            borderRadius: dot / 2,
+                              backgroundColor: 'rgba(88,166,255,0.9)',
+                           }}
+                />
+          );
+            })}
+       </View>
+   ) : null;
 
    return (
       <View style={styles.screen}>
@@ -224,13 +289,14 @@ export default function StudioScreen() {
                       { rotate: `${transform.rotation}deg` },
                    ],
                 }}>
-               <Image
-                  source={resolveGarmentSource(garment ?? placeholderGarment())}
-                  style={{ width: '100%', height: '100%' }}
-                  resizeMode="contain"
-               />
-            </View>
-         </View>
+                <Image
+                   source={resolveGarmentSource(garment ?? placeholderGarment())}
+                   style={{ width: '100%', height: '100%' }}
+                   resizeMode="contain"
+                 />
+              </View>
+              {overlay}
+           </View>
 
          <View style={styles.controls}>
             <Text style={styles.status}>
@@ -282,9 +348,12 @@ export default function StudioScreen() {
                   }))}
              />
 
-            <TouchableOpacity style={styles.button} activeOpacity={0.8} onPress={recompute}>
-               <Text style={styles.buttonText}>Reset placement</Text>
-            </TouchableOpacity>
+              <TouchableOpacity style={styles.button} activeOpacity={0.8} onPress={recompute}>
+                 <Text style={styles.buttonText}>Reset placement</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.button} activeOpacity={0.8} onPress={() => setShowSkeleton((s) => !s)}>
+                 <Text style={styles.buttonText}>Skeleton: {showSkeleton ? 'on' : 'off'}</Text>
+              </TouchableOpacity>
             <TouchableOpacity style={styles.button} activeOpacity={0.8} onPress={pickPhoto}>
                <Text style={styles.buttonText}>Pick photo</Text>
             </TouchableOpacity>

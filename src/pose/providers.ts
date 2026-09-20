@@ -1,13 +1,16 @@
-import { Platform } from 'react-native';
 import { ManualPoseProvider, type PoseProvider } from './PoseProvider';
 import { SamplePoseProvider } from './samplePose';
 
-// Platform factory the studio calls. Web/M0-5 → sample (the box auto-places
-// visibly); native → manual (the M2-4 fallback). When M2-1 lands, the web branch
-// becomes MoveNetPoseProvider — same PoseProvider interface, drop-in.
-export function createPoseProvider(): PoseProvider {
-    if (Platform.OS === 'web') {
-       return new SamplePoseProvider();
-     }
-    return new ManualPoseProvider();
+// Generic provider factory — the default for tsc + the node/jest environment (and
+// any platform file that is not `.web`/`.native`). It never imports TensorFlow,
+// so the test + tooling paths stay free of web-only deps.
+//
+// Expo Metro resolves `providers.web.ts` on web and `providers.native.ts` on
+// native, so this generic file is only ever the fallback. It defaults to the
+// manual provider (the safe no-ML path, M2-4).
+export type PoseProviderKind = 'manual' | 'sample';
+
+export function createPoseProvider(kind: PoseProviderKind = 'manual'): PoseProvider {
+   if(kind === 'sample') return new SamplePoseProvider();
+   return new ManualPoseProvider();
 }

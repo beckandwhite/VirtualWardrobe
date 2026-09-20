@@ -140,3 +140,46 @@ what M0 shipped. Locked outcomes below; the issue docs are amended to match.
   makes it a **dismissible, polished** affordance (native shipping path, not a throwaway — ADR-005).
 - **D19.10 — build order:** `M1-1 → M1-2 → M1-3 → M1-4`, then `M2-1 (vendor) ∥ M2-2`, then `M2-4`,
   then `M2-3`. Topologically sound (M1-3→M1-4, M1-2→M2-2, M2-2→M2-3/M2-4).
+
+## 2026-09-20 — M2-1 (web MoveNet) lands
+
+- **D20.1 — platform-split `providers` keeps `@tensorflow*` out of the native bundle.** The
+   factory is three files: `providers.ts` (generic, native default = `ManualPoseProvider`, no
+   TF import), `providers.web.ts` (web factory, default = `MoveNetPoseProvider`), and
+  `providers.native.ts` (re-exports `providers.ts`). Expo Metro resolves the `.web`/`.native`
+   variant by platform, so the native bundle never resolves the web file and can tree-shake the
+  TF packages. This is the structural guarantee for M2-1 AC4 ("no `@tensorflow*` in native").
+   (A `.native`-only file isn't universally resolved by every Metro version, which is why
+   `providers.ts` remains the always-resolvable fallback.)
+- **D20.2 — lazy + cached + dynamic `import()` in `poseLoader.ts`.** `loadPoseDetector()` is a
+   single-flight promise: it `await import()`s `@tensorflow/tfjs-backend-webgl` (self-registers
+  on import), sets backend `webgl` (falls back to CPU on headless/jsdom), then
+  `createDetector(SupportedModels.MoveNet, { modelType: movenet.modelType.SINGLEPOSE_LIGHTNING,
+  modelUrl })`. `pose-detection` 2.x uses `createDetector(MoveNet, …)` — NOT the 1.x
+  `movenet.create()` — so the loader is written against the installed 2.1.3 API.
+- **D20.3 — model bytes gitignored + `modelUrl.ts` committed-pointer.** Per user instruction the
+   ~MB weights are **gitignored** (`public/pose/**`, keep `.gitkeep`) with a `docs/dev-setup.md`
+   + `npm run fetch:pose` to populate a fresh clone, because committing ~40 MB to git is a real
+   repo decision the user deferred. `src/pose/modelUrl.ts` is the *committed* `MOVENET_MODEL_URL`
+   export (default `undefined`); the fetch script overwrites it via `--emit-url-only`. When
+   `undefined`, the model load fails at runtime → `PoseUnavailable` → `safeEstimate` degrades to
+  manual (documented "skip" path in dev-setup §3).
+- **D20.4 — tfhub.dev is dead.** `tfhub.dev/google/tfjs-model/movenet/*` 302-redirects to Kaggle
+  and the old `tfhub-public` GCS bucket is gone, so `fetch:pose` may fail. Documented three
+  fallbacks in `docs/dev-setup.md` (mirror via `MOVENET_URL`, hand-place + `--emit-url-only`, or
+   skip → manual fallback). The model source is a known external dependency; tracking it as dev-env
+  debt in **M3-5**.
+- **D20.5 — `ml` DoD (screenshot) waived this session; raised as M3-5.** The sandbox renders no
+  browser, so the `ml` DoD's "attach a screenshot + demo note" can't be satisfied here. **New
+  backlog item M3-5** (`Plans/issues/M3-5.md`, labels `debt, tooling, M3`) proposes a
+  **Playwright** headless harness (`npm run e2e:pose`) that renders the web studio on a fixture
+  body photo, runs MoveNet, and captures a PNG — closing the loop. M3-5 depends on M2-2
+  (auto-box) so there's real auto-place to assert on. The `tooling` label was added to the backlog
+   scheme.
+- **D20.6 — skeleton overlay as a React-Native layer, not `react-native-svg`.** M2-1 asks for a
+   "faint keypoint/skeleton overlay (`react-native-svg` or a transformed overlay layer)". Since
+  `react-native-svg` isn't an install (like `@expo/vector-icons`, text-labels-only for MVP), the
+   studio renders keypoints as absolutely-positioned `View`s — segments via a rotated `View`
+  (angle from `atan2`) and dots as round `View`s — toggleable by a "Skeleton" button. This is the
+   `transformed overlay layer` option in the issue; it's a no-dep, web- + native-compatible
+  stand-in.
