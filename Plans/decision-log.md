@@ -232,5 +232,31 @@ what M0 shipped. Locked outcomes below; the issue docs are amended to match.
    no jank", M2-3's live share sheet + native export, and M2-4's "produces a saved look on native"
    are code-complete and unit-tested (`clampTransform`, `autoTransformFor`, serialize round-trip,
    `compose` layer geometry) but **not runtime-exercised**. This is the `ml`/`spike` DoD tracked by
-   M3-5 (headless Playwright `e2e:pose`); the manual-fallback path *is* exercised (manual provider
-   returns `[]`, banner shows). Same precedent as M2-1 D20.5.
+    M3-5 (headless Playwright `e2e:pose`); the manual-fallback path *is* exercised (manual provider
+    returns `[]`, banner shows). Same precedent as M2-1 D20.5.
+- **D21.7 — M3-1 is NO-GO in-sandbox; M2-4 remains the native path.** No device/emulator/
+   camera/EAS account in the sandbox, so on-device pose cannot be built, run, or timed. Per the
+   spike's non-blocking design, the manual fallback (M2-4 / ADR-005) is the shipping native path
+   and the UI is untouched. A `MediaPipePoseProvider` scaffold is deferred behind a "device
+   available" trigger; a one-day revisit flips this to GO. No ADR change (ADR-005 already encodes
+   "native pose is a spike; manual is the shipping path"). Recorded in `Plans/spikes/M3-1-
+   mediapipe-native-pose.md`.
+## 2026-09-20 — M3-2 lands + backlog reconciliation
+
+- **D22.1 — unified share sheet (`src/composer/share.ts`) is the single share path.** Both the
+   studio (M2-3 "save & share") and the Looks gallery (`app/(tabs)/looks.tsx`, M3-2) call
+   `shareLook`/`persistLook`; zero duplicated share code (M3-2 AC3). A `Looks` tab now sits in
+   `app/(tabs)/_layout.tsx` so the gallery is discoverable (M3-2 AC5). M3-2 is **BUILT** (all ACs
+   checked in `Plans/issues/M3-2.md`).
+- **D22.2 — `import/no-unresolved` off for `scripts/**/*.mjs`.** The M3-5 harness
+   (`scripts/pose-smoke.mjs`) does an *optional dynamic* `import('@playwright/test')` that is
+   only present when the browser pass is enabled, and is explicitly skipped (exit 0) when absent.
+   A static resolver false-positives "unresolved" on a clean checkout, so the rule is disabled for
+   the `vw/node-scripts` config block (mirroring the existing node-globals treatment there). This
+   keeps `npx eslint . --max-warnings 0` green so the gate reflects "work is ready" instead of a
+   tooling artifact.
+- **D22.3 — M3-5 status is BUILT-with-waived-browser-pass, not DONE.** `pose-smoke-path.mjs`
+  (pure skip-decision + self-test, `e2e:pose:check`) and `pose-smoke.mjs` (`e2e:pose`, skippable,
+  exits 0 with a demo note when neither a browser nor the model is present) are wired. The
+  Chromium screenshot (AC1) is only produced on a machine with `@playwright/test` + the model —
+  the same in-sandbox ceiling as D20.5/D21.6. M3-3 remains the open M3 feature work.

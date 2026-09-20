@@ -47,13 +47,25 @@ Each item below has a full issue body in `Plans/issues/<id>.md`.
 
 ## M3 · Native + Polish (spikes / optional / tooling)
 
-| ID      | Title                                                    | Labels             | Status     |
+| ID       | Title                                                     | Labels              | Status      |
 |--------|---------------------------------------------------------|-------------------|------------|
-| M3-1    | [spike] EAS prebuilt + Mediapose/Tasks pose for native   | spike, ml, M3      | ⏸ TODO     |
-| M3-2    | Saved-looks gallery + export/share sheet                 | feat, ux, M3       | ⏸ TODO     |
-| M3-3    | App icons / launch screens / i18n / store asset prep     | feat, ux, M3       | ⏸ TODO     |
-| M3-4    | [optional] Account + multi-device sync (separately scoped)| feat, M3, debt    | ⏸ (opt)    |
-| M3-5    | Dev-env: headless-browser harness for `ml`/`spike` DoD   | debt, tooling, M3  | ⏸ TODO     |
+| M3-1     | [spike] EAS prebuilt + Mediapose/Tasks pose for native    | spike, ml, M3       | ⛔ NO-GO*    |
+| M3-2     | Saved-looks gallery + export/share sheet                  | feat, ux, M3        | ✅ BUILT       |
+| M3-3     | App icons / launch screens / i18n / store asset prep      | feat, ux, M3        | ⏸ TODO      |
+| M3-4     | [optional] Account + multi-device sync (separately scoped)| feat, M3, debt     | ⏸ (opt)     |
+| M3-5     | Dev-env: headless-browser harness for `ml`/`spike` DoD    | debt, tooling, M3   | 🚧 BUILT*    |
+
+> * **M3-1 — NO-GO (in-sandbox).** See `Plans/spikes/M3-1-mediapipe-native-pose.md` + M3-1
+>   issue "Verdict". No device/EAS/camera in the sandbox, so the on-device pose spike
+>   (AC1/AC2) cannot be executed; AC3/AC4 are met. M2-4 (manual overlay, ADR-005) stays the
+>    native shipping path; a `MediaPipePoseProvider` is a drop-in when a device appears.
+>
+> * **M3-5 — harness BUILT, browser pass waived.** `scripts/pose-smoke.mjs` +
+>   `scripts/pose-smoke-path.mjs` (pure skip-decision + `e2e:pose` / `e2e:pose:check`)
+>   are wired; on a clean checkout they **skip the browser pass and exit 0** (skippable-when-
+>   model-absent, AC2) and run the pure self-test. The actual Chromium screenshot (AC1) is only
+>   produced on a machine with `@playwright/test` + the MoveNet model — the same in-sandbox
+>    ceiling as M2-1 D20.5 / M2-2 D21.6. M3-3 remains the open M3 feature work.
 
 ## Definition of Done (every issue)
 - [ ] Acceptance criteria met and verified (test where applicable).

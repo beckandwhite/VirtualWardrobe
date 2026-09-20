@@ -12,12 +12,16 @@ module.exports = [
          'react-hooks/set-state-in-effect': 'off',
      },
     },
-    // Dev/build scripts run under Node and use Buffer/process; give them node globals.
-    {
-      name: 'vw/node-scripts',
-      files: ['scripts/**/*.mjs'],
-      languageOptions: { globals: { ...globals.node } },
-    },
+      // Dev/build scripts run under Node and use Buffer/process; give them node globals.
+      // import/no-unresolved is off here: the e2e harness does an optional dynamic
+      // import of @playwright/test (only present when the browser pass is enabled),
+      // so a static "unresolved" error would false-positive on a clean checkout.
+      {
+       name: 'vw/node-scripts',
+       files: ['scripts/**/*.mjs'],
+       languageOptions: { globals: { ...globals.node } },
+       rules: { 'import/no-unresolved': 'off' },
+      },
     {
       ignores: [
         'node_modules/**',
