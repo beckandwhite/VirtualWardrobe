@@ -29,7 +29,9 @@ npm run fetch:pose     # downloads ModelNet-SinglePose-Lite into public/pose/
 
 As of 2025-09 `tfhub.dev` 302-redirects to Kaggle and the old GCS
 `tfhub-public` bucket no longer exists, so `npm run fetch:pose` may fail. Three
-options, in order of preference:
+options, in order of preference (the two active autonomous briefs are
+**M3-6** "synthesize TFJS from the live ONNX, start first" and **M3-7**
+"vendor a known-good TFJS graph" — see `Plans/issues/` + `Plans/decision-log.md` D24):
 
 1. **Find a mirror and hand-fetch it:**
    ```bash
@@ -85,15 +87,20 @@ flag (see `src/catalog/ingest.ts`).
 
 ## 7. Dev environment limitations (M3-5)
 
-The current dev setup can't:
-- Render a web UI (no browser in the sandbox). `@playwright/test` is not installed,
-   and even if it were, the harness below is designed to be **skippable** when the
-   model bytes are absent, so CI stays green in a clean checkout.
-- Run the iOS/Android simulator — same story; native E2E (Expo Go / Detox) is out
-    of scope for M3-5.
-- Talk to the canonical `tfhub.dev` MoveNet URL (302→Kaggle; see §2). The
-   `fetch:pose` script has a fallback; a model-absent run still produces a PNG of
-    the manual-fallback path.
+The current dev setup can't — each now has unblocking work items (autonomous briefs in
+`Plans/issues/`, 2026-09-21, D25):
+
+- **Render a web UI (no browser in the sandbox).** `@playwright/test` is not installed;
+   even then, the harness below is **skippable** when the model bytes are absent, so CI
+  stays green in a clean checkout. → **M3-8** (docs) / **M3-9** (install + run here).
+- **Run the iOS/Android simulator.** Same story; native E2E (Expo Go / Detox) is out of
+   scope for M3-5. The test *environment* is now in scope for two pairs (doc + setup):
+    **M3-10**/**M3-11** (Android emulator + device) and **M3-12**/**M3-13** (iOS Simulator).
+     On-device *pose* stays the M3-1 NO-GO spike; these items stand up the env, not the ML.
+- **Talk to the canonical `tfhub.dev` MoveNet URL (302→Kaggle; see §2).** The
+    `fetch:pose` script has a fallback; a model-absent run still produces a PNG of the
+   manual-fallback path. → **M3-6** (synthesize TFJS from the live ONNX, *start first*) /
+    **M3-7** (vendor a known-good TFJS graph, long-term). See §2 options + D24.
 
 ### M3-5 harness (`npm run e2e:pose`)
 - **Script:** `scripts/pose-smoke.mjs` — a thin Playwright runner that drives

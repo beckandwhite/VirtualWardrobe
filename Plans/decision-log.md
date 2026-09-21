@@ -281,6 +281,66 @@ what M0 shipped. Locked outcomes below; the issue docs are amended to match.
    `splash` key is a core Expo config, so a branded splash needs no plugin dep. `app.json`
    now points `splash.image` at the existing `assets/splash-icon.png` with bg `#E6F4FE`
    (matching the adaptive-icon background). Icons themselves already existed from M0-1.
-  AC1 ("builds + launches on both platforms") and the AC3 screenshot kit are **not**
-   verifiable in-sandbox (no iOS/Android build / no rendered run — same ceiling as D20.5 /
-   D21.6 / M3-1 NO-GO), so M3-3 is recorded **PARTIAL**, not DONE.
+   AC1 ("builds + launches on both platforms") and the AC3 screenshot kit are **not**
+    verifiable in-sandbox (no iOS/Android build / no rendered run — same ceiling as D20.5 /
+     D21.6 / M3-1 NO-GO), so M3-3 is recorded **PARTIAL**, not DONE.
+
+## 2026-09-21 — Dead MoveNet source: two autonomous work items (D24)
+
+Ran `npm run fetch:pose` to vendor the web pose model (M2-1 / M3-5). It failed: `tfhub.dev`
+returns a Kaggle **HTML page** (5.7 KB), which the script then wrote as `model.json` and tried
+to `JSON.parse` ("Unexpected token '<'"). Probed the landscape: `tfhub.dev`→Kaggle HTML,
+`tfhub-public`/`modelzoo-asia` GCS 404, jsDelivr/githack/statically `tfjs-models` 404 (the
+repo ships **source**, not weights). The only live byte for this model is an **ONNX** graph
+on HuggingFace (`Xenova/movenet-singlepose-lightning`, `onnx/model.onnx` ≈9.4 MB, HTTP 200) —
+the **wrong format**, since `@tensorflow-models/pose-detection@2.1.3` (hardcoded dead
+`tfhub.dev` URL) needs a **TFJS graph** (`model.json` + `weightsManifest` shards).
+
+- **D24.1 — deleted the corrupt `model.json`.** The failed `fetch:pose` left a 5.7 KB Kaggle
+  HTML page at `assets/pose/movenet-singlepose-lite/model.json` (not a graph). Removed it so it
+  can't masquerade as a valid model; `public/pose/` was already empty.
+- **D24.2 — two autonomous work items, mutually substitutable.** Created **M3-6** and **M3-7**
+  as **autonomous subagent briefs** (no human in the loop; each logs its own decisions here and in
+  its issue file, finishes DONE/NO-GO/PARTIAL). Both vendor into the same
+   `public/pose/movenet-singlepose-lite/` drop-in slot + `--emit-url-only`, so whichever lands
+  first with a *verified* graph wins and the other closes as superseded:
+     - **M3-6 (START FIRST, fast):** synthesize the TFJS graph by converting the live ONNX with
+       `tensorflowjs_converter --input_format=onnx --output_format=tfjs_graph`. Highest
+       uncertainty (converter op-coverage — `NonMaxSuppressionV3`/`SpaceToDepth` etc.); bails to
+       NO-GO fast. User's "start first" gut call — quickest route to a real model.
+     - **M3-7 (long-term, reliable):** source a *known-good* TFJS graph (teammate cache / a repo
+       that vendors `model.json` + shards), verify API-compat against
+       `node_modules/@tensorflow-models/pose-detection/dist/movenet/`, record provenance (URL +
+       sha256). The durable path if M3-6's converter can't reproduce the op set.
+- **D24.3 — keep it local per ADR-004.** The HuggingFace fetch is a one-time **build-time**
+  vendoring step; at runtime the model loads by URL to a bundled asset, no network.
+
+## 2026-09-21 — §7 limitations → six autonomous env work items (D25)
+
+`docs/dev-setup.md` §7 names two unmet dev-env prerequisites the user bumped into: **§7.1**
+*"can't render a web UI"* (`@playwright/test` not installed — M3-5's browser pass is waived,
+deferring AC1 / M2-1's `ml` DoD) and **§7.2** *"can't run the iOS/Android simulator"*
+(native E2E out of scope). The user asked to raise work items to stand these up — **both the
+docs and the actual setup on this MacBook** — and (where easier) to split them 2 per platform.
+Checked first for duplicates: M3-5 is the *harness script* (explicitly defers the browser
+pass), M3-1 is the *on-device pose* spike (NO-GO) — **neither** is about standing up a test
+environment, so all six are net-new.
+
+- **D25.1 — three doc + setup pairs, six items, all autonomous briefs.** Symmetry with the user's
+  "2 each" ask and the M3-6/M3-7 pattern:
+    - **Playwright:** M3-8 (docs) / M3-9 (setup on this mac) — unblocks M3-5 AC1 + M2-1 `ml` DoD.
+    - **Android:** M3-10 (docs) / M3-11 (setup) — unblocks M1-1 AC1's camera→Item-draft on-device.
+    - **iOS:** M3-12 (docs) / M3-13 (setup) — same on iOS; the host **is** macOS, so iOS is the
+      pair most likely to actually pass in-sandbox (unlike headless Chromium / Android emulator).
+  Each `issue` file is a self-contained autonomous brief (no human in loop; self-logs to this
+  file; finishes DONE/NO-GO/PARTIAL). `docs` = the repeatable prose; `setup` = the *execution*
+  half that proves it on this machine.
+- **D25.2 — scope is the *environment*, never on-device ML.** All six are tooling/docs/qa; the
+  on-device *pose* capability stays M3-1's NO-GO domain. The native test envs verify the **manual**
+  `PoseProvider` path (`providers.native.ts` / M2-4, dev-setup §3), not MoveNet.
+- **D25.3 — a setup item that can't run here is still valuable.** Like D24's "NO-GO is expected
+  and useful," a `setup` item blocked by the known in-sandbox ceiling (D20.5 / D21.6 / M3-1)
+  records a **NO-GO/PARTIAL with the exact blocker** — a precise record of what a capable
+  machine must do, not a dead end. No half-broken toolchain config is left behind (roll back).
+- **D25.4 — `dev-setup.md` §7 now cross-references the pairs.** §7.1 → M3-8/9, §7.2 → M3-10/11/
+  12/13, so each limitation entry points straight at its unblock.
