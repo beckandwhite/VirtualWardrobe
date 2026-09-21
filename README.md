@@ -34,6 +34,13 @@ Expo + TypeScript + Expo Router · Reanimated ·
 - `gh` here is authed to `github.tools.sap`; the project targets the **personal**
    `github.com` (ADR-009). Add that auth via `Plans/04-gh-setup.md`.
 
+## Documentation
+- [`docs/quickstart.md`](docs/quickstart.md) — install, start, and first-run steps.
+- [`docs/usage.md`](docs/usage.md) — how the app works and the expected user flow.
+- [`docs/testing.md`](docs/testing.md) — test, lint, typecheck, and pose smoke checks.
+- [`docs/feedback.md`](docs/feedback.md) — how to report bugs or request features.
+- [`docs/dev-setup.md`](docs/dev-setup.md) — deeper local setup notes for the pose model and environment.
+
 ## Roadmap (MVP)
 - **M0 Foundations** — scaffold, abstractions, local storage, onboarding.
 - **M1 Wardrobe** — capture, CRUD, gallery/filter, bundled catalog.
