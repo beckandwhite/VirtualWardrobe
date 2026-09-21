@@ -54,7 +54,7 @@ Each item below has a full issue body in `Plans/issues/<id>.md`.
 | M3-3      | App icons / launch screens / i18n / store asset prep       | feat, ux, M3        | 🚧 PARTIAL*  |
 | M3-4     | [optional] Account + multi-device sync (separately scoped)| feat, M3, debt     | ⏸ (opt)     |
 | M3-5      | Dev-env: headless-browser harness for `ml`/`spike` DoD     | debt, tooling, M3    | 🚧 BUILT*     |
-| M3-6      | [autonomous] Vendor TFJS MoveNet via ONNX→TFJS conversion (fast) | ml, debt, M3, spike | ⬇️ START FIRST |
+| M3-6      | [autonomous] Vendor TFJS MoveNet via ONNX→TFJS conversion (fast) | ml, debt, M3, spike | 🚧 PARTIAL*     |
 | M3-7       | [autonomous] Vendor a known-good TFJS MoveNet graph (long-term) | ml, debt, M3, spike | 🚧 BACKLOG     |
 | M3-8       | [autonomous] Docs: Playwright web-test environment setup      | docs, tooling, qa, M3 | 🚧 BACKLOG   |
 | M3-9       | [autonomous] Setup: install + run Playwright on this MacBook  | tooling, qa, M3       | 🚧 BACKLOG   |
@@ -88,9 +88,11 @@ Each item below has a full issue body in `Plans/issues/<id>.md`.
 >   `tfhub-public` GCS gone, no jsDelivr mirror). A live **ONNX** copy exists on HuggingFace
 >   (`Xenova/movenet-singlepose-lightning`), but `pose-detection` needs **TFJS**. So two autonomous
 >   subagent work items, mutually substitutable into the same `public/pose/` drop-in slot:
->     - **M3-6 (START FIRST, fast):** synthesize a TFJS graph by converting the ONNX with
->       `tensorflowjs_converter`. Highest uncertainty (op-coverage); bails to NO-GO fast if the
->        converter can't reproduce the op set.
+>     - **M3-6 (PARTIAL, fast):** synthesize a TFJS graph by converting the ONNX with
+>       `tensorflowjs_converter`. The graph and three weight shards were generated and mirrored
+>       into the `public/pose/` and `assets/pose/` drop-in slots, with matching SHA-256 hashes.
+>       Repository gates pass, but Playwright/Chromium is unavailable on this host, so the
+>       network-free `estimatePoses` proof and converter op-coverage remain unverified.
 >     - **M3-7 (long-term, reliable):** source a *known-good* TFJS graph (teammate cache / a repo
 >        that vendors `model.json`+shards), verify API-compat with `pose-detection`, record provenance.
 >   Whichever lands first with a *verified* graph wins; the other closes as superseded. Both unblock

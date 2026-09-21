@@ -6,6 +6,25 @@ in-flight, build-time choices.
 
 ---
 
+## 2026-09-21 — M3-6 follow-up
+
+- **D28: M3-6 produced a TFJS graph, but remains PARTIAL pending inference proof.** The graph and
+  three weight shards are present in `public/pose/movenet-singlepose-lite/` and mirrored under
+  `assets/pose/movenet-singlepose-lite/`. TypeScript, ESLint, Jest (76 tests), and the pose-path
+  self-test pass. The browser harness could not run because Playwright/Chromium is not installed;
+  `estimatePoses` and op coverage therefore remain unverified. The earlier Windows TensorFlow DLL
+  import block is retained below as historical context. M3-7 remains the fallback for a known-good
+  graph if inference fails in an approved browser-enabled environment.
+
+## 2026-09-21 — M3-6 conversion attempt
+
+- **D27: M3-6 is PARTIAL on this Windows host.** The Hugging Face MoveNet ONNX source downloaded
+  successfully (9,413,268 bytes). Python 3.12.10 and `tensorflowjs` 3.18.0 with TensorFlow 2.21.0
+  installed, but importing the converter failed before conversion because Windows Application
+  Control blocked TensorFlow's `_pywrap_record_io` native DLL. No model bytes were emitted or
+  added to the repository. Continue in an approved WSL/Linux or CI environment; M3-7 remains the
+  fallback for a known-good TFJS graph.
+
 ## 2026-09-18 — Build execution begins
 
 - **D1: Skip GitHub entirely; local repo only.**
