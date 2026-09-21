@@ -1,11 +1,11 @@
 # Product Backlog
 
 Single backlog → maps 1:1 to GitHub issues and a GitHub Project board.
-Milestones: **M0 Foundations · M1 Wardrobe · M2 Try-On · M3 Native+Polish · QA Regression**.
+Milestones: **M0 Foundations · M1 Wardrobe · M2 Try-On · M3 Native+Polish · M5 Devops · QA**.
 Each item below has a full issue body in `Plans/issues/<id>.md`.
 
 ## Label scheme
-`feat` · `ux` · `ml` · `qa` · `coverage` · `debt` · `docs` · `spike` · `tooling` · and milestone tags `M0` `M1` `M2` `M3`.
+`feat` · `ux` · `ml` · `qa` · `coverage` · `debt` · `docs` · `spike` · `tooling` · and milestone tags `M0` `M1` `M2` `M3` `M5`.
 
 ## Board columns
 `Backlog · To Do · In Progress · Done · Shipped`
@@ -26,7 +26,7 @@ Each item below has a full issue body in `Plans/issues/<id>.md`.
 
 | ID    | Title                                                           | Labels         | Status      |
 |------|----------------------------------------------------------------|---------------|------------|
-| M1-1 | Camera + library capture (expo-camera / image-picker)           | feat, M1       | ✅ DONE      |
+| M1-1 | Camera + library capture (expo-camera / image-picker)           | feat, M1       | 🚧 PARTIAL   |
 | M1-2 | Item CRUD + thumbnail gen (expo-image-manipulator)              | feat, M1       | ✅ DONE      |
 | M1-3 | Gallery grid + filter/search (category / color / tag)           | feat, ux, M1   | ✅ DONE      |
 | M1-4 | Bundled store.json catalog + ingester                           | feat, M1       | ✅ DONE      |
@@ -62,7 +62,6 @@ Each item below has a full issue body in `Plans/issues/<id>.md`.
 | M3-11      | [autonomous] Setup: Android emulator/device on this MacBook   | tooling, qa, M3       | 🚧 BACKLOG   |
 | M3-12      | [autonomous] Docs: iOS test-environment setup                 | docs, tooling, qa, M3 | 🚧 BACKLOG   |
 | M3-13      | [autonomous] Setup: iOS Simulator on this MacBook             | tooling, qa, M3       | 🚧 BACKLOG   |
-| M3-14      | [autonomous] GitHub Actions build and security workflow       | tooling, qa, M3       | 🚧 BACKLOG   |
 
 > * **M3-1 — NO-GO (in-sandbox).** See `Plans/spikes/M3-1-mediapipe-native-pose.md` + M3-1
 >   issue "Verdict". No device/EAS/camera in the sandbox, so the on-device pose spike
@@ -115,14 +114,25 @@ Each item below has a full issue body in `Plans/issues/<id>.md`.
 >    records a NO-GO/PARTIAL with the exact blocker (the known D20.5/D21.6/M3-1 ceiling) — still
 >    valuable as a precise record.
 
-> * **M3-14 - establish a small, trustworthy CI/security baseline.** The workflow should run on
+## M5 · Devops (CI/CD and delivery confidence)
+
+| ID       | Title                                                     | Labels              | Status       |
+|--------|---------------------------------------------------------|-------------------|------------|
+| M5-1    | [autonomous] GitHub Actions build and security workflow   | tooling, qa, M5      | 🚧 BACKLOG   |
+| M5-2    | CI/CD test execution and reporting                        | tooling, qa, M5      | 🚧 BACKLOG   |
+
+> * **M5-1 - establish a small, trustworthy CI/security baseline.** The workflow should run on
 >   pushes and pull requests, install from the lockfile with `npm ci`, and enforce the repository's
 >   existing typecheck, lint, and Jest gates. Security coverage should start with `npm audit` at a
 >   deliberate severity threshold, CodeQL for JavaScript/TypeScript, and dependency review on pull
 >   requests. GitHub secret scanning/push protection is a repository setting to enable and verify,
 >   not a substitute for the workflow itself.
 
-## QA · Regression & Coverage (M3)
+> * **M5-2 - make CI test results actionable.** Add the clean-install test sequence, coverage and
+>   machine-readable artifacts, clear failure output, required-check guidance, and rerun/download
+>   documentation so a failing CI run can be diagnosed from GitHub Actions.
+
+## QA · Regression & Coverage
 
 | ID        | Title                                                      | Labels                 | Status       |
 |--------|---------------------------------------------------------|-------------------|------------|
