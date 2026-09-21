@@ -62,6 +62,7 @@ Each item below has a full issue body in `Plans/issues/<id>.md`.
 | M3-11      | [autonomous] Setup: Android emulator/device on this MacBook   | tooling, qa, M3       | 🚧 BACKLOG   |
 | M3-12      | [autonomous] Docs: iOS test-environment setup                 | docs, tooling, qa, M3 | 🚧 BACKLOG   |
 | M3-13      | [autonomous] Setup: iOS Simulator on this MacBook             | tooling, qa, M3       | 🚧 BACKLOG   |
+| M3-14      | [autonomous] GitHub Actions build and security workflow       | tooling, qa, M3       | 🚧 BACKLOG   |
 
 > * **M3-1 — NO-GO (in-sandbox).** See `Plans/spikes/M3-1-mediapipe-native-pose.md` + M3-1
 >   issue "Verdict". No device/EAS/camera in the sandbox, so the on-device pose spike
@@ -111,6 +112,13 @@ Each item below has a full issue body in `Plans/issues/<id>.md`.
 >    only — on-device *pose* stays M3-1 (NO-GO in-sandbox). A `setup` item that can't run here
 >    records a NO-GO/PARTIAL with the exact blocker (the known D20.5/D21.6/M3-1 ceiling) — still
 >    valuable as a precise record.
+
+> * **M3-14 - establish a small, trustworthy CI/security baseline.** The workflow should run on
+>   pushes and pull requests, install from the lockfile with `npm ci`, and enforce the repository's
+>   existing typecheck, lint, and Jest gates. Security coverage should start with `npm audit` at a
+>   deliberate severity threshold, CodeQL for JavaScript/TypeScript, and dependency review on pull
+>   requests. GitHub secret scanning/push protection is a repository setting to enable and verify,
+>   not a substitute for the workflow itself.
 
 ## QA · Regression & Coverage (M3)
 
