@@ -10,8 +10,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { router } from 'expo-router';
 import { r, type TryOn } from '@/store';
 import { deleteLook, shareLook } from '@/composer/share';
-// eslint-disable-next-line import/no-unresolved
-import sampleBody from '../../../assets/sample/body.png';
+import sampleBody from '../../assets/sample/body.png';
 
 export default function LooksScreen() {
      const [looks, setLooks] = useState<TryOn[]>([]);

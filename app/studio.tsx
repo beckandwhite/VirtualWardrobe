@@ -42,8 +42,8 @@ import {
     type ShareResult,
 } from '@/composer/share';
 import type { Keypoint, Transform } from '@/pose';
-import sampleBody from '../../assets/sample/body.png'; // eslint-disable-line import/no-unresolved
-import sampleGarment from '../../assets/sample/garment.png'; // eslint-disable-line import/no-unresolved
+import sampleBody from '../assets/sample/body.png';
+import sampleGarment from '../assets/sample/garment.png';
 
 // A garment to overlay: either a wardrobe Item or a catalog StoreItem, normalized
 // to a common shape the studio only ever talks to.
