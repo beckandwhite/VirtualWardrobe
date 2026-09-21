@@ -8,8 +8,8 @@ description: "Local-first virtual wardrobe + pose-aware try-on web/app (Expo)."
 Local-first virtual wardrobe + **pose-aware try-on**. One Expo codebase, shipped to
 **web + iOS + Android**. MVP plan lives in [`Plans/`](Plans/).
 
-> Status: **planning phase.** Repo scaffolded locally; GitHub project + issues pending a
-> github.com auth (see [`Plans/04-gh-setup.md`](Plans/04-gh-setup.md)).
+> Status: **planning phase.** The GitHub project and issue backlog are live; see
+> [`Plans/04-gh-setup.md`](Plans/04-gh-setup.md) and [`AGENTS.md`](AGENTS.md) for the sync workflow.
 
 ## Why it exists
 Try on clothes from your own photos + a bundled catalog, with believable
@@ -21,7 +21,7 @@ pose-aware draping — locally, privacy-first, no server.
 - [`Plans/02-product-backlog.md`](Plans/02-product-backlog.md) — milestone → issue map.
 - [`Plans/03-execution-plan.md`](Plans/03-execution-plan.md) — what gets built, in what order.
 - [`Plans/04-gh-setup.md`](Plans/04-gh-setup.md) — the one manual step to push to github.com.
-- [`Plans/issues/`](Plans/issues/) — 15 issue specs (M0–M3).
+- [`Plans/issues/`](Plans/issues/) — local issue specifications mirrored to GitHub.
 
 ## Stack (target)
 Expo + TypeScript + Expo Router · Reanimated ·
@@ -59,3 +59,4 @@ Expo + TypeScript + Expo Router · Reanimated ·
 - **M1 Wardrobe** — capture, CRUD, gallery/filter, bundled catalog.
 - **M2 Try-On** — web pose + auto-box + manual fine-tune + save/share + manual fallback.
 - **M3 Native + Polish** — on-device pose spike, looks gallery, icons/i18n, optional sync.
+- **M5 Devops** — CI/security workflow and CI/CD test execution/reporting.

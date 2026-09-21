@@ -10,6 +10,8 @@ expo-env.d.ts
 # git
 .git
 .github
+!.github/
+!.github/copilot-instructions.md
 
 # misc
 *.log

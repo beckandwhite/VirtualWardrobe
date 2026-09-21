@@ -1,11 +1,11 @@
 # Product Backlog
 
 Single backlog → maps 1:1 to GitHub issues and a GitHub Project board.
-Milestones: **M0 Foundations · M1 Wardrobe · M2 Try-On · M3 Native+Polish · M5 Devops · QA**.
+Milestones: **M0 Foundations · M1 Wardrobe · M2 Try-On · M3 Native+Polish · M6 Language & i18n · M5 Devops · QA**.
 Each item below has a full issue body in `Plans/issues/<id>.md`.
 
 ## Label scheme
-`feat` · `ux` · `ml` · `qa` · `coverage` · `debt` · `docs` · `spike` · `tooling` · and milestone tags `M0` `M1` `M2` `M3` `M5`.
+`feat` · `ux` · `ml` · `qa` · `coverage` · `debt` · `docs` · `spike` · `tooling` · and milestone tags `M0` `M1` `M2` `M3` `M6` `M5`.
 
 ## Board columns
 `Backlog · To Do · In Progress · Done · Shipped`
@@ -62,6 +62,26 @@ Each item below has a full issue body in `Plans/issues/<id>.md`.
 | M3-11      | [autonomous] Setup: Android emulator/device on this MacBook   | tooling, qa, M3       | 🚧 BACKLOG   |
 | M3-12      | [autonomous] Docs: iOS test-environment setup                 | docs, tooling, qa, M3 | 🚧 BACKLOG   |
 | M3-13      | [autonomous] Setup: iOS Simulator on this MacBook             | tooling, qa, M3       | 🚧 BACKLOG   |
+| M3-14      | Storyboard the core wardrobe-to-try-on user journey             | ux, docs, M3          | 🚧 BACKLOG   |
+
+## M6 · Language & i18n
+
+| ID       | Title                                                     | Labels              | Status      |
+|--------|---------------------------------------------------------|-------------------|------------|
+| M6-1    | Language/i18n foundation and translation workflow        | docs, ux, M6        | 🚧 BACKLOG |
+| M6-2    | English canonical catalog and copy review                | docs, ux, M6        | 🚧 BACKLOG |
+| M6-3    | Hungarian translation                                    | docs, ux, M6        | 🚧 BACKLOG |
+| M6-4    | German translation                                       | docs, ux, M6        | 🚧 BACKLOG |
+| M6-5    | Spanish translation completion                           | docs, ux, M6        | 🚧 BACKLOG |
+| M6-6    | Italian translation                                      | docs, ux, M6        | 🚧 BACKLOG |
+| M6-7    | French translation                                       | docs, ux, M6        | 🚧 BACKLOG |
+| M6-8    | Vietnamese translation                                   | docs, ux, M6        | 🚧 BACKLOG |
+| M6-9    | Chinese translation                                      | docs, ux, M6        | 🚧 BACKLOG |
+
+> * **M6-1** establishes the typed eight-locale catalog, fallback and formatting rules, coverage
+>   checks, persistence behavior, and contributor workflow. M6-2 makes English the reviewed source
+>   catalog; M6-3 through M6-9 then deliver Hungarian, German, Spanish completion, Italian,
+>   French, Vietnamese, and Chinese translations.
 
 > * **M3-1 — NO-GO (in-sandbox).** See `Plans/spikes/M3-1-mediapipe-native-pose.md` + M3-1
 >   issue "Verdict". No device/EAS/camera in the sandbox, so the on-device pose spike
