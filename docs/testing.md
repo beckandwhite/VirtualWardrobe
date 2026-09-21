@@ -70,6 +70,24 @@ Then run the app locally with:
 npm run web
 ```
 
+## QA summary
+
+For a coverage assessment and a prioritized list of QA gaps, see [docs/testing-summary.md](testing-summary.md).
+
+For execution-ready planning and implementation guidance for the next QA iteration, see [docs/qa-grooming-plan.md](qa-grooming-plan.md).
+
+For the most immediate implementation-ready repository test plan, see [docs/qa-repository-test-plan.md](qa-repository-test-plan.md).
+
+For the exact execution checklist to implement the first QA test sprint, see [docs/qa-repository-test-checklist.md](qa-repository-test-checklist.md).
+
+For the next major UI-focused QA workstream, see [docs/qa-screen-test-plan.md](qa-screen-test-plan.md).
+
+For the runtime pose and browser validation stream, see [docs/qa-pose-and-browser-test-plan.md](qa-pose-and-browser-test-plan.md).
+
+For the consolidated next sprint queue, see [docs/qa-sprint-backlog.md](qa-sprint-backlog.md).
+
+The project currently has a solid unit-test baseline, but the highest-value gaps are the repository/SQLite layer, screen-level flows, and pose fallback integration checks.
+
 ## Test areas in the repo
 
 Current tests are organized under the [tests](tests) folder and cover areas such as:

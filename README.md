@@ -38,8 +38,21 @@ Expo + TypeScript + Expo Router · Reanimated ·
 - [`docs/quickstart.md`](docs/quickstart.md) — install, start, and first-run steps.
 - [`docs/usage.md`](docs/usage.md) — how the app works and the expected user flow.
 - [`docs/testing.md`](docs/testing.md) — test, lint, typecheck, and pose smoke checks.
+- [`docs/testing-summary.md`](docs/testing-summary.md) — QA summary, coverage assessment, and risk areas.
+- [`docs/qa-grooming-plan.md`](docs/qa-grooming-plan.md) — execution-ready QA plan for the next grooming cycle.
+- [`docs/qa-repository-test-plan.md`](docs/qa-repository-test-plan.md) — implementation-ready plan for repository and SQLite regression tests.
+- [`docs/qa-repository-test-checklist.md`](docs/qa-repository-test-checklist.md) — step-by-step execution checklist for the first QA implementation task.
+- [`docs/qa-screen-test-plan.md`](docs/qa-screen-test-plan.md) — implementation-ready plan for onboarding, capture, wardrobe, and studio flow coverage.
+- [`docs/qa-pose-and-browser-test-plan.md`](docs/qa-pose-and-browser-test-plan.md) — implementation-ready plan for pose fallback and browser smoke validation.
+- [`docs/qa-sprint-backlog.md`](docs/qa-sprint-backlog.md) — consolidated sprint backlog and prioritization for the next QA cycle.
 - [`docs/feedback.md`](docs/feedback.md) — how to report bugs or request features.
 - [`docs/dev-setup.md`](docs/dev-setup.md) — deeper local setup notes for the pose model and environment.
+
+## QA work items
+- [`Plans/issues/QA-1.md`](Plans/issues/QA-1.md) — repository / SQLite regression tests
+- [`Plans/issues/QA-2.md`](Plans/issues/QA-2.md) — screen-level flow tests for onboarding, capture, and studio
+- [`Plans/issues/QA-3.md`](Plans/issues/QA-3.md) — pose-provider failure and fallback regression tests
+- [`Plans/issues/QA-4.md`](Plans/issues/QA-4.md) — browser-level smoke tests for the Expo web app
 
 ## Roadmap (MVP)
 - **M0 Foundations** — scaffold, abstractions, local storage, onboarding.
