@@ -13,8 +13,10 @@
         "@/capture/*": ["./src/capture/*"],
    "@/wardrobe": ["./src/wardrobe/index.ts"],
    "@/wardrobe/*": ["./src/wardrobe/*"],
-   "@/catalog": ["./src/catalog/index.ts"],
-   "@/catalog/*": ["./src/catalog/*"]
+     "@/catalog": ["./src/catalog/index.ts"],
+      "@/catalog/*": ["./src/catalog/*"],
+      "@/i18n": ["./src/i18n/index.ts"],
+      "@/i18n/*": ["./src/i18n/*"]
     }
   },
    "include": ["**/*.ts", "**/*.tsx", ".expo/types/**/*.ts", "expo-env.d.ts"],

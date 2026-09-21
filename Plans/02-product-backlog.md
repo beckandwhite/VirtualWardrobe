@@ -51,7 +51,7 @@ Each item below has a full issue body in `Plans/issues/<id>.md`.
 |--------|---------------------------------------------------------|-------------------|------------|
 | M3-1     | [spike] EAS prebuilt + Mediapose/Tasks pose for native    | spike, ml, M3       | ⛔ NO-GO*    |
 | M3-2     | Saved-looks gallery + export/share sheet                  | feat, ux, M3        | ✅ BUILT       |
-| M3-3     | App icons / launch screens / i18n / store asset prep      | feat, ux, M3        | ⏸ TODO      |
+| M3-3      | App icons / launch screens / i18n / store asset prep       | feat, ux, M3        | 🚧 PARTIAL*  |
 | M3-4     | [optional] Account + multi-device sync (separately scoped)| feat, M3, debt     | ⏸ (opt)     |
 | M3-5     | Dev-env: headless-browser harness for `ml`/`spike` DoD    | debt, tooling, M3   | 🚧 BUILT*    |
 
@@ -61,11 +61,18 @@ Each item below has a full issue body in `Plans/issues/<id>.md`.
 >    native shipping path; a `MediaPipePoseProvider` is a drop-in when a device appears.
 >
 > * **M3-5 — harness BUILT, browser pass waived.** `scripts/pose-smoke.mjs` +
->   `scripts/pose-smoke-path.mjs` (pure skip-decision + `e2e:pose` / `e2e:pose:check`)
+>    `scripts/pose-smoke-path.mjs` (pure skip-decision + `e2e:pose` / `e2e:pose:check`)
 >   are wired; on a clean checkout they **skip the browser pass and exit 0** (skippable-when-
->   model-absent, AC2) and run the pure self-test. The actual Chromium screenshot (AC1) is only
+>    model-absent, AC2) and run the pure self-test. The actual Chromium screenshot (AC1) is only
 >   produced on a machine with `@playwright/test` + the MoveNet model — the same in-sandbox
->    ceiling as M2-1 D20.5 / M2-2 D21.6. M3-3 remains the open M3 feature work.
+>    ceiling as M2-1 D20.5 / M2-2 D21.6.
+>
+> * **M3-3 — PARTIAL, zero-dep (D23.1).** i18n layer (`src/i18n/`: pure 2-locale catalog en+es,
+>    `useI18n` provider, `LanguageSwitcher`) is wired into onboarding + the tab titles, language
+>   persisted in `app_settings`; `app.json` now has a branded `splash` + `icon`. **Not** device-
+>  verified (no iOS/Android build in-sandbox, same ceiling as M2/M3-1) and the store-asset
+>   screenshot kit is out of scope in-sandbox. 2 locales + working no-reload language switch
+>   (AC2) are done and unit-tested.
 
 ## Definition of Done (every issue)
 - [ ] Acceptance criteria met and verified (test where applicable).

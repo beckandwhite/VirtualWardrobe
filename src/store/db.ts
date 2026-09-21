@@ -79,9 +79,10 @@ export async function initStore(): Promise<void> {
         key TEXT PRIMARY KEY,
         value TEXT NOT NULL
        );
-      INSERT OR IGNORE INTO app_settings (key, value) VALUES
-        ('has_onboarded', '0'),
-         ('catalog_ingested', '0');
+     INSERT OR IGNORE INTO app_settings (key, value) VALUES
+         ('has_onboarded', '0'),
+          ('catalog_ingested', '0'),
+          ('language', 'en');
    `);
 
     // 2. Schema-versioned migrations.

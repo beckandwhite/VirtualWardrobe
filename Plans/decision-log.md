@@ -259,4 +259,28 @@ what M0 shipped. Locked outcomes below; the issue docs are amended to match.
   (pure skip-decision + self-test, `e2e:pose:check`) and `pose-smoke.mjs` (`e2e:pose`, skippable,
   exits 0 with a demo note when neither a browser nor the model is present) are wired. The
   Chromium screenshot (AC1) is only produced on a machine with `@playwright/test` + the model —
-  the same in-sandbox ceiling as D20.5/D21.6. M3-3 remains the open M3 feature work.
+   the same in-sandbox ceiling as D20.5/D21.6.
+## 2026-09-20 — M3-3 lands (i18n + branded splash) + backlog reconciliation
+
+- **D23.1 — i18n is a zero-dependency in-house catalog, not i18next.** M3-3 suggests
+   `i18next` + `react-i18next`, but the project's standing philosophy is minimal deps
+  (D21.3 refused a new dep for the composer; D7 favors in-house where the surface is
+   small). The onboarding flow that needed i18n most is the smallest surface, and a
+   2-locale catalog is a `Record<Locale, Record<string,string>>` + one pure `translate`
+   function — strictly more legible than `i18next.init()`, with zero runtime cost. So:
+    `src/i18n/strings.ts` (pure core, jest-runnable, like `compose`/`autoBox`) +
+   `src/i18n/useI18n.tsx` (React provider, language persisted via `r.setSetting('language', …)`)
+   + `src/i18n/LanguageSwitcher.tsx`. **2 locales: en + es.** If a 3rd locale or plural/
+   interpolation needs appear, that's the trigger to adopt i18next — not before.
+- **D23.2 — language switch re-renders via context state, not a native reload.** `setLocale`
+   updates React context state (instant re-render of the consuming tree) and persists to
+    `app_settings`. No `expo-localization`, no `reloadAsync` — so a switch provably cannot
+   reload-crash the app (M3-3 AC2). A `language` seed is added to `app_settings` in
+   `initStore` next to `has_onboarded`/`catalog_ingested`.
+- **D23.3 — branded splash via core `app.json` `splash` (no `expo-splash-screen`).** The
+   `splash` key is a core Expo config, so a branded splash needs no plugin dep. `app.json`
+   now points `splash.image` at the existing `assets/splash-icon.png` with bg `#E6F4FE`
+   (matching the adaptive-icon background). Icons themselves already existed from M0-1.
+  AC1 ("builds + launches on both platforms") and the AC3 screenshot kit are **not**
+   verifiable in-sandbox (no iOS/Android build / no rendered run — same ceiling as D20.5 /
+   D21.6 / M3-1 NO-GO), so M3-3 is recorded **PARTIAL**, not DONE.

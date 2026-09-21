@@ -11,12 +11,15 @@ import { type PermissionResponse } from 'expo';
 import { router } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { r } from '@/store';
+import { useI18n } from '@/i18n/useI18n';
+import LanguageSwitcher from '@/i18n/LanguageSwitcher';
 
 export default function OnboardingScreen() {
-   const [status, setStatus] = useState<PermissionResponse | null>(null);
-   const [permissionAsked, setPermissionAsked] = useState(false);
+  const [status, setStatus] = useState<PermissionResponse | null>(null);
+  const [permissionAsked, setPermissionAsked] = useState(false);
+  const { t } = useI18n();
 
-   const requestCamera = useCallback(async () => {
+  const requestCamera = useCallback(async () => {
        try {
           const res = await Camera.Camera.requestCameraPermissionsAsync();
            setStatus(res);
@@ -41,49 +44,41 @@ export default function OnboardingScreen() {
          contentContainerStyle={styles.content}>
          <StatusBar />
          <View style={styles.card}>
-            <Text style={styles.title}>Welcome to VirtualWardrobe</Text>
-            <Text style={styles.body}>
-            Try on clothes from photos you take and a curated catalog — all on your
-            device, nothing uploaded.
-            </Text>
+             <Text style={styles.title}>{t('onboarding.welcome')}</Text>
+              <Text style={styles.body}>{t('onboarding.body')}</Text>
 
-            <View style={styles.section}>
-               <Text style={styles.sectionTitle}>Camera</Text>
-              {granted ? (
-                  <Text style={styles.ok}>✓ Camera access enabled</Text>
-              ) : permissionAsked && !canAskAgain ? (
-                    <Text style={styles.deny}>
-                 Camera permission denied. Re-enable it in your device settings to use
-                 the camera; you can still open photos.
-                  </Text>
-              ) : permissionAsked ? (
-                    <Text style={styles.deny}>
-                 Camera access not granted. You can re-enable it anytime from here.
-                  </Text>
-              ) : null}
+              <View style={styles.section}>
+                 <Text style={styles.sectionTitle}>{t('onboarding.camera')}</Text>
+                 {granted ? (
+                    <Text style={styles.ok}>{t('onboarding.camera.granted')}</Text>
+                 ) : permissionAsked && !canAskAgain ? (
+                    <Text style={styles.deny}>{t('onboarding.camera.denied')}</Text>
+                 ) : permissionAsked ? (
+                    <Text style={styles.deny}>{t('onboarding.camera.notgranted')}</Text>
+                 ) : null}
 
-              {!granted ? (
-                 <TouchableOpacity
-                    style={styles.button}
-                    activeOpacity={0.8}
-                    onPress={requestCamera}>
-                    <Text style={styles.buttonText}>Enable camera</Text>
-                 </TouchableOpacity>
-              ) : null}
+                 {!granted ? (
+                   <TouchableOpacity
+                     style={styles.button}
+                     activeOpacity={0.8}
+                     onPress={requestCamera}>
+                       <Text style={styles.buttonText}>{t('onboarding.camera.enable')}</Text>
+                   </TouchableOpacity>
+                 ) : null}
 
-              <Text style={styles.hint}>
-            Camera lets you photograph clothes. The wardrobe works without it.
-             </Text>
-             </View>
+                 <Text style={styles.hint}>{t('onboarding.camera.hint')}</Text>
+                </View>
 
-             <View style={styles.footer}>
-            <TouchableOpacity
-               style={styles.primaryButton}
-               activeOpacity={0.8}
-               onPress={finish}>
-                <Text style={styles.primaryText}>Start →</Text>
-             </TouchableOpacity>
-            </View>
+                 <LanguageSwitcher />
+
+                <View style={styles.footer}>
+              <TouchableOpacity
+                style={styles.primaryButton}
+                activeOpacity={0.8}
+                onPress={finish}>
+                  <Text style={styles.primaryText}>{t('onboarding.start')}</Text>
+               </TouchableOpacity>
+              </View>
          </View>
        </ScrollView>
    );
