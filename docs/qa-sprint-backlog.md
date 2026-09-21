@@ -10,17 +10,19 @@ The goal is to reduce risk in the highest-value areas without changing productio
 
 Baseline verification is green in the workspace:
 
-- `npm test -- --runInBand` → 7/7 suites passed
+- `npm test -- --runInBand` → 8/8 suites passed
 - `npx tsc --noEmit` → passed
 - `npx eslint . --max-warnings 0` → passed
 
-The project has a solid unit-test foundation, but the remaining gaps sit in runtime integration and user-flow coverage.
+The project has a solid unit-test foundation **that now includes the persistence/repo layer**
+(after QA-1, 2026-09-21). The remaining gaps sit in runtime integration, user-flow coverage,
+pose fallback, and browser smoke.
 
 ## Prioritization
 
-### P0 — Repository / SQLite regression coverage
+### P0 — Repository / SQLite regression coverage — **DONE (QA-1, 2026-09-21)**
 
-Primary doc:
+Primary docs:
 
 - [Plans/issues/QA-1.md](../Plans/issues/QA-1.md)
 - [docs/qa-repository-test-plan.md](qa-repository-test-plan.md)

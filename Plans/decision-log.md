@@ -343,4 +343,25 @@ environment, so all six are net-new.
   records a **NO-GO/PARTIAL with the exact blocker** — a precise record of what a capable
   machine must do, not a dead end. No half-broken toolchain config is left behind (roll back).
 - **D25.4 — `dev-setup.md` §7 now cross-references the pairs.** §7.1 → M3-8/9, §7.2 → M3-10/11/
-  12/13, so each limitation entry points straight at its unblock.
+   12/13, so each limitation entry points straight at its unblock.
+
+## 2026-09-21 — QA sprint begins (QA-1 repository regressions)
+
+- **D26.1 — QA-1 covers the repo with a faithful in-memory fake DB, not a device/wasm harness.**
+  The persistence contract in `src/store/repo.ts` is pure data logic, so the suite
+  (`tests/store/repo.test.ts`, 28 tests / 5 describe blocks) drives the *real* `r` object
+  against a hand-rolled fake of the four expo-sqlite surface methods
+   (`getFirstAsync`/`getAllAsync`/`runAsync`/`withTransactionAsync`) + a `jest.mock` of `db.ts`'s
+  `getDb` that hands the repo the active fake. No `@testing-library/react-native`, no native
+   runtime, no `.wasm` — the same structural-fake style as `tests/catalog/ingest.test.ts`.
+- **D26.2 — assert the *actual* `rowToPaths`/`rowToTags` asymmetry, record a latent finding.**
+  `rowToTags` trims + drops empties; `rowToPaths` only drops *empty-string* fragments, so a
+  `' '` (whitespace-only) fragment **survives**. The test asserts the real behavior (don't change
+   production code to make a test pass) and flags the asymmetry as a non-blocking robustness note:
+   paths aren't trimmed the way tags are. No clean-data caller is affected.
+- **D26.3 — deterministic fault-injection for the missing-row error path.** `insertItem` /
+   `insertStoreItem` throw `'<entity>: row missing after insert'` when the post-insert read
+   returns null; the fake exposes `setFailAfterInsert(true)` so that branch is asserted without a
+   real DB.
+- **D26.4 — `jest` baseline moves 48→76 tests (7→8 suites).** The new `store/repo` suite is the
+   first persistence-layer coverage; gates (tsc + eslint + jest) stay green.

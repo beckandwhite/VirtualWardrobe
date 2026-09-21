@@ -18,10 +18,57 @@ Add tests covering:
 - malformed or missing rows
 
 ## Acceptance criteria
-- [ ] Repository CRUD behavior is covered by automated tests
-- [ ] Tag/path serialization is exercised with real data-shape cases
-- [ ] Missing-row and invalid-input handling is asserted
-- [ ] Tests run as part of the normal Jest suite
+- [x] Repository CRUD behavior is covered by automated tests
+- [x] Tag/path serialization is exercised with real data-shape cases
+- [x] Missing-row and invalid-input handling is asserted
+- [x] Tests run as part of the normal Jest suite
 
 ## Notes
 This is a foundational QA work item because the app stores user state locally and lacks direct regression protection for that data contract.
+
+## Decision log
+- **D26.1 — one focused suite, a faithful in-memory fake DB, not `@testing-library`/device.**
+  The repo's persistence logic (serialization, row→domain conversion, ordering, cascade) is
+  pure data contract, so a hand-rolled fake of the four expo-sqlite surface methods
+  (`getFirstAsync`/`getAllAsync`/`runAsync`/`withTransactionAsync`) driven through the *real*
+  `r` (via a `jest.mock` of `db.ts`'s `getDb`) exercises the exact repo code with zero native /
+  wasm / device dependency. Matches the existing `tests/catalog/ingest.test.ts` fake-repo style.
+- **D26.2 — assert the *actual* serialization contract, not an ideal one.** `rowToTags`
+  trims + drops empties, but `rowToPaths` only drops *empty-string* fragments (`filter(Boolean)`);
+  a whitespace-only fragment is kept. The test asserts this asymmetry (a `' '` fragment survives)
+  rather than changing production code, and `Plans/decision-log.md` D26 records it as a latent
+  robustness note (paths don't trim the way tags do).
+- **D26.3 — fault-injection for the missing-row error path.** `insertItem`/`insertStoreItem`
+  throw `'<entity>: row missing after insert'` when the post-insert read returns null; the fake
+  exposes a `setFailAfterInsert` toggle so that branch is asserted deterministically.
+
+## Status: BUILT (2026-09-21)
+Gate-green (tsc + eslint + jest 76/76 across 8 suites), committed as the QA-1 commit.
+
+### Built
+- `tests/store/repo.test.ts` — 28 tests across five suites: settings/onboarding, item CRUD,
+  catalog store-items, body-photos/try-ons, and serialization/edge-cases. Drives the real
+  `src/store/repo.ts` `r` against an in-memory fake of the expo-sqlite surface (mocked `getDb`).
+
+### Verified against
+- `tests/store/repo.test.ts`
+  - [x] `getSetting`/`setSetting` read + write + replace; `setOnboarded` writes `has_onboarded='1'` idempotently
+  - [x] `insertItem` returns a typed `Item`; tags round-trip; omitted `tags`/`thumbnailPath` default to `[]`/`null`
+  - [x] `listItems` descending `created_at`; `getItem` valid id + `undefined` for unknown id
+  - [x] `updateItem` partial patch (name/color/tags/thumbnail) preserves unpatched fields; empty patch is a no-op
+  - [x] `deleteItem` cascades to related `try_ons` and spares other items
+  - [x] `insertStoreItem` stores catalog metadata; `listStoreItems` ascending `name`; null `specs` + empty `imagePaths` valid
+  - [x] `insertBodyPhoto` / `insertTryOn` / `listTryOns` (descending) / `deleteTryOn` (single-row) + null `output_path`
+  - [x] tag + path round-trips on real row shapes; missing/empty rows don't crash; post-insert missing row throws
+
+### Follow-ups
+- **Latent finding (D26.2):** `rowToPaths` does not trim whitespace-only fragments the way
+  `rowToTags` does. Non-blocking; the test documents the current contract. A future tightening
+  (trim paths too) would be a one-line change with no callers affected on clean data.
+
+### Stats
+| check | result |
+|---|---|
+| `tsc --noEmit` | ✅ PASS |
+| `eslint . --max-warnings 0` | ✅ PASS |
+| `jest` | ✅ PASS (76/76 across 8 suites — adds `store/repo` to the prior 48 across 7) |

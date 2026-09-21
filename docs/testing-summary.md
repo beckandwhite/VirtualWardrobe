@@ -2,12 +2,12 @@
 
 ## Executive summary
 
-The repository is in a strong unit-test baseline, with 7 Jest suites passing and 48 tests passing in the current workspace. The suite is especially good at validating pure logic such as garment placement, wardrobe filtering, catalog ingestion, export composition, and locale lookup.
+The repository is in a strong unit-test baseline, with 8 Jest suites passing and 76 tests passing in the current workspace. The suite is especially good at validating pure logic such as garment placement, wardrobe filtering, catalog ingestion, export composition, locale lookup, **and the persistence/repo layer** (added by QA-1).
 
 Current baseline evidence:
 
-- `npm test -- --runInBand` → 7/7 suites passed
-- 48/48 tests passed
+- `npm test -- --runInBand` → 8/8 suites passed
+- 76/76 tests passed
 - `npx tsc --noEmit` → passed during the last verification run
 - `npx eslint . --max-warnings 0` → passed during the last verification run
 
@@ -68,19 +68,41 @@ This covers:
 - validity checks for locale names
 - catalog completeness across the supported locales
 
+### 5. Repository / persistence layer (added by QA-1, 2026-09-21)
+The store/persistence contract is covered in:
+
+- [tests/store/repo.test.ts](../tests/store/repo.test.ts)
+
+This covers:
+
+- settings + onboarding persistence (`setSetting`/`getSetting`/`setOnboarded`, idempotent)
+- item CRUD with cascade delete of related try-ons
+- catalog store-item insert/list + null specs / empty image-paths handling
+- body-photo and try-on persistence with descending time ordering
+- string-row → typed-object round-tripping for tags and paths
+- missing / empty row handling and post-insert fault injection
+
 ## Coverage gaps and risk areas
 
-### 1. Repository / SQLite layer is not covered
-The repository layer in [src/store/repo.ts](../src/store/repo.ts) contains a large amount of DB logic, but there are no direct tests for:
+### 1. ~~Repository / SQLite layer is not covered~~ — **CLOSED by QA-1 (2026-09-21)**
 
-- item insert/update/delete flows
-- onboarding persistence
-- try-on persistence
-- storage conversion from string rows to typed objects
-- body-photo lifecycles
-- error handling around missing rows or invalid shapes
+The repository layer in [src/store/repo.ts](../src/store/repo.ts) now has full regression
+coverage in [tests/store/repo.test.ts](../tests/store/repo.test.ts) (28 tests across five
+suites), driven through the real `r` object against an in-memory fake of the expo-sqlite
+surface. This covers:
 
-Risk: logic that looks simple in code can still fail under real Expo SQLite conditions.
+- item insert/update/delete flows (+ cascade delete of related `try_ons`)
+- onboarding persistence (`setOnboarded` → `has_onboarded`, idempotent)
+- catalog store-item insert/list + null `specs` / empty `imagePaths`
+- try-on + body-photo persistence (insert/list/delete, descending order, null `output_path`)
+- string-row → typed-object conversion for tags and paths
+- error handling around missing rows (post-insert fault injection) and missing/empty reads
+
+One latent finding was recorded, not fixed: `rowToPaths` does not trim whitespace the way
+`rowToTags` does (D26.2) — the test asserts the current contract as-is.
+
+Remaining risk: the fake is hand-rolled; a real-expo-sqlite harness (device/wasm) would add
+confidence, but the data contract itself is now protected.
 
 ### 2. UI flow and screen logic is not tested
 The app screens in [app](../app) include several user interactions that are not covered by automated tests:
@@ -136,8 +158,9 @@ Risk: a broken edge condition can produce silent failures that are not protected
 
 ## Recommended test strategy
 
-### Priority 1: database and state regressions
-Add repository-level tests for data persistence and conversion behavior.
+### Priority 1: database and state regressions — **DONE (QA-1, 2026-09-21)**
+Repository-level tests for data persistence and conversion behavior are now in
+[tests/store/repo.test.ts](../tests/store/repo.test.ts).
 
 ### Priority 2: user flow tests
 Add screen-level tests for onboarding, capture, wardrobe, and studio interactions.
@@ -150,4 +173,6 @@ Create a browser-driven smoke test for the studio route once a capable environme
 
 ## QA conclusion
 
-The project is in a solid initial quality state for pure logic and deterministic domain logic, but it is not yet broad enough to serve as a production confidence suite. The next most valuable investment is not more random unit tests; it is coverage for data persistence, real app flow, and the pose fallback integration path.
+The project started from a solid pure-logic baseline and has now added first-class coverage for
+the persistence layer (QA-1). The remaining highest-value investments are screen-level flow
+coverage (QA-2), pose-provider fallback regressions (QA-3), and a browser smoke test (QA-4).
