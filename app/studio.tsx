@@ -16,7 +16,7 @@ import {
 } from 'react-native';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocalSearchParams } from 'expo-router';
-import * as ImagePicker from 'expo-image-picker';
+import { pickImageFromLibrary } from '@/capture/pickImage';
 import {
     useSharedValue,
     useAnimatedStyle,
@@ -272,13 +272,12 @@ export default function StudioScreen() {
 
      const pickPhoto = useCallback(async () => {
           try {
-             const res = await ImagePicker.launchImageLibraryAsync({
-                mediaTypes: 'images',
-                quality: 0.7,
-             });
-             if (res.canceled || !res.assets?.[0]) return;
-             setBodySource({ uri: res.assets[0].uri });
-             setBodyPath(res.assets[0].uri);
+             // Call synchronously in the gesture — no await before the picker, or
+             // Safari drops the user activation and the dialog never opens.
+             const picked = await pickImageFromLibrary();
+             if (!picked) return;
+             setBodySource({ uri: picked.uri });
+             setBodyPath(picked.uri);
           } catch (e) {
              console.error('studio: pick photo failed', e);
           }

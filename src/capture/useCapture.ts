@@ -2,6 +2,7 @@ import { useCallback, useState } from 'react';
 import { Platform } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { Paths, File } from 'expo-file-system';
+import { pickImageFromLibrary } from './pickImage';
 
 // M1-1: a single, platform-agnostic capture entry point. Screens never branch on
 // platform — they call `takePhoto(source)` and get back a persisted image URI.
@@ -45,20 +46,21 @@ export function useCapture(): CaptureApi {
    const takePhoto = useCallback(
       async (source: CaptureSource): Promise<CaptureResult | null> => {
          try {
-            if (source === 'camera') {
-               const perm = await ImagePicker.requestCameraPermissionsAsync();
-               if (!perm.granted) {
-                  setCameraAvailable(false);
-                  return null;
-                 }
-              } else {
-               const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
-               if (!perm.granted) return null;
-              }
-            const res =
-              source === 'camera'
-                 ? await ImagePicker.launchCameraAsync({ mediaTypes: 'images', quality: 0.7 })
-                 : await ImagePicker.launchImageLibraryAsync({ mediaTypes: 'images', quality: 0.7 });
+            if (source === 'library') {
+               // Library goes through the platform-split picker: on web this uses a
+               // real input.click() (Safari won't open the dialog from expo's
+               // synthetic click, nor after an awaited permission call), on native
+               // it requests permission + launches the library picker.
+               const picked = await pickImageFromLibrary();
+               if (!picked) return null;
+               return { uri: persist(picked.uri), source };
+            }
+            const perm = await ImagePicker.requestCameraPermissionsAsync();
+            if (!perm.granted) {
+               setCameraAvailable(false);
+               return null;
+            }
+            const res = await ImagePicker.launchCameraAsync({ mediaTypes: 'images', quality: 0.7 });
             if (res.canceled || !res.assets?.[0]) return null;
             const uri = persist(res.assets[0].uri);
             return { uri, source };
