@@ -11,13 +11,11 @@ import {
     TouchableOpacity,
     ScrollView,
     type ImageSourcePropType,
-    type StyleProp,
-    type ViewStyle,
 } from 'react-native';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocalSearchParams } from 'expo-router';
 import { pickImageFromLibrary } from '@/capture/pickImage';
-import {
+import Animated, {
     useSharedValue,
     useAnimatedStyle,
     useAnimatedReaction,
@@ -397,13 +395,13 @@ export default function StudioScreen() {
                    setDims({ w: width, h: height });
                 }}>
                 <Image source={bodySource} style={StyleSheet.absoluteFill} resizeMode="contain" />
-                  <View {...panResponder.panHandlers} style={garmentStyle as StyleProp<ViewStyle>}>
+               <Animated.View {...panResponder.panHandlers} style={garmentStyle}>
                      <Image
                       source={resolveGarmentSource(garment ?? placeholderGarment())}
                       style={styles.garmentImg}
                       resizeMode="contain"
                    />
-                </View>
+                </Animated.View>
                 {overlay}
              </View>
 
