@@ -8,7 +8,8 @@ import {
 } from 'react-native';
 import { useState } from 'react';
 import { router } from 'expo-router';
-import { useCapture, type CaptureSource } from '@/capture';
+import { useCapture, type CaptureSource, type CaptureResult } from '@/capture';
+import { FilePickerButton } from '@/capture/FilePickerButton';
 import { r } from '@/store';
 import {
    buildDraftFromCapture,
@@ -50,6 +51,23 @@ export default function CaptureScreen() {
          }
         };
 
+   // Web-only path: FilePickerButton gives us a blob URI directly (persist is a
+   // no-op on web), so we build the draft inline and skip the takePhoto wrapper.
+   const captureFromUri = async (uri: string) => {
+      setBusy(true);
+      try {
+         const result: CaptureResult = { uri, source: 'library' };
+         const draft = buildDraftFromCapture(result, hint);
+         if (!draft) { setBusy(false); return; }
+         await r.insertItem(draft);
+         const next = captureNextStep(draft);
+         if (next.navigate) await router.replace(next.route);
+      } catch (e) {
+         console.error('capture save failed', e);
+         setBusy(false);
+      }
+   };
+
    return (
         <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
            <Text style={styles.title}>Add a garment</Text>
@@ -71,13 +89,23 @@ export default function CaptureScreen() {
            </View>
 
            <View style={styles.actions}>
-              <TouchableOpacity
-                style={styles.action}
-                activeOpacity={0.8}
-                disabled={busy}
-                onPress={() => captureAndSave('library')}>
-                <Text style={styles.actionText}>Photo</Text>
-              </TouchableOpacity>
+              {Platform.OS === 'web' ? (
+                <FilePickerButton
+                  style={styles.action}
+                  labelStyle={styles.actionText}
+                  disabled={busy}
+                  onPick={captureFromUri}>
+                  Photo
+                </FilePickerButton>
+              ) : (
+                <TouchableOpacity
+                  style={styles.action}
+                  activeOpacity={0.8}
+                  disabled={busy}
+                  onPress={() => captureAndSave('library')}>
+                  <Text style={styles.actionText}>Photo</Text>
+                </TouchableOpacity>
+              )}
               {cameraAvailable && Platform.OS !== 'web' ? (
                 <TouchableOpacity
                   style={styles.action}

@@ -15,7 +15,7 @@ import {
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocalSearchParams } from 'expo-router';
 import { Slider } from '@/studio/Slider';
-import { pickImageFromLibrary } from '@/capture/pickImage';
+import { FilePickerButton } from '@/capture/FilePickerButton';
 import Animated, {
     useSharedValue,
     useAnimatedStyle,
@@ -269,19 +269,6 @@ export default function StudioScreen() {
           ],
      }));
 
-     const pickPhoto = useCallback(async () => {
-          try {
-             // Call synchronously in the gesture — no await before the picker, or
-             // Safari drops the user activation and the dialog never opens.
-             const picked = await pickImageFromLibrary();
-             if (!picked) return;
-             setBodySource({ uri: picked.uri });
-             setBodyPath(picked.uri);
-          } catch (e) {
-             console.error('studio: pick photo failed', e);
-          }
-     }, []);
-
         // Persist the current composite: export + write the TryOn row via the
         // M2-3 composer pipeline (web composite / native garment degrade, D21.3).
         // Stateful wrapper that keeps the error surface + the recent strip fresh.
@@ -473,9 +460,12 @@ export default function StudioScreen() {
                       <Text style={styles.buttonText}>Skeleton: {showSkeleton ? 'on' : 'off'}</Text>
                    </TouchableOpacity>
                 </View>
-                <TouchableOpacity style={styles.button} activeOpacity={0.8} onPress={pickPhoto}>
-                   <Text style={styles.buttonText}>Pick photo</Text>
-                </TouchableOpacity>
+                <FilePickerButton
+                   style={styles.button}
+                   labelStyle={styles.buttonText}
+                   onPick={(uri) => { setBodySource({ uri }); setBodyPath(uri); }}>
+                   Pick photo
+                </FilePickerButton>
                 <TouchableOpacity
                   style={[styles.button, styles.primary, saving ? styles.busy : null]}
                   disabled={saving}
