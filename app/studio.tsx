@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocalSearchParams } from 'expo-router';
+import { Slider } from '@/studio/Slider';
 import { pickImageFromLibrary } from '@/capture/pickImage';
 import Animated, {
     useSharedValue,
@@ -489,72 +490,6 @@ export default function StudioScreen() {
       );
 }
 
-// A precision slider: a draggable thumb on a track (1:1 with the gesture) plus a
-// numeric readout for accessibility. Writes through `onChange` to the shared value.
-// No external slider dependency (ADR: minimal deps) — a PanResponder thumb on a
-// track gives the same 1:1 control across web + native.
-function Slider({
-     label,
-     min,
-     max,
-     value,
-     display,
-     onChange,
-}: {
-     label: string;
-     min: number;
-     max: number;
-     value: number;
-     display: string;
-     onChange: (v: number) => void;
-}) {
-     const [track, setTrack] = useState(0);
-     const startRef = useRef(value);
-     const valueRef = useRef(value);
-     useEffect(() => {
-          valueRef.current = value;
-     }, [value]);
-
-     /* eslint-disable react-hooks/refs */
-     const pan = useMemo(
-          () =>
-             PanResponder.create({
-                onStartShouldSetPanResponder: () => true,
-                onMoveShouldSetPanResponder: () => true,
-                onPanResponderGrant: () => {
-                   startRef.current = valueRef.current;
-                },
-                onPanResponderMove: (_e, g) => {
-                   const w = track || 1;
-                   const next = startRef.current + (g.dx / w) * (max - min);
-                   onChange(Math.max(min, Math.min(max, next)));
-                },
-             }),
-          [track, min, max, onChange],
-     );
-     /* eslint-enable react-hooks/refs */
-
-     const frac = (value - min) / (max - min || 1);
-
-     return (
-      <View style={styles.sliderRow}>
-               <Text style={styles.sliderLabel}>{label}</Text>
-               <View
-                 style={styles.sliderTrack}
-                 onLayout={(e) => setTrack(e.nativeEvent.layout.width)}
-                  {...pan.panHandlers}>
-                  <View
-                    style={[
-                       styles.sliderThumb,
-                        { left: `${frac * 100}%`, transform: [{ translateX: '-50%' }] },
-                    ]}
-                  />
-               </View>
-               <Text style={styles.sliderValue}>{display}</Text>
-            </View>
-       );
-}
-
 // The minimal saved-looks strip (M2-3): a horizontal row of the most recent
 // TryOn rows; tap to reopen one into the editor. The first-class gallery is M3-2.
 function RecentLooks({
@@ -633,36 +568,6 @@ const styles = StyleSheet.create({
         fontSize: 13,
         color: '#58a6ff',
         fontWeight: '600',
-     },
-     sliderRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 10,
-     },
-     sliderLabel: {
-        width: 64,
-        fontSize: 13,
-        color: '#c9d1d9',
-     },
-     sliderTrack: {
-        flex: 1,
-        height: 28,
-        backgroundColor: '#21262d',
-        borderRadius: 14,
-        justifyContent: 'center',
-     },
-     sliderThumb: {
-        position: 'absolute',
-        width: 24,
-        height: 24,
-        borderRadius: 12,
-        backgroundColor: '#58a6ff',
-     },
-     sliderValue: {
-        width: 44,
-        textAlign: 'right',
-        fontSize: 12,
-        color: '#8b949e',
      },
      buttonRow: {
         flexDirection: 'row',
