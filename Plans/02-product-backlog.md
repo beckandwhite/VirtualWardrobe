@@ -149,7 +149,7 @@ issue bodies; implementation notes remain here only when they are useful as dura
 |--------|---------------------------------------------------------|-------------------|------------|
 | M5-1    | [autonomous] GitHub Actions build and security workflow   | tooling, qa, M5      | 🚧 PARTIAL*  |
 | M5-2    | CI/CD test execution and reporting                        | tooling, qa, M5      | ✅ DONE*      |
-| M5-3    | [autonomous] Private GitHub Actions runner from Docker    | tooling, qa, M5      | 🚧 PARTIAL*  |
+| M5-3    | [autonomous] Private GitHub Actions runner from Docker    | tooling, qa, M5      | ✅ CLOSED*    |
 
 > * **M5-1 - establish a small, trustworthy CI/security baseline.** The workflow should run on
 >   pushes and pull requests, install from the lockfile with `npm ci`, and enforce the repository's
@@ -168,10 +168,12 @@ issue bodies; implementation notes remain here only when they are useful as dura
 >   `35736973132`; the issue is therefore **DONE** relative to its own scope, even though the overall
 >   workflow still failed on CodeQL.
 >
-> * **M5-3 - PARTIAL on 2026-09-22.** The pinned Docker runner, secret-free ephemeral bootstrap,
->   least-privilege defaults, labeled dispatch-only smoke workflow, and teardown documentation are
->   implemented. Docker image build and live labeled-job execution remain unverified because the
->   current Windows host has no running Docker Desktop Linux engine; no runner was registered.
+> * **M5-3 - closed on 2026-09-22 with a documented blocker.** The pinned Docker runner,
+>   secret-free ephemeral bootstrap, least-privilege defaults, labeled dispatch-only smoke workflow,
+>   and teardown documentation are implemented. Docker image build and live labeled-job execution
+>   remain unverified because the current Windows host has no running Docker Desktop Linux engine;
+>   no runner was registered. The issue is closed as a verified host/permission blocker, with the
+>   exact prerequisites recorded for a future private-runner deployment.
 
 ## M4 QA · Regression & Coverage
 
