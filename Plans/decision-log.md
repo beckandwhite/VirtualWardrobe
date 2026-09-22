@@ -6,6 +6,44 @@ in-flight, build-time choices.
 
 ---
 
+## 2026-09-22 - M5-1 and M5-2 hosted CI
+
+- **D41: split CI ownership by job.** `.github/workflows/ci.yml` keeps M5-1
+  responsible for checkout, Node 22 setup, `npm ci`, typecheck, lint, npm
+  audit at the `high` threshold, CodeQL, and pull-request dependency review.
+  M5-2 owns an independent Jest job so test diagnostics are still produced
+  when the quality job fails.
+- **D41.1: use native Jest outputs instead of a new reporter dependency.** The
+  test job runs `npm test -- --coverage --runInBand --json`, writes
+  `artifacts/jest-results.json`, and uploads it with `coverage/`. A short
+  summary is appended to the Actions run summary and artifact upload runs on
+  failure.
+- **D41.2: security-setting limits are documented, not bypassed.** Secret
+  scanning and push protection require repository administration and are
+  documented in `docs/ci.md`; the workflow does not pretend it can enable or
+  verify those settings.
+
+---
+
+## 2026-09-22 - M5-3 private runner path
+
+- **D40: use an ephemeral, non-root Docker runner.** M5-3 adds a pinned Ubuntu
+  24.04 image with GitHub Actions runner `2.328.0`, explicit labels, a
+  read-only root filesystem, dropped capabilities, `no-new-privileges`, no
+  Docker socket, and a named work volume. The runner token is runtime-only;
+  the container configures one `--ephemeral` runner and removes its
+  registration on exit.
+- **D40.1: keep hosted CI independent.** The labeled smoke workflow is
+  `workflow_dispatch`-only and targets `virtualwardrobe-private`; M5-1/M5-2
+  remain the default GitHub-hosted path.
+- **D40.2: PARTIAL on this Windows host.** The offline Compose preflight,
+  PowerShell syntax check, shell syntax check, Compose rendering, and
+  whitespace validation pass. Docker image build and the disposable labeled
+  job remain unverified because the Docker Desktop Linux engine is not running;
+  no GitHub runner was registered and no token was stored.
+
+---
+
 ## 2026-09-22 — welcome and navigation work items
 
 - **D39: welcome and navigation are separate autonomous slices.** M3-16 owns first-run product

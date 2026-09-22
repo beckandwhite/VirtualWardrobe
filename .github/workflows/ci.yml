@@ -1,0 +1,129 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  NODE_VERSION: '22.x'
+
+jobs:
+  quality:
+    name: Quality and dependency security
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Audit production and development dependencies
+        run: npm audit --audit-level=high
+
+  tests:
+    name: Jest tests and coverage
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Jest with coverage and JSON results
+        run: |
+          mkdir -p artifacts
+          npm test -- --coverage --runInBand --json --outputFile=artifacts/jest-results.json
+
+      - name: Add test summary
+        if: always()
+        run: |
+          node <<'NODE'
+          const fs = require('node:fs');
+          const path = 'artifacts/jest-results.json';
+          if (!fs.existsSync(path)) {
+            fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, 'Jest did not produce a result file. Check the test step log.\n');
+            process.exit(0);
+          }
+          const result = JSON.parse(fs.readFileSync(path, 'utf8'));
+          const status = result.success ? 'passed' : 'failed';
+          const lines = [
+            `## Jest ${status}`,
+            '',
+            `- Test suites: ${result.numPassedTestSuites ?? 0} passed, ${result.numFailedTestSuites ?? 0} failed`,
+            `- Tests: ${result.numPassedTests ?? 0} passed, ${result.numFailedTests ?? 0} failed`,
+            `- Runtime: ${result.startTime ? `${((Date.now() - result.startTime) / 1000).toFixed(1)}s` : 'unknown'}`,
+            '',
+          ];
+          fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, lines.join('\n'));
+          NODE
+
+      - name: Upload test and coverage artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jest-results-and-coverage
+          path: |
+            artifacts/jest-results.json
+            coverage/
+          if-no-files-found: warn
+          retention-days: 14
+
+  codeql:
+    name: CodeQL
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: javascript-typescript
+
+      - name: Analyze
+        uses: github/codeql-action/analyze@v3
+
+  dependency-review:
+    name: Dependency review
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - name: Review dependency changes
+        uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: high

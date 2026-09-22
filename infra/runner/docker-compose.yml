@@ -1,0 +1,26 @@
+services:
+  runner:
+    build:
+      context: .
+      args:
+        RUNNER_VERSION: "2.328.0"
+    environment:
+      REPO_URL: ${REPO_URL:?Set REPO_URL, for example https://github.com/beckandwhite/VirtualWardrobe}
+      RUNNER_TOKEN: ${RUNNER_TOKEN:?Set RUNNER_TOKEN for one disposable runner}
+      RUNNER_NAME: ${RUNNER_NAME:-virtualwardrobe-private}
+      RUNNER_LABELS: ${RUNNER_LABELS:-self-hosted,linux,x64,virtualwardrobe-private}
+    init: true
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    tmpfs:
+      - /tmp
+      - /run
+    volumes:
+      - runner-work:/home/runner/_work
+    restart: "no"
+
+volumes:
+  runner-work:

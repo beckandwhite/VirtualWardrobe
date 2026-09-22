@@ -47,6 +47,8 @@ Expo + TypeScript + Expo Router · Reanimated ·
 - [`docs/qa-sprint-backlog.md`](docs/qa-sprint-backlog.md) — consolidated sprint backlog and prioritization for the next QA cycle.
 - [`docs/feedback.md`](docs/feedback.md) — how to report bugs or request features.
 - [`docs/dev-setup.md`](docs/dev-setup.md) — deeper local setup notes for the pose model and environment.
+- [`docs/ci.md`](docs/ci.md) — hosted CI checks, artifacts, reruns, and branch protection.
+- [`infra/runner/README.md`](infra/runner/README.md) — optional private Docker runner setup and teardown.
 
 ## M4 QA work items
 - [M4-1](https://github.com/beckandwhite/VirtualWardrobe/issues/28) — repository / SQLite regression tests

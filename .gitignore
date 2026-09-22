@@ -12,10 +12,14 @@ expo-env.d.ts
 .github
 !.github/
 !.github/copilot-instructions.md
+!.github/workflows/
+!.github/workflows/**
 
 # misc
 *.log
 .DS_Store
+coverage/
+artifacts-ci/
 
 # native builds
 ios/Pods/
