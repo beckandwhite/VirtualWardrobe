@@ -141,8 +141,8 @@ issue bodies; implementation notes remain here only when they are useful as dura
 
 | ID       | Title                                                     | Labels              | Status       |
 |--------|---------------------------------------------------------|-------------------|------------|
-| M5-1    | [autonomous] GitHub Actions build and security workflow   | tooling, qa, M5      | 🚧 BACKLOG   |
-| M5-2    | CI/CD test execution and reporting                        | tooling, qa, M5      | 🚧 BACKLOG   |
+| M5-1    | [autonomous] GitHub Actions build and security workflow   | tooling, qa, M5      | 🚧 PARTIAL*  |
+| M5-2    | CI/CD test execution and reporting                        | tooling, qa, M5      | ✅ DONE*      |
 | M5-3    | [autonomous] Private GitHub Actions runner from Docker    | tooling, qa, M5      | 🚧 PARTIAL*  |
 
 > * **M5-1 - establish a small, trustworthy CI/security baseline.** The workflow should run on
@@ -151,10 +151,16 @@ issue bodies; implementation notes remain here only when they are useful as dura
 >   deliberate severity threshold, CodeQL for JavaScript/TypeScript, and dependency review on pull
 >   requests. GitHub secret scanning/push protection is a repository setting to enable and verify,
 >   not a substitute for the workflow itself.
+>   **Current status:** `Quality` and `Jest` jobs passed in the first GH run, but the overall run
+>   still fails because the `CodeQL` analysis step failed. The work item remains **PARTIAL** until the
+>   security analysis job is fixed or the workflow is narrowed to a verified default configuration.
 
 > * **M5-2 - make CI test results actionable.** Add the clean-install test sequence, coverage and
 >   machine-readable artifacts, clear failure output, required-check guidance, and rerun/download
 >   documentation so a failing CI run can be diagnosed from GitHub Actions.
+>   **Current status:** The repository's `Jest tests and coverage` job succeeded on GitHub run
+>   `35736973132`; the issue is therefore **DONE** relative to its own scope, even though the overall
+>   workflow still failed on CodeQL.
 >
 > * **M5-3 - PARTIAL on 2026-09-22.** The pinned Docker runner, secret-free ephemeral bootstrap,
 >   least-privilege defaults, labeled dispatch-only smoke workflow, and teardown documentation are
