@@ -20,17 +20,20 @@ export function FilePickerButton({
   return (
     <View style={[{ position: 'relative' }, style]}>
       <Text style={labelStyle}>{children}</Text>
-      {React.createElement('label', {
-        htmlFor: disabled ? undefined : id,
-        style: {
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          cursor: disabled ? 'default' : 'pointer',
+      {React.createElement(
+        'label',
+        {
+          htmlFor: disabled ? undefined : id,
+          style: {
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            cursor: disabled ? 'default' : 'pointer',
+          },
         },
-        children: React.createElement('input', {
+        React.createElement('input', {
           key: 'input',
           id,
           type: 'file',
@@ -43,7 +46,7 @@ export function FilePickerButton({
             e.target.value = '';
           },
         }),
-      })}
+      )}
     </View>
   );
 }

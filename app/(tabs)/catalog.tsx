@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { router } from 'expo-router';
-import { r, type StoreItem, type ItemCategory } from '@/store';
+import { r, type StoreItem } from '@/store';
 import { PLACEHOLDER_URIS } from '@/catalog/placeholders';
 
 function resolveSource(item: StoreItem): ImageSourcePropType {
