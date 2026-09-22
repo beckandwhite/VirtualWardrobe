@@ -8,32 +8,126 @@ in-flight, build-time choices.
 
 ## 2026-09-22 — welcome and navigation work items
 
-- **D36: welcome and navigation are separate autonomous slices.** M3-16 owns first-run product
+- **D39: welcome and navigation are separate autonomous slices.** M3-16 owns first-run product
   orientation, persistence, and welcome copy; M3-17 owns route ownership, return paths, and
   navigation behavior. Both use M3-14 as the journey source of truth and log material decisions
   here rather than waiting for approval.
 
 ## 2026-09-22 — backlog grilling decisions
 
-- **D29: M3-3 is split by ownership.** M3-3 owns branding/release configuration, M3-15 owns the
+- **D32: M3-3 is split by ownership.** M3-3 owns branding/release configuration, M3-15 owns the
   portfolio screenshot kit, and M6-1 owns the i18n foundation; no issue may silently absorb the
   others' work.
-- **D30: M3-6 and M3-7 compete for one MoveNet graph.** The first independently verified,
+- **D33: M3-6 and M3-7 compete for one MoveNet graph.** The first independently verified,
   network-free graph wins; the other issue is closed as superseded and its evidence is retained.
-- **D31: host-specific setup is honest.** M3-9, M3-11, and M3-13 are future Mac-host briefs;
+- **D34: host-specific setup is honest.** M3-9, M3-11, and M3-13 are future Mac-host briefs;
   Windows execution records PARTIAL/NO-GO rather than claiming Mac success. M1-1 requires camera
   permission, capture, import, persistence, draft creation, and screenshot/video evidence on each
   target.
-- **D32: Playwright is a repository devDependency and required in CI.** The model-absent manual
+- **D35: Playwright is a repository devDependency and required in CI.** The model-absent manual
   fallback remains valid, but missing Playwright is not a permitted CI skip after setup lands.
-- **D33: CI ownership is separated.** M5-1 owns workflow/install/typecheck/lint/security; M5-2
+- **D36: CI ownership is separated.** M5-1 owns workflow/install/typecheck/lint/security; M5-2
   owns Jest, coverage, artifacts, diagnostics, and required-check guidance; M5-3 is an optional
   private-runner path and never a prerequisite for hosted CI.
-- **D34: M6 supports nine locales.** The set is `en`, `hu`, `de`, `es`, `it`, `fr`, `vi`, `zh-CN`,
+- **D37: M6 supports nine locales.** The set is `en`, `hu`, `de`, `es`, `it`, `fr`, `vi`, `zh-CN`,
   and `zh-TW`. Translation agents may complete work when automated gates pass; native review is
   not a separate blocking criterion. Material choices still go in this log.
-- **D35: M3-4 stays parked.** Account/sync implementation is not authorized; the next allowed
+- **D38: M3-4 stays parked.** Account/sync implementation is not authorized; the next allowed
   step is a separately scoped privacy/backend architecture spike.
+
+## 2026-09-22 — QA sprint lands (QA-2 / QA-3 / QA-4)
+
+QA-1 was already committed (76/76). QA-2, QA-3, QA-4 finished this sprint; full suite
+now **129/129 across 15 suites**, with `tsc`, `eslint --max-warnings 0`, `e2e:web:check`,
+and the skippable `e2e:web` all green.
+
+- **D28.1 — orchestrator reconciliation: number the QA decisions D29–D31, contiguous after
+  the committed D28.** The three QA agents ran in parallel and independently picked numbers
+  that collided / skipped: QA-2 wrote `D27.x` (collided with M3-6's uncommitted `D27`) and
+  QA-3/QA-4 wrote `D30.x`/`D32.x`. Reconciled to a single contiguous block — **QA-2 → D29.x,
+  QA-3 → D30.x, QA-4 → D31.x** — and the stale `D27.x`/`D32.x` cross-refs in the issue files
+  *and* the new source/test comments were renumbered to match. QA-3's agent timed out before
+  returning its log block; D30.x here is reconstructed from its on-disk work (`tests/pose/`
+  + `QA-3.md` status), which was complete (tests + AC + status verified green). The unrelated
+  `Research/bookmarks.md` edits a QA agent made are out of scope and were left uncommitted.
+
+- **D29.1 — onboarding camera-feedback is one source of truth, not two.** `app/onboarding.tsx`
+  carried an *inline* copy of `onboardingCameraState`/`OnboardingCameraState` that could drift
+  from `src/onboarding/cameraState.ts` (created mid-QA-2). Deleted the inline copy; the screen
+  imports the pure branch and keeps `PermissionResponse` at its call site, while
+  `cameraState.ts` keeps a structural `CameraPermissionStatus` to stay node/jest-importable.
+
+- **D29.2 — extract the *decision*, leave a thin view — no device or rendering harness.** Per
+  repo policy (no `@testing-library/react-native`, no simulator), each screen's decision was
+  pulled into a node-safe `src/` module the screen imports and the test drives: entry redirect
+  → `src/onboarding/entryRedirect.ts` (`'loading'|'/onboarding'|'/wardrobe'`); capture draft/nav
+  → `src/capture/draft.ts` (`buildDraftFromCapture` + `captureNextStep`); wardrobe empty-state →
+   `src/wardrobe/emptyState.ts` (`emptyStateVariant` + `hasActiveCriteria`); studio save/share
+  notice → `src/composer/notice.ts`. Tests assert the pure logic with no router/store/UI — the
+   `tests/catalog/ingest.test.ts` fake style.
+
+- **D29.3 — `captureNextStep` is a typed discriminated union, not a loose flag.** The screen's
+   `router.replace` needs a typed `Href`; the helper returns
+   `{ navigate:true, route:'/wardrobe' } | { navigate:false, route:null }` so a null draft
+   (cancel/denial/error) resets busy and never navigates. The "on error, don't navigate" safety
+  property is the null-draft case; `busy` itself stays a UI side-effect in the view.
+
+- **D29.4 — empty-state is a pure selector over the *snapshot*.** The wardrobe screen already
+  derives `visible = applyFilters(...)` (covered by `tests/wardrobe/filter.test.ts`); QA-2 adds
+  the screen-owned selection `emptyStateVariant` (`none`|`filtered`|`has-items`, snapshot-empty
+  takes priority) + `hasActiveCriteria`, reusing not duplicating the filter test.
+
+- **D29.5 — studio sliders + export already covered; QA-2 adds the *notice* gap.** The critical
+  controls (`clampTransform`, `autoTransformFor` incl. empty-keypoint identity fallback,
+   `serialize`/`deserialize`, `compose` geometry) are regression-tested by
+   `tests/composer/transform.test.ts` + `tests/composer/export.test.ts` (cited, not duplicated).
+   `src/composer/notice.ts` covers the one untested branch: the save/share error-rendering
+   surface. Native `expo-sharing` / browser canvas export are not runtime-exercised (same
+  in-sandbox ceiling as D20.5 / D21.6; M3-5/M3-9 is the path to a real e2e share screenshot).
+
+- **D30.1 — exercise the *real* loader/providers, mock only the `@tensorflow*` boundary.** The
+  pose flow's logic is real code worth covering; only the heavy model boundary is unrunnable in a
+  node/jsdom-less env. The suite mocks `tfjs-backend-webgl`, `tfjs-core`, and
+  `@tensorflow-models/pose-detection` and drives the actual `loadPoseDetector` /
+   `createPoseProvider` / `safeEstimate` — no model bytes, WebGL, or network.
+- **D30.2 — assert call *counts*, not reference identity (single-flight).** `loadPoseDetector` is
+  `async` and wraps the cached promise in a fresh `Promise` per call, so single-flight is asserted
+   via `createDetector` called exactly once across N concurrent callers, and `resetPoseDetector`
+  re-opening init (called twice).
+- **D30.3 — model-absence / invalid-URL guard = "thread the bundled URL, don't fetch".** The
+   loader test pins `createDetector` receives `modelUrl: MOVENET_MODEL_URL` +
+  `modelType: 'lite'`, so a wiring regression is caught; a missing/undecodable model surfaces as
+   `PoseUnavailable` (the fallback signal).
+- **D30.4 — the manual fallback is an end-to-end property.** AC1+AC2 covered by the full chain:
+  throwing provider → `safeEstimate` `[]` → `autoTransformFor([])` → `IDENTITY_TRANSFORM`,
+   proving estimation failure lands on the manual-overlay path (the native shipping path, D21.5),
+  not just that `safeEstimate` returns `[]`.
+- **D30.5 — per-line eslint disables are scoped, not blanket.** `import/no-duplicates` (Expo
+  resolver collapses `providers` + `providers.web`) and `import/first` (the loader's
+  `jest.mock`-before-`import`) are false positives, disabled per-line with rationale so
+   `--max-warnings 0` stays green without weakening other rules.
+
+- **D31.1 — skippable browser smoke harness, mirroring M3-5's `e2e:pose`.** `scripts/
+  web-smoke.mjs` (`e2e:web`) does an optional dynamic `import('@playwright/test')` and skips
+   (exit 0 + demo note + artifact) when Playwright/Chromium is absent — the same in-sandbox
+  ceiling as D22.3. `scripts/web-smoke-path.mjs` (`e2e:web:check`, `--selftest`) holds the pure
+  skip-decision + report builders so CI can gate without a browser. `@playwright/test` is **not**
+   added (ADR-004); `import/no-unresolved` stays off for `scripts/**/*.mjs` (D22.2).
+- **D31.2 — no-fatal-error vs expected-warn is a classification, not a blanket ban.** The happy
+  path asserts **zero fatal** `pageerror`/`console.error`, but the pose-fallback `console.warn`
+   (`safeEstimate`) is **expected** on the model-absent manual path. `classifyConsole` sorts
+   entries into `fatal`/`expected`/`info`; a manual run passes only when `expectedWarns>0` —
+    *asserting the fallback fired*, not that the console is silent.
+- **D31.3 — the manual-fallback path is the in-sandbox default, asserted cleanly (AC3).** With the
+  MoveNet model absent, web `createPoseProvider('movenet')` → `safeEstimate` `[]` →
+  `autoTransformFor([])` → identity, and the studio renders the M2-4 banner; the harness asserts
+   that banner when `decidePath('manual')`, so a model-less run still completes with a PNG + report.
+- **D31.4 — in-sandbox browser ceiling: BUILT-with-waived-browser-pass, not DONE.** No Chromium/
+  Playwright and no model bytes in the sandbox (D20.5 / D21.6 / D22.3), so the browser pass is
+   written for a capable machine and *waived* here: `e2e:web` exits 0 with a SKIP note +
+    `docs/screenshots/web-last-run.{md,json}`, and `e2e:web:check` proves the skip-decision +
+   classification without a browser. No CI workflow was wired (left to the orchestrator; the
+   harness is CI-friendly via exit codes + the JSON artifact).
 
 ## 2026-09-21 — M3-6 follow-up
 

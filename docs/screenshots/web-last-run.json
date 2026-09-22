@@ -1,0 +1,22 @@
+{
+  "path": "manual",
+  "modelUrl": null,
+  "modelPresent": true,
+  "browserEnabled": false,
+  "skipped": true,
+  "routes": [
+    {
+      "route": "/wardrobe",
+      "ok": false
+    },
+    {
+      "route": "/studio",
+      "ok": false
+    }
+  ],
+  "seconds": 0,
+  "status": "SKIP",
+  "ok": false,
+  "summary": "QA-4 e2e:web smoke (asserts the manual path)\nbrowser pass skipped — no Chromium/Playwright (in-sandbox ceiling)\nstatus: SKIP\nroutes: 0/2 ok\nfatal console/pageerror: 0\nexpected fallback warns: 0\nfailed routes: /wardrobe, /studio",
+  "generatedAt": "2026-09-22T10:31:37.059Z"
+}

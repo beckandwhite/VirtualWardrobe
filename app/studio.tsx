@@ -41,6 +41,7 @@ import {
     reopenTransform,
     type ShareResult,
 } from '@/composer/share';
+import { noticeForShare, EXPORT_ERROR_NOTICE } from '@/composer/notice';
 import type { Keypoint, Transform } from '@/pose';
 import sampleBody from '../assets/sample/body.png';
 import sampleGarment from '../assets/sample/garment.png';
@@ -298,12 +299,12 @@ export default function StudioScreen() {
                    });
               await refreshRecent();
              return row;
-           } catch (e) {
+             } catch (e) {
             // M2-3: a failed export surfaces visibly, never silent.
             console.error('studio: export/save failed', e);
-            setNotice({ kind: 'error', text: 'Export failed — try again.' });
+            setNotice(EXPORT_ERROR_NOTICE);
             return null;
-          } finally {
+           } finally {
             setSaving(false);
           }
           },
@@ -312,21 +313,16 @@ export default function StudioScreen() {
 
         // Share the just-exported look through the M3-2 unified share sheet (the
         // same function the Looks gallery calls — no duplicated share code).
-       const share = useCallback(async () => {
-          const row = await persist();
-          if (!row) return;
-          const result: ShareResult = await shareLook(row);
-          if (result.kind === 'error') {
-             setNotice({ kind: 'error', text: 'Share failed.' });
-             return;
-            }
-          setNotice({
-             kind: 'info',
-             text: result.kind === 'downloaded'
-                     ? 'Look saved — downloaded image.'
-                     : 'Look saved.',
-            });
-      }, [persist]);
+        const share = useCallback(async () => {
+           const row = await persist();
+           if (!row) return;
+           const result: ShareResult = await shareLook(row);
+            // The notice surface is a pure mapping of the share-result kind
+            // (src/composer/notice.ts) the QA-2 flow tests exercise.
+           const notice = noticeForShare(result);
+           setNotice(notice);
+           if (notice?.kind === 'error') return;
+        }, [persist]);
 
          // Open an existing saved look back into the editor (reconstruct from the
          // stored transform — M2-3 reopen / M3-2 gallery).

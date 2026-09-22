@@ -15,10 +15,82 @@ Test:
 - model absence / invalid URL handling
 
 ## Acceptance criteria
-- [ ] Pose-provider fallback logic is tested under failure conditions
-- [ ] Manual fallback path is asserted as a supported behavior
-- [ ] The web/native split is validated by platform-aware logic
-- [ ] A regression around missing model data is prevented
+- [x] Pose-provider fallback logic is tested under failure conditions
+- [x] Manual fallback path is asserted as a supported behavior
+- [x] The web/native split is validated by platform-aware logic
+- [x] A regression around missing model data is prevented
 
 ## Notes
 This is especially important because the pose feature is optional in some environments yet critical in the web flow.
+
+## Decision log
+- **D30.1 — exercise the *real* loader/providers, mock only the `@tensorflow*` boundary.** The pose
+  flow's logic (single-flight init, failure caching, `PoseUnavailable` signalling, the safe→manual
+  degrade, the platform factory split) is all real code worth covering; only the heavy model boundary
+  is unrunnable in a node/jsdom-less jest env. So the suite mocks `@tensorflow/tfjs-backend-webgl`,
+  `@tensorflow/tfjs-core`, and `@tensorflow-models/pose-detection` and drives the actual
+   `loadPoseDetector` / `createPoseProvider` / `safeEstimate` — no model bytes, WebGL, or network.
+- **D30.2 — assert call *counts*, not reference identity (single-flight).** `loadPoseDetector` is
+  `async` and wraps the cached promise in a fresh `Promise` per call, so two `loadPoseDetector()`
+  calls are *not* reference-equal even when served from one init. The single-flight property is
+  therefore asserted via `createDetector` being called exactly once across N concurrent callers,
+   and `resetPoseDetector` re-opening the init (`createDetector` called twice).
+- **D30.3 — the model-absence / invalid-URL guard is "thread the bundled URL, don't fetch".** ADR-
+   004 (fully local) means a bad or missing `MOVENET_MODEL_URL` is the regression that silently
+   breaks the load; the loader test pins that `createDetector` receives `modelUrl: MOVENET_MODEL_URL`
+    + `modelType: 'lite'`, so a wiring regression is caught rather than passing with the wrong/absent
+   URL. A missing/undecodable model is asserted to surface as `PoseUnavailable` (the fallback signal).
+- **D30.4 — the manual fallback is an end-to-end property, not just a branch.** AC1 + AC2 are
+  covered by the full chain: a throwing provider → `safeEstimate` `[]` → `autoTransformFor([])` →
+   `IDENTITY_TRANSFORM`. This proves estimation failure lands on the manual-overlay path (no crash),
+   the shipping native path per D21.5 / M2-4 — not merely that `safeEstimate` returns `[]`.
+- **D30.5 — per-line eslint disables are scoped, not blanket.** Expo's platform-aware resolver
+   collapses `providers` + `providers.web` to one resolved path, making `import/no-duplicates` a false
+   positive (the split import IS the test); `import/first` is a false positive on the loader's
+   `jest.mock`-before-`import` block. Both are disabled per-line with rationale comments, keeping
+   `eslint . --max-warnings 0` green without weakening any other rule.
+
+## Status: BUILT (2026-09-22)
+Gate-green (tsc + eslint 0-warnings + jest 129/129 across 15 suites).
+
+### Built
+- `tests/pose/loader.test.ts` — 6 tests: single-flight init (one `createDetector` for N
+  concurrent callers), success caching until `reset`, a missing/undecodable model surfacing as
+  `PoseUnavailable`, a failed load cached so a bad model isn't retried every render, `resetPoseDetector`
+  clearing that failure, and the bundled `MOVENET_MODEL_URL` threaded into `createDetector` (the
+  model-absence / invalid-URL regression guard). Mocks the `@tensorflow*` boundary so the real loader
+  runs with no model bytes, WebGL, or network.
+- `tests/pose/providers.test.ts` — 8 tests: the generic and web factory platform split (defaults +
+  named overrides + unrecognized-kind degrade), agreement between the two factories on the
+  manual/sample providers, `ManualPoseProvider` as the no-ML fallback (empty keypoints),
+  `safeEstimate` swallowing a throwing provider and a non-array result to `[]`, a healthy provider
+  passing through, and the end-to-end chain: failing provider → `safeEstimate` `[]` →
+  `autoTransformFor([])` → `IDENTITY_TRANSFORM` (the manual-overlay fallback path).
+
+### Verified against
+- `tests/pose/loader.test.ts`
+   - [x] concurrent callers share one init (single-flight, `createDetector` called once)
+   - [x] a successful load is cached until `resetPoseDetector` (no re-init)
+   - [x] a missing / undecodable model surfaces as `PoseUnavailable` (the fallback signal)
+   - [x] a failed load is cached so the bad model is not retried every render
+   - [x] `resetPoseDetector` clears a cached failure so the next attempt can succeed
+   - [x] the bundled `MOVENET_MODEL_URL` (and `modelType: 'lite'`) is threaded into `createDetector`
+- `tests/pose/providers.test.ts`
+   - [x] generic (node/jest/native) factory defaults to the manual provider; web factory defaults to MoveNet
+   - [x] both factories honor `manual`/`sample` overrides and an unrecognized kind degrades to the platform default
+   - [x] `ManualPoseProvider` returns empty keypoints (the supported no-ML fallback)
+   - [x] `safeEstimate` degrades a throwing / non-array provider to `[]` and passes a healthy one through
+   - [x] empty keypoints map to `IDENTITY_TRANSFORM` (auto→manual placement), asserted end-to-end after a provider failure
+
+### Follow-ups
+- The Expo platform-aware eslint resolver collapses `providers` and `providers.web` to the same
+  resolved path, so `import/no-duplicates` is a false positive on the platform-split test; it is
+  disabled per-line with a rationale comment (the split import is the point of the test). Likewise
+  `import/first` is disabled on the loader's `jest.mock`-before-import block.
+
+### Stats
+| check | result |
+|---|---|
+| `tsc --noEmit` | ✅ PASS |
+| `eslint . --max-warnings 0` | ✅ PASS |
+| `jest` | ✅ PASS (129/129 across 15 suites — QA-3 adds 14 tests to the `pose/loader` + `pose/providers` suites (the pose group: 8 keypoints + 14 = 22); the full suite reflects the concurrent QA-2 + QA-4 suites) |

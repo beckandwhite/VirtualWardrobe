@@ -9,44 +9,46 @@ import {
 import { useState } from 'react';
 import { router } from 'expo-router';
 import { useCapture, type CaptureSource } from '@/capture';
-import { r, type ItemCategory } from '@/store';
+import { r } from '@/store';
+import {
+   buildDraftFromCapture,
+   captureNextStep,
+   DRAFT_HINTS,
+ } from '@/capture/draft';
 
 // M1-1 capture screen: a garment-type hint chip row + Photo/Camera actions.
 // A capture produces an `Item` draft (D19.5: type 'other' + default color) that
 // M1-2 will type in full; here the user gets the image in with minimal friction.
+// The draft-shape + the "on nothing captured / on error, reset busy and don't
+// navigate" decision live in src/capture/draft.ts as the single source of truth
+// the QA-2 flow tests exercise.
 
-const HINTS: ItemCategory[] = ['top', 'bottom', 'dress', 'outerwear', 'shoes', 'other'];
+const HINTS = DRAFT_HINTS;
 
 export default function CaptureScreen() {
    const { cameraAvailable, takePhoto } = useCapture();
    const [busy, setBusy] = useState(false);
    const [hint, setHint] = useState('');
 
-   const captureAndSave = async (source: CaptureSource) => {
+    const captureAndSave = async (source: CaptureSource) => {
       setBusy(true);
       try {
          const result = await takePhoto(source);
-         if (!result) {
+         const draft = buildDraftFromCapture(result, hint);
+         if (!draft) {
+             // Nothing captured (cancel / denial / error): reset busy, no insert, no nav.
             setBusy(false);
             return;
+             }
+               // Best-effort hint: a user-tapped chip seeds the draft's tags; M1-2 types it fully.
+         await r.insertItem(draft);
+         const next = captureNextStep(draft);
+         if (next.navigate) await router.replace(next.route);
+         } catch (e) {
+       console.error('capture save failed', e);
+       setBusy(false);
          }
-          const tags = ['draft', source];
-          if (hint) tags.push(hint);
-          // Best-effort hint: a user-tapped chip seeds the draft's tags; M1-2 types it fully.
-          await r.insertItem({
-             type: 'other',
-             name: 'New item',
-             color: 'unknown',
-             tags,
-             imagePath: result.uri,
-             thumbnailPath: result.uri,
-              });
-          await router.replace('/wardrobe');
-       } catch (e) {
-        console.error('capture save failed', e);
-        setBusy(false);
-       }
-     };
+        };
 
    return (
         <ScrollView style={styles.screen} contentContainerStyle={styles.content}>

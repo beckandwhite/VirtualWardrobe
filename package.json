@@ -46,10 +46,12 @@
       "lint": "eslint . --max-warnings 0",
       "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
       "test": "jest",
-        "gen-placeholders": "node scripts/gen-placeholders.mjs",
-        "fetch:pose": "node scripts/fetch-movenet.mjs",
-        "e2e:pose": "node scripts/pose-smoke.mjs",
-        "e2e:pose:check": "node scripts/pose-smoke-path.mjs --selftest"
-     },
+          "gen-placeholders": "node scripts/gen-placeholders.mjs",
+          "fetch:pose": "node scripts/fetch-movenet.mjs",
+          "e2e:pose": "node scripts/pose-smoke.mjs",
+          "e2e:pose:check": "node scripts/pose-smoke-path.mjs --selftest",
+          "e2e:web": "node scripts/web-smoke.mjs",
+          "e2e:web:check": "node scripts/web-smoke-path.mjs --selftest"
+       },
   "private": true
 }
