@@ -32,6 +32,10 @@ issue bodies; implementation notes remain here only when they are useful as dura
 | M1-3 | Gallery grid + filter/search (category / color / tag)           | feat, ux, M1   | ✅ DONE      |
 | M1-4 | Bundled store.json catalog + ingester                           | feat, M1       | ✅ DONE      |
 
+> * **M1-4 note (2026-09-22):** Catalog card placeholder images replaced with inline SVG
+>   illustrations (t-shirt, trousers, dress, jacket, sneaker, tote bag) in
+>   `src/catalog/placeholders.ts`; no binary assets or file imports required on web.
+
 ## M2 · Try-On Studio — ✅ Complete (2026-09-20, code-complete + gate-green; native runtime not exercised in-sandbox → M3-5)
 
 | ID     | Title                                                         | Labels            | Status       |

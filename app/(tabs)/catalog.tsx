@@ -10,28 +10,10 @@ import {
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { router } from 'expo-router';
 import { r, type StoreItem, type ItemCategory } from '@/store';
-import topPh from '../../assets/store/placeholder-top.png';
-import bottomPh from '../../assets/store/placeholder-bottom.png';
-import dressPh from '../../assets/store/placeholder-dress.png';
-import outerwearPh from '../../assets/store/placeholder-outerwear.png';
-import shoesPh from '../../assets/store/placeholder-shoes.png';
-import otherPh from '../../assets/store/placeholder-other.png';
-
-// Catalog images ship as bundled PNGs, not file URIs — the manifest stores the
-// asset *path* as a string for reference, but the UI resolves by category to the
-// imported asset (an ImageSourcePropType: a handle on native, a URL on web).
-// Mirrors the studio's sampleGarment placeholder resolution.
-const PLACEHOLDER: Record<ItemCategory, ImageSourcePropType> = {
-   top: topPh,
-   bottom: bottomPh,
-   dress: dressPh,
-   outerwear: outerwearPh,
-   shoes: shoesPh,
-   other: otherPh,
-};
+import { PLACEHOLDER_URIS } from '@/catalog/placeholders';
 
 function resolveSource(item: StoreItem): ImageSourcePropType {
-   return PLACEHOLDER[item.category];
+   return { uri: PLACEHOLDER_URIS[item.category] };
 }
 
 export default function CatalogScreen() {
