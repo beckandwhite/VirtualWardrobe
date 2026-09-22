@@ -38,9 +38,9 @@ Gates: `npx jest` = 27/27 (4 suites), `npx tsc --noEmit` clean,
    `confidence floor`, `out-of-range` fallback) and an end-to-end fake-detector
     → provider → `computeGarmentBox` flow.
 - `docs/dev-setup.md` — new dev-environment guide.
-- `Plans/issues/M3-5.md` — new backlog item: headless-browser (`Playwright`)
+- GitHub issue [M3-5](https://github.com/beckandwhite/VirtualWardrobe/issues/18) — headless-browser (`Playwright`)
     harness for the `ml` / `spike` DoD.
-- `Plans/issues/M2-1.md` — acceptance criteria marked, decision log D20.1–D20.6,
+- GitHub issue [M2-1](https://github.com/beckandwhite/VirtualWardrobe/issues/10) — acceptance criteria marked, decision log D20.1–D20.6,
     status BUILT.
 - `Plans/02-product-backlog.md` — status columns + M3-5 + `tooling` label.
 - `Plans/decision-log.md` — D20 entry.
@@ -50,7 +50,7 @@ Gates: `npx jest` = 27/27 (4 suites), `npx tsc --noEmit` clean,
 
 ## What's next (in order, per user instruction)
 **M2-2 · Auto-scaled garment box + Reanimated fine-tune**
-- Tasks per `Plans/issues/M2-2.md`:
+- Tasks per GitHub issue [M2-2](https://github.com/beckandwhite/VirtualWardrobe/issues/11):
    - `computeGarmentBox` is pure + unit-tested already (`src/composer/autoBox.ts`);
      just verify `autoBox` produces sane numbers for the fixture keypoints
       (M0-2's `SAMPLE_KEYPPOINTS`).
@@ -89,7 +89,7 @@ Gates: `npx jest` = 27/27 (4 suites), `npx tsc --noEmit` clean,
    for that consolidation.
 
 ## Open follow-ups (not blockers, noted for the M2 window)
-- `plans/issues/M2-1.md` "No `@tensorflow*` in native bundle" acceptance
+- GitHub issue [M2-1](https://github.com/beckandwhite/VirtualWardrobe/issues/10) "No `@tensorflow*` in native bundle" acceptance
    (AC3): not mechanically verified this session (no native build here).
    The platform file split (`providers.web.ts` vs `providers.ts`) and the
     dynamic `import()` in `poseLoader.ts` are the design; a
@@ -132,7 +132,7 @@ Gates: `npx jest` = 27/27 (4 suites), `npx tsc --noEmit` clean,
    `src/pose/poseLoader.ts`, `src/pose/providers.web.ts`,
     `src/pose/providers.native.ts`, `src/pose/modelUrl.ts`,
       `tests/pose/keypoints.test.ts`, `docs/dev-setup.md`,
-       `Plans/issues/M3-5.md`, `scripts/fetch-movenet.mjs`,
+      GitHub issue M3-5, `scripts/fetch-movenet.mjs`,
         `public/pose/movenet-singlepose-lite/.gitkeep`,
          `assets/pose/movenet-singlepose-lite/.gitkeep`
 - Modified: `src/pose/types.ts` (`Keypoint.name` union),
@@ -141,6 +141,6 @@ Gates: `npx jest` = 27/27 (4 suites), `npx tsc --noEmit` clean,
        `.gitignore` (ignore `public/pose/**` bytes), `package.json`
         (`fetch:pose`, `gen-placeholders`, `expo-sharing` dep),
          `tests/autoBox.test.ts` (one filter patched for the union),
-          `Plans/issues/M2-1.md` (acceptance + D20 + status),
+          GitHub issue M2-1 (acceptance + D20 + status),
            `Plans/02-product-backlog.md` (status cols, M3-5, `tooling`),
             `Plans/decision-log.md` (D20 entry).

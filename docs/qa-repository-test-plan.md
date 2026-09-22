@@ -217,7 +217,7 @@ The repository coverage work is complete when:
 
 ## Related docs
 
-- [Plans/issues/M4-1.md](../Plans/issues/M4-1.md)
+- [M4-1](https://github.com/beckandwhite/VirtualWardrobe/issues/28)
 - [docs/testing-summary.md](testing-summary.md)
 - [src/store/repo.ts](../src/store/repo.ts)
 - [src/store/db.ts](../src/store/db.ts)

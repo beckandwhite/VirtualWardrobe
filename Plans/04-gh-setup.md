@@ -87,4 +87,5 @@ Uploaded to `beckandwhite/VirtualWardrobe` and added to project 1:
 | M4-3 | #30 | yes |
 | M4-4 | #31 | yes |
 
-M4 QA items are included under the `M4 QA` milestone.
+M4 QA items are included under the `M4 QA` milestone. GitHub contains the full issue bodies; this
+ledger records only the issue-number mapping and project-card audit state.

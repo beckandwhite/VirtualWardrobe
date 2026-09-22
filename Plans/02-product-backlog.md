@@ -2,7 +2,8 @@
 
 Single backlog → maps 1:1 to GitHub issues and a GitHub Project board.
 Milestones: **M0 Foundations · M1 Wardrobe · M2 Try-On · M3 Native+Polish · M4 QA · M6 Language & i18n · M5 Devops**.
-Each item below has a full issue body in `Plans/issues/<id>.md`.
+Each item below links to its full work-item body in GitHub. Local files intentionally do not mirror
+issue bodies; implementation notes remain here only when they are useful as durable project status.
 
 ## Label scheme
 `feat` · `ux` · `ml` · `qa` · `coverage` · `debt` · `docs` · `spike` · `tooling` · and milestone tags `M0` `M1` `M2` `M3` `M6` `M5`.

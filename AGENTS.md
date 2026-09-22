@@ -7,10 +7,10 @@ GitHub is the operational source of truth for work-item state:
 - Issues: https://github.com/beckandwhite/VirtualWardrobe/issues
 - Project: https://github.com/users/beckandwhite/projects/1
 - Milestones, labels, comments, issue state, and `Board Status` are read from GitHub.
-- `Plans/issues/*.md` are the local issue specifications and audit snapshot. Do not infer the
-  current status from a local file when GitHub disagrees.
-- Update both sides when changing an issue definition: preserve the full issue body on GitHub,
-  then update the matching local specification and `Plans/02-product-backlog.md`.
+- GitHub issue bodies are the only full work-item specifications. Do not infer current status from
+  local summaries when GitHub disagrees.
+- Keep concise implementation status, dependencies, and durable decisions in the local backlog,
+  handoff, and decision log; update the GitHub issue body first for work-item definition changes.
 
 ## Start here
 
@@ -37,16 +37,17 @@ gh issue list --repo $repo --milestone 'M5 Devops' --state all --limit 100 --jso
   `Done`, `Shipped`).
 - Add missing issue cards with `gh project item-add 1 --owner beckandwhite --url <issue-url>`.
 - Prefer issue numbers and URLs over title matching because titles can be renamed.
-- Run `node scripts/gh-bootstrap.mjs` only when reconciling the complete local specification set;
-  it is idempotent and creates missing issues/cards without replacing GitHub comments.
+- Run `node scripts/gh-bootstrap.mjs` only to reconcile milestones, labels, and project cards; issue
+  bodies and issue creation are managed directly in GitHub.
 
 ## Planning edits
 
 When adding or renaming a work item:
 
-1. Update the GitHub issue first, including its milestone and labels.
-2. Add or rename the matching file under `Plans/issues/` with the complete issue body.
-3. Update `Plans/02-product-backlog.md` and the upload ledger in `Plans/04-gh-setup.md`.
-4. Verify issue count, project-card count, milestone assignment, and body fidelity.
+1. Update the GitHub issue first, including its body, milestone, labels, and state.
+2. Update the concise local summary in `Plans/02-product-backlog.md` and the upload ledger in
+  `Plans/04-gh-setup.md` when identifiers or durable status change.
+3. Record material implementation decisions in `Plans/decision-log.md`.
+4. Verify issue count, project-card count, milestone assignment, and live body state.
 
 Do not create a second issue to repair a title or milestone mistake. Edit the existing issue.

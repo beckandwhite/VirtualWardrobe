@@ -24,7 +24,7 @@ pose fallback, and browser smoke.
 
 Primary docs:
 
-- [Plans/issues/M4-1.md](../Plans/issues/M4-1.md)
+- [M4-1](https://github.com/beckandwhite/VirtualWardrobe/issues/28)
 - [docs/qa-repository-test-plan.md](qa-repository-test-plan.md)
 - [docs/qa-repository-test-checklist.md](qa-repository-test-checklist.md)
 
@@ -44,7 +44,7 @@ Acceptance theme:
 
 Primary doc:
 
-- [Plans/issues/M4-2.md](../Plans/issues/M4-2.md)
+- [M4-2](https://github.com/beckandwhite/VirtualWardrobe/issues/29)
 - [docs/qa-screen-test-plan.md](qa-screen-test-plan.md)
 
 Why it is next:
@@ -62,7 +62,7 @@ Acceptance theme:
 
 Primary doc:
 
-- [Plans/issues/M4-3.md](../Plans/issues/M4-3.md)
+- [M4-3](https://github.com/beckandwhite/VirtualWardrobe/issues/30)
 - [docs/qa-pose-and-browser-test-plan.md](qa-pose-and-browser-test-plan.md)
 
 Why it is next:
@@ -80,7 +80,7 @@ Acceptance theme:
 
 Primary doc:
 
-- [Plans/issues/M4-4.md](../Plans/issues/M4-4.md)
+- [M4-4](https://github.com/beckandwhite/VirtualWardrobe/issues/31)
 - [docs/qa-pose-and-browser-test-plan.md](qa-pose-and-browser-test-plan.md)
 
 Why it is after P2:

@@ -136,7 +136,7 @@ Missing validation for:
 Risk: an unavailable model or provider initialization issue could break the studio in a way that unit tests do not catch.
 
 ### 4. Browser and app-level smoke tests are still deferred
-The repo documents the browser-based capability gap in [Plans/issues/M3-5.md](../Plans/issues/M3-5.md). The current suite does not validate:
+The repo documents the browser-based capability gap in [M3-5](https://github.com/beckandwhite/VirtualWardrobe/issues/18). The current suite does not validate:
 
 - Expo web startup
 - actual rendering of the Studio route

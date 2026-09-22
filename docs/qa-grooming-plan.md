@@ -35,7 +35,7 @@ Implementation direction:
 
 Work item:
 
-- [Plans/issues/M4-1.md](../Plans/issues/M4-1.md)
+- [M4-1](https://github.com/beckandwhite/VirtualWardrobe/issues/28)
 
 ### 2. Screen-level behavioral coverage
 
@@ -55,7 +55,7 @@ Implementation direction:
 
 Work item:
 
-- [Plans/issues/M4-2.md](../Plans/issues/M4-2.md)
+- [M4-2](https://github.com/beckandwhite/VirtualWardrobe/issues/29)
 
 ### 3. Pose fallback and provider resilience
 
@@ -75,7 +75,7 @@ Implementation direction:
 
 Work item:
 
-- [Plans/issues/M4-3.md](../Plans/issues/M4-3.md)
+- [M4-3](https://github.com/beckandwhite/VirtualWardrobe/issues/30)
 
 ### 4. Browser smoke validation
 
@@ -84,7 +84,7 @@ Target: Expo web/runtime validation
 Why this matters:
 
 - Unit tests cannot confirm route rendering, asset loading, or browser runtime issues.
-- The repo already documents a headless-browser gap in [Plans/issues/M3-5.md](../Plans/issues/M3-5.md).
+- The repo already documents a headless-browser gap in [M3-5](https://github.com/beckandwhite/VirtualWardrobe/issues/18).
 
 Implementation direction:
 
@@ -94,7 +94,7 @@ Implementation direction:
 
 Work item:
 
-- [Plans/issues/M4-4.md](../Plans/issues/M4-4.md)
+- [M4-4](https://github.com/beckandwhite/VirtualWardrobe/issues/31)
 
 ## Recommended execution order
 

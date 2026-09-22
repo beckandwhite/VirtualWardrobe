@@ -49,10 +49,10 @@ Expo + TypeScript + Expo Router · Reanimated ·
 - [`docs/dev-setup.md`](docs/dev-setup.md) — deeper local setup notes for the pose model and environment.
 
 ## M4 QA work items
-- [`Plans/issues/M4-1.md`](Plans/issues/M4-1.md) — repository / SQLite regression tests
-- [`Plans/issues/M4-2.md`](Plans/issues/M4-2.md) — screen-level flow tests for onboarding, capture, and studio
-- [`Plans/issues/M4-3.md`](Plans/issues/M4-3.md) — pose-provider failure and fallback regression tests
-- [`Plans/issues/M4-4.md`](Plans/issues/M4-4.md) — browser-level smoke tests for the Expo web app
+- [M4-1](https://github.com/beckandwhite/VirtualWardrobe/issues/28) — repository / SQLite regression tests
+- [M4-2](https://github.com/beckandwhite/VirtualWardrobe/issues/29) — screen-level flow tests for onboarding, capture, and studio
+- [M4-3](https://github.com/beckandwhite/VirtualWardrobe/issues/30) — pose-provider failure and fallback regression tests
+- [M4-4](https://github.com/beckandwhite/VirtualWardrobe/issues/31) — browser-level smoke tests for the Expo web app
 
 ## Roadmap (MVP)
 - **M0 Foundations** — scaffold, abstractions, local storage, onboarding.

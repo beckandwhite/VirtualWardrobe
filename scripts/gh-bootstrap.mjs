@@ -5,35 +5,21 @@
 //   gh auth login -h github.com   # token scopes: repo, project, public_repo
 //   gh auth status -h github.com  # must show your personal login
 //
-// This script is idempotent-ish (checks before creating milestones/labels) and is
-// intentionally the "single source of truth" between Plans/issues/*.md and GitHub.
+// This script reconciles GitHub milestones, labels, and project cards. GitHub issue bodies are
+// the source of truth; the repository does not mirror them under Plans/issues/.
 //
 // Usage:  node scripts/gh-bootstrap.mjs
 // Env:    OWNER=<your-handle>  REPO=VirtualWardrobe  DRY_RUN=1  (dry run prints only)
 
 import { spawnSync } from 'node:child_process';
-import { readFileSync, readdirSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
-import { dirname, join } from 'node:path';
 
 const OWNER = process.env.OWNER || 'beckandwhite';
 const REPO = process.env.REPO || 'VirtualWardrobe';
 const DRY = process.env.DRY_RUN === '1';
 
 const MILESTONES = ['M0 Foundations', 'M1 Wardrobe', 'M2 Try-On', 'M3 Native+Polish', 'M4 QA', 'M5 Devops', 'M6 Language & i18n'];
-const MILESTONE_BY_PREFIX = {
-  M0: 'M0 Foundations',
-  M1: 'M1 Wardrobe',
-  M2: 'M2 Try-On',
-  M3: 'M3 Native+Polish',
-  M5: 'M5 Devops',
-  M4: 'M4 QA',
-};
 const BASE_LABELS = ['feat', 'ux', 'ml', 'debt', 'docs', 'spike', 'tooling', 'M0', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6'];
 const STATUS_OPTIONS = ['Backlog', 'To Do', 'In Progress', 'Done', 'Shipped'];
-
-const repoRoot = join(dirname(fileURLToPath(import.meta.url)), '..');
-const issuesDir = join(repoRoot, 'Plans', 'issues');
 
 function gh(args, { input } = {}) {
   if (DRY) {
@@ -86,54 +72,11 @@ run('meta', () => {
     if (milestones.some(m => m.title === title)) { console.log(`    (milestone exists: ${title})`); continue; }
     api('POST', `/repos/${OWNER}/${REPO}/milestones`, { title });
   }
-  const files = readdirSync(issuesDir).filter(f => f.endsWith('.md'));
-  const labels = new Set(BASE_LABELS);
-  for (const f of files) {
-    const issue = parseIssue(f);
-    if (!issue.excluded) issue.labels.split(',').map(s => s.trim()).filter(Boolean).forEach(l => labels.add(l));
-  }
-  for (const label of labels) gh(['label', 'create', label, '--description', label, '--color', '0e639c']);
+  for (const label of BASE_LABELS) gh(['label', 'create', label, '--description', label, '--color', '0e639c']);
 });
 
-// 3. Issues from Plans/issues/*.md
-function parseIssue(name) {
-  const raw = readFileSync(join(issuesDir, name), 'utf8');
-  const [first, ...rest] = raw.split('\n');
-  const title = first.replace(/^#\s*/, '').trim();
-  const meta = raw.match(/Milestone:\s*([^·]+)·\s*Labels:\s*(.+)/);
-  const milestone = meta ? meta[1].trim() : null;
-  const labels = meta ? meta[2].trim() : '';
-  const num = title.split(' · ')[0]; // e.g. M0-1
-  return { title, milestone, labels, num, body: rest.join('\n'), file: name, excluded: false };
-}
-
-function createIssue(issue) {
-  if (issue.excluded) return null;
-  console.log(`   • ${issue.num}: ${issue.title}`);
-  const existing = JSON.parse(ghCapture(['issue', 'list', '--repo', `${OWNER}/${REPO}`, '--state', 'all', '--limit', '100', '--json', 'number,title,url']));
-  const found = existing.find(i => i.title === issue.title);
-  if (found) return found;
-  const args = ['issue', 'create', '--repo', `${OWNER}/${REPO}`, '--title', issue.title, '--body-file', join(issuesDir, issue.file)];
-  if (issue.labels) args.push('--label', issue.labels.split(',').map(s => s.trim()).join(','));
-  const url = ghCapture(args).split(/\r?\n/).find(line => line.startsWith('http'));
-  const created = JSON.parse(ghCapture(['issue', 'view', url, '--json', 'number,title,url']));
-  if (issue.milestone) {
-    const milestones = JSON.parse(api('GET', `/repos/${OWNER}/${REPO}/milestones?state=all&per_page=100`));
-    const milestoneTitle = MILESTONE_BY_PREFIX[issue.milestone] || issue.milestone;
-    const milestone = milestones.find(m => m.title === milestoneTitle);
-    if (milestone) api('PATCH', `/repos/${OWNER}/${REPO}/issues/${created.number}`, { milestone: milestone.number });
-  }
-  return created;
-}
-
-run('issues', () => {
-  console.log(`\n[3/4] issues from Plans/issues/`);
-  const files = readdirSync(issuesDir).filter(f => f.endsWith('.md')).sort();
-  for (const f of files) {
-    const issue = parseIssue(f);
-    createIssue(issue);
-  }
-});
+// 3. Issue bodies are managed directly in GitHub; this script never creates or overwrites them.
+console.log('\n[3/4] issue bodies: GitHub source of truth (no local mirror)');
 
 // 4. Project board + add issues (GitHub Projects v2)
 run('project', () => {
@@ -148,12 +91,10 @@ run('project', () => {
     gh(['project', 'field-create', String(projectNumber), '--owner', OWNER, '--name', 'Board Status', '--data-type', 'SINGLE_SELECT', '--single-select-options', STATUS_OPTIONS.join(',')]);
   }
   const issues = JSON.parse(ghCapture(['issue', 'list', '--repo', `${OWNER}/${REPO}`, '--state', 'all', '--limit', '100', '--json', 'number,title,url']));
-  const included = readdirSync(issuesDir).filter(f => f.endsWith('.md')).map(parseIssue).filter(i => !i.excluded);
   const projectItems = JSON.parse(ghCapture(['project', 'item-list', String(projectNumber), '--owner', OWNER, '--limit', '100', '--format', 'json'])).items;
   const existingUrls = new Set(projectItems.map(item => item.content?.url).filter(Boolean));
-  for (const issue of included) {
-    const remote = issues.find(i => i.title === issue.title);
-    if (remote && !existingUrls.has(remote.url)) gh(['project', 'item-add', String(projectNumber), '--owner', OWNER, '--url', remote.url]);
+  for (const remote of issues) {
+    if (!existingUrls.has(remote.url)) gh(['project', 'item-add', String(projectNumber), '--owner', OWNER, '--url', remote.url]);
   }
   const m0 = issues.find(i => i.title.startsWith('M0-1 ·'));
   if (m0) gh(['project', 'item-edit', String(projectNumber), '--owner', OWNER, '--url', m0.url, '--field', 'Board Status', '--value', 'In Progress']);

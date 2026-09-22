@@ -10,7 +10,7 @@
 
 ## Objective
 
-Implement the repository / SQLite regression suite for the highest-priority QA gap described in [Plans/issues/M4-1.md](../Plans/issues/M4-1.md).
+Implement the repository / SQLite regression suite for the highest-priority QA gap described in [M4-1](https://github.com/beckandwhite/VirtualWardrobe/issues/28).
 
 This checklist is sprint-ready and intentionally focused on execution. It assumes no product scope changes and no production code refactoring beyond the test harness itself.
 
@@ -32,7 +32,7 @@ This is the first QA implementation task because it protects the app’s persist
 
 - [docs/qa-repository-test-plan.md](qa-repository-test-plan.md)
 - [docs/testing-summary.md](testing-summary.md)
-- [Plans/issues/M4-1.md](../Plans/issues/M4-1.md)
+- [M4-1](https://github.com/beckandwhite/VirtualWardrobe/issues/28)
 
 ## Workstream 1: test harness setup
 
@@ -207,7 +207,7 @@ This issue is complete when:
 
 ## Related files
 
-- [Plans/issues/M4-1.md](../Plans/issues/M4-1.md)
+- [M4-1](https://github.com/beckandwhite/VirtualWardrobe/issues/28)
 - [docs/qa-repository-test-plan.md](qa-repository-test-plan.md)
 - [docs/testing-summary.md](testing-summary.md)
 - [src/store/repo.ts](../src/store/repo.ts)

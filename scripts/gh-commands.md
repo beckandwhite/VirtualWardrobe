@@ -16,17 +16,20 @@ gh milestone create "M0 Foundations"
 gh milestone create "M1 Wardrobe"
 gh milestone create "M2 Try-On"
 gh milestone create "M3 Native+Polish"
+gh milestone create "M4 QA"
+gh milestone create "M5 Devops"
+gh milestone create "M6 Language & i18n"
 ```
 
 ## Labels
 ```bash
-for l in feat ux ml debt docs spike M0 M1 M2 M3; do
+for l in feat ux ml debt docs spike tooling qa coverage M0 M1 M2 M3 M4 M5 M6; do
   gh label create "$l" --description "$l" --color 0e639c 2>/dev/null || true
 done
 ```
 
-## Issues (one per Plans/issues/*.md)
-Replace `M0-1` etc. with the actual id; copy title/body from the md:
+## Issues
+Issue bodies are authored directly in GitHub. Create or edit them with `gh issue create` / `gh issue edit`; local issue-body files are intentionally not maintained.
 ```bash
 gh issue create --title "M0-1 · Initialize Expo + TS strict + Expo Router + lint/format" \
   --body-file Plans/issues/M0-1.md \

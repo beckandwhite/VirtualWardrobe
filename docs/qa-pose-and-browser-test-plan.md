@@ -23,7 +23,7 @@ The repository already validates the pure math and data logic, but not the real 
 - [src/composer](../src/composer)
 - [app/studio.tsx](../app/studio.tsx)
 - [docs/dev-setup.md](dev-setup.md)
-- [Plans/issues/M3-5.md](../Plans/issues/M3-5.md)
+- [M3-5](https://github.com/beckandwhite/VirtualWardrobe/issues/18)
 
 ### In scope
 
@@ -103,7 +103,7 @@ This preserves fast feedback for local development while still covering the real
 - [scripts/pose-smoke.mjs](../scripts/pose-smoke.mjs)
 - [scripts/pose-smoke-path.mjs](../scripts/pose-smoke-path.mjs)
 - [docs/dev-setup.md](dev-setup.md)
-- [Plans/issues/M3-5.md](../Plans/issues/M3-5.md)
+- [M3-5](https://github.com/beckandwhite/VirtualWardrobe/issues/18)
 
 ### Proposed tests
 
@@ -170,8 +170,8 @@ The pose + browser QA work is complete when:
 
 - [docs/testing-summary.md](testing-summary.md)
 - [docs/qa-grooming-plan.md](qa-grooming-plan.md)
-- [Plans/issues/M4-3.md](../Plans/issues/M4-3.md)
-- [Plans/issues/M4-4.md](../Plans/issues/M4-4.md)
-- [Plans/issues/M3-5.md](../Plans/issues/M3-5.md)
+- [M4-3](https://github.com/beckandwhite/VirtualWardrobe/issues/30)
+- [M4-4](https://github.com/beckandwhite/VirtualWardrobe/issues/31)
+- [M3-5](https://github.com/beckandwhite/VirtualWardrobe/issues/18)
 - [src/pose](../src/pose)
 - [app/studio.tsx](../app/studio.tsx)
