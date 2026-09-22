@@ -72,9 +72,9 @@ issue bodies; implementation notes remain here only when they are useful as dura
 
 | ID       | Title                                                     | Labels              | Status      |
 |--------|---------------------------------------------------------|-------------------|------------|
-| M6-1    | Language/i18n foundation and translation workflow        | docs, ux, M6        | 🚧 BACKLOG |
+| M6-1    | Language/i18n foundation and translation workflow        | docs, ux, M6        | ⚠️ PARTIAL  |
 | M6-2    | English canonical catalog and copy review                | docs, ux, M6        | 🚧 BACKLOG |
-| M6-3    | Hungarian translation                                    | docs, ux, M6        | 🚧 BACKLOG |
+| M6-3    | Hungarian translation                                    | docs, ux, M6        | ⚠️ PARTIAL  |
 | M6-4    | German translation                                       | docs, ux, M6        | 🚧 BACKLOG |
 | M6-5    | Spanish translation completion                           | docs, ux, M6        | 🚧 BACKLOG |
 | M6-6    | Italian translation                                      | docs, ux, M6        | 🚧 BACKLOG |
@@ -88,6 +88,12 @@ issue bodies; implementation notes remain here only when they are useful as dura
 >   checks, persistence behavior, and contributor workflow. M6-2 makes English the reviewed source
 >   catalog; M6-3 through M6-10 then deliver Hungarian, German, Spanish completion, Italian,
 >   French, Vietnamese, Simplified Chinese, and Traditional Chinese translations.
+
+> * **M6-1 / M6-3 — PARTIAL.** The i18n core now has typed metadata for all nine locales,
+>   deterministic fallback and BCP-47 normalization, per-locale coverage reporting, and focused
+>   Jest tests. The current canonical catalog is covered in Hungarian. Remaining work is the
+>   contributor workflow and interpolation/formatting rules, expansion to every user-facing app
+>   surface, and Hungarian storyboard review.
 
 > * **M3-1 — NO-GO (in-sandbox).** See `Plans/spikes/M3-1-mediapipe-native-pose.md` + M3-1
 >   issue "Verdict". No device/EAS/camera in the sandbox, so the on-device pose spike

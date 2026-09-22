@@ -442,6 +442,19 @@ what M0 shipped. Locked outcomes below; the issue docs are amended to match.
    the same in-sandbox ceiling as D20.5/D21.6.
 ## 2026-09-20 — M3-3 lands (i18n + branded splash) + backlog reconciliation
 
+## 2026-09-22 — M6-1 / M6-3 i18n foundation and Hungarian catalog
+
+- **D39.1 — M6 keeps the zero-dependency catalog.** The existing pure TypeScript i18n core was
+  extended rather than replaced: `LOCALES` is the typed nine-locale selection order, English is
+  canonical, and `catalogCoverage()` reports missing and unexpected keys for each locale.
+- **D39.2 — Locale resolution accepts BCP-47 variants.** Exact supported tags such as `zh-CN`
+  and `zh-TW` are preserved; regional variants such as `es-MX` fall back to their supported base
+  locale, while unknown languages fall back to English. Switching remains React state plus the
+  existing persisted setting, with no reload.
+- **D39.3 — M6-3 is partial by design.** Hungarian covers every key in the current canonical
+  catalog and has automated completeness/nonblank checks. The work item remains open until the
+  English catalog covers all user-facing surfaces and the Hungarian core journey is reviewed.
+
 - **D23.1 — i18n is a zero-dependency in-house catalog, not i18next.** M3-3 suggests
    `i18next` + `react-i18next`, but the project's standing philosophy is minimal deps
   (D21.3 refused a new dep for the composer; D7 favors in-house where the surface is

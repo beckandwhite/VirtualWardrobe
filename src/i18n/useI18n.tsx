@@ -75,6 +75,12 @@ function systemLocalePrefix(): string | undefined {
   // hook degrades to the default locale when the global is absent (tests/web).
   const raw = (globalThis as { settings?: { locale?: string } }).settings?.locale;
   if (!raw) return undefined;
-  const prefix = raw.split('-')[0].toLowerCase();
-  return LOCALE_LABELS[(prefix as Locale)] !== undefined ? prefix : undefined;
+
+  const normalized = raw.replace(/_/g, '-');
+  if (normalized in LOCALE_LABELS) return normalized as Locale;
+
+  const prefix = normalized.split('-')[0].toLowerCase();
+  if (prefix in LOCALE_LABELS) return prefix as Locale;
+
+  return undefined;
 }
