@@ -55,6 +55,9 @@ Uploaded to `beckandwhite/VirtualWardrobe` and added to project 1:
 | M3-1 | #14 | yes |
 | M3-2 | #15 | yes |
 | M3-3 | #16 | yes |
+| M3-15 | #44 | yes |
+| M3-16 | #46 | yes |
+| M3-17 | #47 | yes |
 | M3-4 | #17 | yes |
 | M3-5 | #18 | yes |
 | M3-6 | #19 | yes |
@@ -75,8 +78,10 @@ Uploaded to `beckandwhite/VirtualWardrobe` and added to project 1:
 | M6-7 | #41 | yes |
 | M6-8 | #42 | yes |
 | M6-9 | #43 | yes |
+| M6-10 | #45 | yes |
 | M5-1 | #25 | yes |
 | M5-2 | #32 | yes |
+| M5-3 | #33 | yes |
 | QA-1 | #28 | yes |
 | QA-2 | #29 | yes |
 | QA-3 | #30 | yes |

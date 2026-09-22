@@ -51,7 +51,7 @@ Each item below has a full issue body in `Plans/issues/<id>.md`.
 |--------|---------------------------------------------------------|-------------------|------------|
 | M3-1     | [spike] EAS prebuilt + Mediapose/Tasks pose for native    | spike, ml, M3       | ⛔ NO-GO*    |
 | M3-2     | Saved-looks gallery + export/share sheet                  | feat, ux, M3        | ✅ BUILT       |
-| M3-3      | App icons / launch screens / i18n / store asset prep       | feat, ux, M3        | 🚧 PARTIAL*  |
+| M3-3      | [autonomous] App branding and release asset configuration | feat, ux, M3        | 🚧 PARTIAL*  |
 | M3-4     | [optional] Account + multi-device sync (separately scoped)| feat, M3, debt     | ⏸ (opt)     |
 | M3-5      | Dev-env: headless-browser harness for `ml`/`spike` DoD     | debt, tooling, M3    | 🚧 BUILT*     |
 | M3-6      | [autonomous] Vendor TFJS MoveNet via ONNX→TFJS conversion (fast) | ml, debt, M3, spike | 🚧 PARTIAL*     |
@@ -63,6 +63,9 @@ Each item below has a full issue body in `Plans/issues/<id>.md`.
 | M3-12      | [autonomous] Docs: iOS test-environment setup                 | docs, tooling, qa, M3 | 🚧 BACKLOG   |
 | M3-13      | [autonomous] Setup: iOS Simulator on this MacBook             | tooling, qa, M3       | 🚧 BACKLOG   |
 | M3-14      | Storyboard the core wardrobe-to-try-on user journey             | ux, docs, M3          | 🚧 BACKLOG   |
+| M3-15      | [autonomous] Portfolio screenshot kit and demo path             | ux, docs, M3          | 🚧 BACKLOG   |
+| M3-16      | [autonomous] Welcome screen: explain VirtualWardrobe and try-on | feat, ux, M3          | 🚧 BACKLOG   |
+| M3-17      | [autonomous] Improve application navigation and return paths   | feat, ux, M3          | 🚧 BACKLOG   |
 
 ## M6 · Language & i18n
 
@@ -76,12 +79,14 @@ Each item below has a full issue body in `Plans/issues/<id>.md`.
 | M6-6    | Italian translation                                      | docs, ux, M6        | 🚧 BACKLOG |
 | M6-7    | French translation                                       | docs, ux, M6        | 🚧 BACKLOG |
 | M6-8    | Vietnamese translation                                   | docs, ux, M6        | 🚧 BACKLOG |
-| M6-9    | Chinese translation                                      | docs, ux, M6        | 🚧 BACKLOG |
+| M6-9    | [autonomous] Simplified Chinese translation              | docs, ux, M6        | 🚧 BACKLOG |
+| M6-10   | [autonomous] Traditional Chinese translation             | docs, ux, M6        | 🚧 BACKLOG |
 
-> * **M6-1** establishes the typed eight-locale catalog, fallback and formatting rules, coverage
+> * **M6-1** establishes the typed nine-locale catalog (`en`, `hu`, `de`, `es`, `it`, `fr`, `vi`,
+>   `zh-CN`, `zh-TW`), fallback and formatting rules, coverage
 >   checks, persistence behavior, and contributor workflow. M6-2 makes English the reviewed source
->   catalog; M6-3 through M6-9 then deliver Hungarian, German, Spanish completion, Italian,
->   French, Vietnamese, and Chinese translations.
+>   catalog; M6-3 through M6-10 then deliver Hungarian, German, Spanish completion, Italian,
+>   French, Vietnamese, Simplified Chinese, and Traditional Chinese translations.
 
 > * **M3-1 — NO-GO (in-sandbox).** See `Plans/spikes/M3-1-mediapipe-native-pose.md` + M3-1
 >   issue "Verdict". No device/EAS/camera in the sandbox, so the on-device pose spike
@@ -95,12 +100,9 @@ Each item below has a full issue body in `Plans/issues/<id>.md`.
 >   produced on a machine with `@playwright/test` + the MoveNet model — the same in-sandbox
 >    ceiling as M2-1 D20.5 / M2-2 D21.6.
 >
-> * **M3-3 — PARTIAL, zero-dep (D23.1).** i18n layer (`src/i18n/`: pure 2-locale catalog en+es,
->     `useI18n` provider, `LanguageSwitcher`) is wired into onboarding + the tab titles, language
->   persisted in `app_settings`; `app.json` now has a branded `splash` + `icon`. **Not** device-
->  verified (no iOS/Android build in-sandbox, same ceiling as M2/M3-1) and the store-asset
->   screenshot kit is out of scope in-sandbox. 2 locales + working no-reload language switch
->    (AC2) are done and unit-tested.
+> * **M3-3 — PARTIAL, branding only.** `app.json` has a branded `splash` + `icon`, but release
+>   device-build verification remains open. The existing two-locale implementation is carried
+>   forward as input to M6-1; the portfolio screenshot kit is M3-15.
 >
 > * **M3-6 / M3-7 — the dead MoveNet source, two ways to a real graph (D24).** `npm run fetch:pose`
 >   fails because the canonical TFJS MoveNet graph is gone everywhere public (`tfhub.dev`→Kaggle,
@@ -140,6 +142,7 @@ Each item below has a full issue body in `Plans/issues/<id>.md`.
 |--------|---------------------------------------------------------|-------------------|------------|
 | M5-1    | [autonomous] GitHub Actions build and security workflow   | tooling, qa, M5      | 🚧 BACKLOG   |
 | M5-2    | CI/CD test execution and reporting                        | tooling, qa, M5      | 🚧 BACKLOG   |
+| M5-3    | [autonomous] Private GitHub Actions runner from Docker    | tooling, qa, M5      | 🚧 BACKLOG   |
 
 > * **M5-1 - establish a small, trustworthy CI/security baseline.** The workflow should run on
 >   pushes and pull requests, install from the lockfile with `npm ci`, and enforce the repository's

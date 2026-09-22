@@ -6,6 +6,35 @@ in-flight, build-time choices.
 
 ---
 
+## 2026-09-22 — welcome and navigation work items
+
+- **D36: welcome and navigation are separate autonomous slices.** M3-16 owns first-run product
+  orientation, persistence, and welcome copy; M3-17 owns route ownership, return paths, and
+  navigation behavior. Both use M3-14 as the journey source of truth and log material decisions
+  here rather than waiting for approval.
+
+## 2026-09-22 — backlog grilling decisions
+
+- **D29: M3-3 is split by ownership.** M3-3 owns branding/release configuration, M3-15 owns the
+  portfolio screenshot kit, and M6-1 owns the i18n foundation; no issue may silently absorb the
+  others' work.
+- **D30: M3-6 and M3-7 compete for one MoveNet graph.** The first independently verified,
+  network-free graph wins; the other issue is closed as superseded and its evidence is retained.
+- **D31: host-specific setup is honest.** M3-9, M3-11, and M3-13 are future Mac-host briefs;
+  Windows execution records PARTIAL/NO-GO rather than claiming Mac success. M1-1 requires camera
+  permission, capture, import, persistence, draft creation, and screenshot/video evidence on each
+  target.
+- **D32: Playwright is a repository devDependency and required in CI.** The model-absent manual
+  fallback remains valid, but missing Playwright is not a permitted CI skip after setup lands.
+- **D33: CI ownership is separated.** M5-1 owns workflow/install/typecheck/lint/security; M5-2
+  owns Jest, coverage, artifacts, diagnostics, and required-check guidance; M5-3 is an optional
+  private-runner path and never a prerequisite for hosted CI.
+- **D34: M6 supports nine locales.** The set is `en`, `hu`, `de`, `es`, `it`, `fr`, `vi`, `zh-CN`,
+  and `zh-TW`. Translation agents may complete work when automated gates pass; native review is
+  not a separate blocking criterion. Material choices still go in this log.
+- **D35: M3-4 stays parked.** Account/sync implementation is not authorized; the next allowed
+  step is a separately scoped privacy/backend architecture spike.
+
 ## 2026-09-21 — M3-6 follow-up
 
 - **D28: M3-6 produced a TFJS graph, but remains PARTIAL pending inference proof.** The graph and

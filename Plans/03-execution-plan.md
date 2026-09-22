@@ -2,27 +2,28 @@
 
 ## Status
 - Repo initialized locally (`git init`), branch `main`, local identity set.
-- **Not yet on github.com** — the machine's `gh` is authed only to `github.tools.sap`
-  (ADR-009). See `Plans/04-gh-setup.md` for the one manual unblock.
-- **Step 4 (implementation) is intentionally NOT started** — planning phase only.
+- GitHub is the live issue/project source of truth; the backlog has been implemented through M2
+  and is now being decomposed into bounded M3/M5/M6 work items.
+- Planning refresh completed 2026-09-22; issue definitions and local specifications are mirrored.
 
 ## Steps
-1. **Scaffold + Plans (DONE in this phase)** — folder skeleton + this `Plans/` dir.
-2. **GitHub unblock (manual, one-time):** `gh auth login -h github.com` with the
-   beckandwhite personal token (scope incl. `repo`, `project`).
-3. **Create GitHub Project + issues (this is the priority this phase):**
-   - `gh project init` a board with columns Backlog/To Do/In Progress/Done/Shipped.
-   - Create milestones M0–M3 and the label set.
-   - Open the 15 issues from `Plans/issues/*.md`, tag milestones + labels,
-     add each to the board; move M0-1 → In Progress.
-   - The generator script lives in the repo (see `04-gh-setup.md`).
-4. **Implement M0 (deferred, not now):** M0-1 → M0-4, each a PR off `main`.
-5. **M1, then M2** vertical slices. M3 spikes/optional afterwards.
+1. **M1-1 native evidence:** execute Android and iOS host briefs when the corresponding Mac/device
+  environments are available; require the evidence bar in M1-1.
+2. **M3-8 → M3-9 → M3-5:** install Playwright as a repository devDependency and require the
+  browser pass in CI; retain model-absent manual fallback.
+3. **M3-6 ∥ M3-7:** race the conversion and known-good graph paths; the first verified graph wins,
+  and the other issue is superseded.
+4. **M3-14 → M3-16 → M3-17 → M3-15:** settle the product journey, implement welcome orientation,
+   improve route/return behavior, then capture the portfolio artifact set.
+5. **M5-1 → M5-2; M5-3 optional:** establish hosted CI first; private Docker runner remains
+  independently parked until an approved host and permissions exist.
+6. **M6-1 → M6-2 → M6-3…M6-10:** establish the nine-locale catalog, then translations.
 
 ## GitHub structure (target, on github.com / beckandwhite)
 - Repo: `VirtualWardrobe` (private initially; can go public for portfolio).
 - Project board columns: `Backlog · To Do · In Progress · Done · Shipped`.
-- Milestones: `M0 Foundations`, `M1 Wardrobe`, `M2 Try-On`, `M3 Native+Polish`.
+- Milestones: `M0 Foundations`, `M1 Wardrobe`, `M2 Try-On`, `M3 Native+Polish`, `M5 Devops`,
+  `M6 Language & i18n`.
 - Labels: `feat`, `ux`, `ml`, `debt`, `docs`, `spike`, `M0`, `M1`, `M2`, `M3`.
 
 ## Risks / watch-items
