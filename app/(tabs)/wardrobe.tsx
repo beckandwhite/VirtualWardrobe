@@ -11,6 +11,7 @@ import { useMemo, useState } from 'react';
 import { router } from 'expo-router';
 import { useItems } from '@/store';
 import { applyFilters, type FilterCriteria } from '@/wardrobe';
+import { emptyStateVariant, hasActiveCriteria } from '@/wardrobe/emptyState';
 
 // M1-3: the wardrobe browse experience. A virtualized thumbnail grid (reuse the
 // M1-2 `useItems` + `Item` snapshot) with a filter/search bar on top. The visible
@@ -45,11 +46,15 @@ export default function WardrobeScreen() {
       [items, criteria, query],
    );
 
-   const hasActive = Boolean(criteria.category || criteria.color || query.trim());
-   const clearAll = () => {
+    // The "N of M" / "Clear filters" surface and the empty-state selection are
+    // pure selectors (src/wardrobe/emptyState.ts) the QA-2 flow tests exercise;
+    // this screen is the thin view that renders their result.
+   const hasActive = hasActiveCriteria(criteria, query);
+    const empty = emptyStateVariant(items, visible);
+    const clearAll = () => {
       setCriteria({});
       setQuery('');
-    };
+     };
 
    const toggleCategory = (c: string) =>
       setCriteria((prev) => ({ ...prev, category: prev.category === c ? undefined : c }));
@@ -115,28 +120,30 @@ export default function WardrobeScreen() {
               refreshing={loading}
               onRefresh={reload}
               ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
-              ListEmptyComponent={
-                   items.length === 0 ? (
-                         <View style={styles.empty}>
-                            <Text style={styles.emptyText}>
-                         No items yet. Tap the + to add your first one.
-                          </Text>
-                        </View>
-                      ) : (
-                          <View style={styles.empty}>
-                             <Text style={styles.emptyText}>
-                       Nothing matches your filters.
-                        </Text>
-                             <TouchableOpacity activeOpacity={0.7} onPress={clearAll}>
-                                <Text style={styles.clearLink}>Clear filters</Text>
-                              </TouchableOpacity>
-                            <TouchableOpacity
-                               activeOpacity={0.7}
-                               onPress={() => router.push('/capture')}>
-                                <Text style={styles.addLink}>Add an item</Text>
-                              </TouchableOpacity>
-                          </View>
-                     )}
+               ListEmptyComponent={
+                    empty === 'none' ? (
+                           <View style={styles.empty}>
+                              <Text style={styles.emptyText}>
+                           No items yet. Tap the + to add your first one.
+                             </Text>
+                           </View>
+                        ) : (
+                            empty === 'filtered' ? (
+                                   <View style={styles.empty}>
+                                       <Text style={styles.emptyText}>
+                               Nothing matches your filters.
+                                 </Text>
+                                   <TouchableOpacity activeOpacity={0.7} onPress={clearAll}>
+                                      <Text style={styles.clearLink}>Clear filters</Text>
+                                    </TouchableOpacity>
+                                  <TouchableOpacity
+                                activeOpacity={0.7}
+                                onPress={() => router.push('/capture')}>
+                                     <Text style={styles.addLink}>Add an item</Text>
+                                  </TouchableOpacity>
+                               </View>
+                              ) : null
+                       )}
               renderItem={({ item }) => (
                        <TouchableOpacity
                        key={String(item.id)}

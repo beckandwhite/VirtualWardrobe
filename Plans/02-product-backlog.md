@@ -157,9 +157,9 @@ Each item below has a full issue body in `Plans/issues/<id>.md`.
 | ID        | Title                                                      | Labels                 | Status       |
 |--------|---------------------------------------------------------|-------------------|------------|
 | QA-1       | Repository / SQLite regression tests                      | qa, coverage, M3      | ✅ BUILT (D26) |
-| QA-2      | Screen-level flow tests (onboarding, capture, studio)    | qa, coverage, ux, M3 | 🚧 TODO     |
-| QA-3      | Pose-provider failure & fallback regression tests        | qa, coverage, ml, M3 | 🚧 TODO     |
-| QA-4      | Browser-level smoke tests for the Expo web app           | qa, coverage, tooling, M3 | 🚧 TODO |
+| QA-2       | Screen-level flow tests (onboarding, capture, studio)     | qa, coverage, ux, M3 | ✅ BUILT (D29) |
+| QA-3       | Pose-provider failure & fallback regression tests         | qa, coverage, ml, M3 | ✅ BUILT (D30) |
+| QA-4        | Browser-level smoke tests for the Expo web app             | qa, coverage, tooling, M3 | 🟡 BUILT-waived (D31) |
 
 ## Definition of Done (every issue)
 - [ ] Acceptance criteria met and verified (test where applicable).

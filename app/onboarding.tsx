@@ -13,6 +13,15 @@ import { useCallback, useState } from 'react';
 import { r } from '@/store';
 import { useI18n } from '@/i18n/useI18n';
 import LanguageSwitcher from '@/i18n/LanguageSwitcher';
+import { onboardingCameraState } from '@/onboarding/cameraState';
+
+// app/index.tsx routes here; the screen's permission feedback is a pure branch on
+// the Camera.PermissionResponse the native camera returns. The branch (and the
+// copy it shows) lives in src/onboarding/cameraState.ts as the single source of
+// truth both this JSX and the QA-2 flow tests exercise — no rendering harness.
+// QA-2 / D27.1 removes the screen's earlier inline duplicate of that branch.
+// The local `OnboardingCameraState` type was deleted with the duplicate branch;
+// the type now lives alongside the imported function in cameraState.ts.
 
 export default function OnboardingScreen() {
   const [status, setStatus] = useState<PermissionResponse | null>(null);
@@ -35,29 +44,29 @@ export default function OnboardingScreen() {
       router.replace('/wardrobe');
        }, []);
 
-   const granted = status?.status === 'granted';
-   const canAskAgain = status?.canAskAgain ?? true;
+    const cameraState = onboardingCameraState(status, permissionAsked);
+    const granted = cameraState === 'granted';
 
-   return (
-      <ScrollView
-         style={styles.screen}
-         contentContainerStyle={styles.content}>
-         <StatusBar />
-         <View style={styles.card}>
-             <Text style={styles.title}>{t('onboarding.welcome')}</Text>
-              <Text style={styles.body}>{t('onboarding.body')}</Text>
+    return (
+        <ScrollView
+          style={styles.screen}
+          contentContainerStyle={styles.content}>
+           <StatusBar />
+           <View style={styles.card}>
+               <Text style={styles.title}>{t('onboarding.welcome')}</Text>
+                <Text style={styles.body}>{t('onboarding.body')}</Text>
 
-              <View style={styles.section}>
-                 <Text style={styles.sectionTitle}>{t('onboarding.camera')}</Text>
-                 {granted ? (
-                    <Text style={styles.ok}>{t('onboarding.camera.granted')}</Text>
-                 ) : permissionAsked && !canAskAgain ? (
-                    <Text style={styles.deny}>{t('onboarding.camera.denied')}</Text>
-                 ) : permissionAsked ? (
-                    <Text style={styles.deny}>{t('onboarding.camera.notgranted')}</Text>
-                 ) : null}
+                <View style={styles.section}>
+                   <Text style={styles.sectionTitle}>{t('onboarding.camera')}</Text>
+                   {cameraState === 'granted' ? (
+                      <Text style={styles.ok}>{t('onboarding.camera.granted')}</Text>
+                   ) : cameraState === 'denied' ? (
+                     <Text style={styles.deny}>{t('onboarding.camera.denied')}</Text>
+                   ) : cameraState === 'notgranted' ? (
+                     <Text style={styles.deny}>{t('onboarding.camera.notgranted')}</Text>
+                   ) : null}
 
-                 {!granted ? (
+                   {!granted ? (
                    <TouchableOpacity
                      style={styles.button}
                      activeOpacity={0.8}
