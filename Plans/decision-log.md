@@ -35,25 +35,25 @@ in-flight, build-time choices.
 - **D38: M3-4 stays parked.** Account/sync implementation is not authorized; the next allowed
   step is a separately scoped privacy/backend architecture spike.
 
-## 2026-09-22 — QA sprint lands (QA-2 / QA-3 / QA-4)
+## 2026-09-22 — M4 QA sprint lands (M4-2 / M4-3 / M4-4)
 
-QA-1 was already committed (76/76). QA-2, QA-3, QA-4 finished this sprint; full suite
+M4-1 was already committed (76/76). M4-2, M4-3, M4-4 finished this sprint; full suite
 now **129/129 across 15 suites**, with `tsc`, `eslint --max-warnings 0`, `e2e:web:check`,
 and the skippable `e2e:web` all green.
 
 - **D28.1 — orchestrator reconciliation: number the QA decisions D29–D31, contiguous after
   the committed D28.** The three QA agents ran in parallel and independently picked numbers
-  that collided / skipped: QA-2 wrote `D27.x` (collided with M3-6's uncommitted `D27`) and
-  QA-3/QA-4 wrote `D30.x`/`D32.x`. Reconciled to a single contiguous block — **QA-2 → D29.x,
-  QA-3 → D30.x, QA-4 → D31.x** — and the stale `D27.x`/`D32.x` cross-refs in the issue files
-  *and* the new source/test comments were renumbered to match. QA-3's agent timed out before
+  that collided / skipped: M4-2 wrote `D27.x` (collided with M3-6's uncommitted `D27`) and
+  M4-3/M4-4 wrote `D30.x`/`D32.x`. Reconciled to a single contiguous block — **M4-2 → D29.x,
+  M4-3 → D30.x, M4-4 → D31.x** — and the stale `D27.x`/`D32.x` cross-refs in the issue files
+  *and* the new source/test comments were renumbered to match. M4-3's agent timed out before
   returning its log block; D30.x here is reconstructed from its on-disk work (`tests/pose/`
-  + `QA-3.md` status), which was complete (tests + AC + status verified green). The unrelated
+  + `M4-3.md` status), which was complete (tests + AC + status verified green). The unrelated
   `Research/bookmarks.md` edits a QA agent made are out of scope and were left uncommitted.
 
 - **D29.1 — onboarding camera-feedback is one source of truth, not two.** `app/onboarding.tsx`
   carried an *inline* copy of `onboardingCameraState`/`OnboardingCameraState` that could drift
-  from `src/onboarding/cameraState.ts` (created mid-QA-2). Deleted the inline copy; the screen
+  from `src/onboarding/cameraState.ts` (created mid-M4-2). Deleted the inline copy; the screen
   imports the pure branch and keeps `PermissionResponse` at its call site, while
   `cameraState.ts` keeps a structural `CameraPermissionStatus` to stay node/jest-importable.
 
@@ -73,11 +73,11 @@ and the skippable `e2e:web` all green.
   property is the null-draft case; `busy` itself stays a UI side-effect in the view.
 
 - **D29.4 — empty-state is a pure selector over the *snapshot*.** The wardrobe screen already
-  derives `visible = applyFilters(...)` (covered by `tests/wardrobe/filter.test.ts`); QA-2 adds
+  derives `visible = applyFilters(...)` (covered by `tests/wardrobe/filter.test.ts`); M4-2 adds
   the screen-owned selection `emptyStateVariant` (`none`|`filtered`|`has-items`, snapshot-empty
   takes priority) + `hasActiveCriteria`, reusing not duplicating the filter test.
 
-- **D29.5 — studio sliders + export already covered; QA-2 adds the *notice* gap.** The critical
+- **D29.5 — studio sliders + export already covered; M4-2 adds the *notice* gap.** The critical
   controls (`clampTransform`, `autoTransformFor` incl. empty-keypoint identity fallback,
    `serialize`/`deserialize`, `compose` geometry) are regression-tested by
    `tests/composer/transform.test.ts` + `tests/composer/export.test.ts` (cited, not duplicated).
@@ -487,9 +487,9 @@ environment, so all six are net-new.
 - **D25.4 — `dev-setup.md` §7 now cross-references the pairs.** §7.1 → M3-8/9, §7.2 → M3-10/11/
    12/13, so each limitation entry points straight at its unblock.
 
-## 2026-09-21 — QA sprint begins (QA-1 repository regressions)
+## 2026-09-21 — M4 QA sprint begins (M4-1 repository regressions)
 
-- **D26.1 — QA-1 covers the repo with a faithful in-memory fake DB, not a device/wasm harness.**
+- **D26.1 — M4-1 covers the repo with a faithful in-memory fake DB, not a device/wasm harness.**
   The persistence contract in `src/store/repo.ts` is pure data logic, so the suite
   (`tests/store/repo.test.ts`, 28 tests / 5 describe blocks) drives the *real* `r` object
   against a hand-rolled fake of the four expo-sqlite surface methods

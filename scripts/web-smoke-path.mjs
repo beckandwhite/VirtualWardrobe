@@ -1,4 +1,4 @@
-// QA-4 pure smoke-decision — the part of the browser smoke that's testable without
+// M4-4 pure smoke-decision — the part of the browser smoke that's testable without
 // a browser. `decidePath` picks which studio path the harness asserts on: 'auto'
 // when the MoveNet model is reachable (URL pointer + model bytes present), 'manual'
 // otherwise. A model-absent run still asserts the happy path *on the manual
@@ -101,7 +101,7 @@ export function buildReport(run) {
 }
 
 function reportSummary({ path, skipped, status, fatalErrors, failedRoutes, expectedWarns, routes }) {
-    const parts = [`QA-4 e2e:web smoke (asserts the ${path} path)`];
+    const parts = [`M4-4 e2e:web smoke (asserts the ${path} path)`];
     if (skipped) parts.push('browser pass skipped — no Chromium/Playwright (in-sandbox ceiling)');
     parts.push(`status: ${status}`);
     parts.push(`routes: ${routes.filter((r) => r.ok).length}/${routes.length} ok`);

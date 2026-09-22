@@ -12,7 +12,7 @@ import {
 // covers what those do not: the *notice the screen renders* from a share result
 // and from an export failure. That mapping lives in src/composer/notice.ts
 // (node-importable), so it asserts the error-rendering branch without a UI —
-// QA-2 AC4 (critical studio controls by regression) + AC1 (save/share transition).
+// M4-2 AC4 (critical studio controls by regression) + AC1 (save/share transition).
 
 describe('noticeForShare', () => {
    it('renders an info notice for a downloaded look (web share)', () => {

@@ -21,7 +21,7 @@ import {
 // M1-2 will type in full; here the user gets the image in with minimal friction.
 // The draft-shape + the "on nothing captured / on error, reset busy and don't
 // navigate" decision live in src/capture/draft.ts as the single source of truth
-// the QA-2 flow tests exercise.
+// the M4-2 flow tests exercise.
 
 const HINTS = DRAFT_HINTS;
 

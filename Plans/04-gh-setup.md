@@ -82,9 +82,9 @@ Uploaded to `beckandwhite/VirtualWardrobe` and added to project 1:
 | M5-1 | #25 | yes |
 | M5-2 | #32 | yes |
 | M5-3 | #33 | yes |
-| QA-1 | #28 | yes |
-| QA-2 | #29 | yes |
-| QA-3 | #30 | yes |
-| QA-4 | #31 | yes |
+| M4-1 | #28 | yes |
+| M4-2 | #29 | yes |
+| M4-3 | #30 | yes |
+| M4-4 | #31 | yes |
 
-QA items are included under the `QA` milestone.
+M4 QA items are included under the `M4 QA` milestone.

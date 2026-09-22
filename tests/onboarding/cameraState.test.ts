@@ -11,7 +11,7 @@ import {
 // Onboarding permission-feedback + continuation flow. The branch logic lives in
 // src/onboarding/cameraState.ts (the single source of truth app/onboarding.tsx
 // imports), so these tests exercise that pure logic without a device or a
-// rendering harness — QA-2 AC1/AC2 (permission branches) + AC3 (device-free flow).
+// rendering harness — M4-2 AC1/AC2 (permission branches) + AC3 (device-free flow).
 
 function status(s: string, canAskAgain?: boolean): CameraPermissionStatus {
     return { status: s, canAskAgain };

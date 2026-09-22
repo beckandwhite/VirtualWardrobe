@@ -1,4 +1,4 @@
-// QA-3 · pose-provider failure & fallback regressions.
+// M4-3 · pose-provider failure & fallback regressions.
 //
 // The pose flow is the app's most fragile runtime path: provider selection is
 // platform-branching, a failed model load must degrade to the manual overlay
@@ -36,7 +36,7 @@ function failingDetector(): PoseDetectorLike {
     };
 }
 
-describe('QA-3 · factory platform split', () => {
+describe('M4-3 · factory platform split', () => {
     it('generic (node/jest/native fallback) defaults to the manual no-ML provider', async () => {
        const p = createGeneric();
         expect(p.name).toBe('manual');
@@ -64,7 +64,7 @@ describe('QA-3 · factory platform split', () => {
        });
 });
 
-describe('QA-3 · ManualPoseProvider + safeEstimate', () => {
+describe('M4-3 · ManualPoseProvider + safeEstimate', () => {
     it('the manual provider is the supported no-ML fallback (empty keypoints)', async () => {
        // ManualPoseProvider.estimate ignores its image arg — it never looks at a photo.
        expect(await new ManualPoseProvider().estimate()).toEqual([]);

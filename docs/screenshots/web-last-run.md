@@ -1,4 +1,4 @@
-QA-4 e2e:web smoke (asserts the manual path)
+M4-4 e2e:web smoke (asserts the manual path)
 browser pass skipped — no Chromium/Playwright (in-sandbox ceiling)
 status: SKIP
 routes: 0/2 ok

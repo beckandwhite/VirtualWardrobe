@@ -13,7 +13,7 @@ import type { CaptureResult } from '@/capture';
 //
 // `buildDraftFromCapture` returns the insertion input for a real result, or `null`
 // when there is nothing to save — the null is exactly the screen's "don't insert,
-// don't navigate" branch, so the two diverge on the same decision. QA-2 / D29.3.
+// don't navigate" branch, so the two diverge on the same decision. M4-2 / D29.3.
 
 // The valid chip values the capture screen offers (M1-1 hint row). The screen's
 // `hint` state is a `string` (empty = no chip); the chips it can hold are this

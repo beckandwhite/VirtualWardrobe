@@ -1,4 +1,4 @@
-// QA-4 e2e:web harness. Drives the Expo web build through a minimal happy path and
+// M4-4 e2e:web harness. Drives the Expo web build through a minimal happy path and
 // asserts the real screens render: entry (loading → redirect to /onboarding or
 // /wardrobe), the /wardrobe + /studio routes, and the manual-fallback banner when
 // the pose model is absent (the in-sandbox default). Captures a screenshot + a

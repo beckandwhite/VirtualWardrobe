@@ -8,7 +8,7 @@ import type { FilterableItem, FilterCriteria } from './filter';
 //                 "Nothing matches your filters." (+ Clear / Add affordances).
 //   - `has-items`→ something is visible: the grid, no empty view.
 // `items.length === 0` takes priority over `visible.length === 0`, exactly the
-// order the JSX tests. QA-2 / D29.4.
+// order the JSX tests. M4-2 / D29.4.
 export type EmptyStateVariant = 'none' | 'filtered' | 'has-items';
 
 export function emptyStateVariant(

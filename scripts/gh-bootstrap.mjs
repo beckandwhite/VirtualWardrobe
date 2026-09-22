@@ -20,16 +20,16 @@ const OWNER = process.env.OWNER || 'beckandwhite';
 const REPO = process.env.REPO || 'VirtualWardrobe';
 const DRY = process.env.DRY_RUN === '1';
 
-const MILESTONES = ['M0 Foundations', 'M1 Wardrobe', 'M2 Try-On', 'M3 Native+Polish', 'M5 Devops', 'QA'];
+const MILESTONES = ['M0 Foundations', 'M1 Wardrobe', 'M2 Try-On', 'M3 Native+Polish', 'M4 QA', 'M5 Devops', 'M6 Language & i18n'];
 const MILESTONE_BY_PREFIX = {
   M0: 'M0 Foundations',
   M1: 'M1 Wardrobe',
   M2: 'M2 Try-On',
   M3: 'M3 Native+Polish',
   M5: 'M5 Devops',
-  QA: 'QA',
+  M4: 'M4 QA',
 };
-const BASE_LABELS = ['feat', 'ux', 'ml', 'debt', 'docs', 'spike', 'tooling', 'M0', 'M1', 'M2', 'M3'];
+const BASE_LABELS = ['feat', 'ux', 'ml', 'debt', 'docs', 'spike', 'tooling', 'M0', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6'];
 const STATUS_OPTIONS = ['Backlog', 'To Do', 'In Progress', 'Done', 'Shipped'];
 
 const repoRoot = join(dirname(fileURLToPath(import.meta.url)), '..');

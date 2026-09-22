@@ -2,7 +2,7 @@
 
 ## Status: DONE (2026-09-21) — `tests/store/repo.test.ts` (28 tests, gate-green)
 
-> This checklist was implemented by `tests/store/repo.test.ts` (QA-1). The repository layer is now
+> This checklist was implemented by `tests/store/repo.test.ts` (M4-1). The repository layer is now
 > protected: `npx jest` is **76/76 across 8 suites** (was 48/7), `tsc`/`eslint` clean. A few
 > sub-items were adapted to the *actual* production contract rather than an ideal one — notably
 > path fragments (D26.2: `rowToPaths` does not trim whitespace the way `rowToTags` does), which is
@@ -10,7 +10,7 @@
 
 ## Objective
 
-Implement the repository / SQLite regression suite for the highest-priority QA gap described in [Plans/issues/QA-1.md](../Plans/issues/QA-1.md).
+Implement the repository / SQLite regression suite for the highest-priority QA gap described in [Plans/issues/M4-1.md](../Plans/issues/M4-1.md).
 
 This checklist is sprint-ready and intentionally focused on execution. It assumes no product scope changes and no production code refactoring beyond the test harness itself.
 
@@ -32,7 +32,7 @@ This is the first QA implementation task because it protects the app’s persist
 
 - [docs/qa-repository-test-plan.md](qa-repository-test-plan.md)
 - [docs/testing-summary.md](testing-summary.md)
-- [Plans/issues/QA-1.md](../Plans/issues/QA-1.md)
+- [Plans/issues/M4-1.md](../Plans/issues/M4-1.md)
 
 ## Workstream 1: test harness setup
 
@@ -207,7 +207,7 @@ This issue is complete when:
 
 ## Related files
 
-- [Plans/issues/QA-1.md](../Plans/issues/QA-1.md)
+- [Plans/issues/M4-1.md](../Plans/issues/M4-1.md)
 - [docs/qa-repository-test-plan.md](qa-repository-test-plan.md)
 - [docs/testing-summary.md](testing-summary.md)
 - [src/store/repo.ts](../src/store/repo.ts)

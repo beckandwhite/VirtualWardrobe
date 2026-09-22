@@ -2,7 +2,7 @@
 
 ## Executive summary
 
-The repository is in a strong unit-test baseline, with 8 Jest suites passing and 76 tests passing in the current workspace. The suite is especially good at validating pure logic such as garment placement, wardrobe filtering, catalog ingestion, export composition, locale lookup, **and the persistence/repo layer** (added by QA-1).
+The repository is in a strong unit-test baseline, with 8 Jest suites passing and 76 tests passing in the current workspace. The suite is especially good at validating pure logic such as garment placement, wardrobe filtering, catalog ingestion, export composition, locale lookup, **and the persistence/repo layer** (added by M4-1).
 
 Current baseline evidence:
 
@@ -68,7 +68,7 @@ This covers:
 - validity checks for locale names
 - catalog completeness across the supported locales
 
-### 5. Repository / persistence layer (added by QA-1, 2026-09-21)
+### 5. Repository / persistence layer (added by M4-1, 2026-09-21)
 The store/persistence contract is covered in:
 
 - [tests/store/repo.test.ts](../tests/store/repo.test.ts)
@@ -84,7 +84,7 @@ This covers:
 
 ## Coverage gaps and risk areas
 
-### 1. ~~Repository / SQLite layer is not covered~~ — **CLOSED by QA-1 (2026-09-21)**
+### 1. ~~Repository / SQLite layer is not covered~~ — **CLOSED by M4-1 (2026-09-21)**
 
 The repository layer in [src/store/repo.ts](../src/store/repo.ts) now has full regression
 coverage in [tests/store/repo.test.ts](../tests/store/repo.test.ts) (28 tests across five
@@ -158,7 +158,7 @@ Risk: a broken edge condition can produce silent failures that are not protected
 
 ## Recommended test strategy
 
-### Priority 1: database and state regressions — **DONE (QA-1, 2026-09-21)**
+### Priority 1: database and state regressions — **DONE (M4-1, 2026-09-21)**
 Repository-level tests for data persistence and conversion behavior are now in
 [tests/store/repo.test.ts](../tests/store/repo.test.ts).
 
@@ -174,5 +174,5 @@ Create a browser-driven smoke test for the studio route once a capable environme
 ## QA conclusion
 
 The project started from a solid pure-logic baseline and has now added first-class coverage for
-the persistence layer (QA-1). The remaining highest-value investments are screen-level flow
-coverage (QA-2), pose-provider fallback regressions (QA-3), and a browser smoke test (QA-4).
+the persistence layer (M4-1). The remaining highest-value investments are screen-level flow
+coverage (M4-2), pose-provider fallback regressions (M4-3), and a browser smoke test (M4-4).

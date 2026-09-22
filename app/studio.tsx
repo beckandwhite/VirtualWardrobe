@@ -318,7 +318,7 @@ export default function StudioScreen() {
            if (!row) return;
            const result: ShareResult = await shareLook(row);
             // The notice surface is a pure mapping of the share-result kind
-            // (src/composer/notice.ts) the QA-2 flow tests exercise.
+            // (src/composer/notice.ts) the M4-2 flow tests exercise.
            const notice = noticeForShare(result);
            setNotice(notice);
            if (notice?.kind === 'error') return;

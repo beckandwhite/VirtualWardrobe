@@ -18,8 +18,8 @@ import { onboardingCameraState } from '@/onboarding/cameraState';
 // app/index.tsx routes here; the screen's permission feedback is a pure branch on
 // the Camera.PermissionResponse the native camera returns. The branch (and the
 // copy it shows) lives in src/onboarding/cameraState.ts as the single source of
-// truth both this JSX and the QA-2 flow tests exercise — no rendering harness.
-// QA-2 / D27.1 removes the screen's earlier inline duplicate of that branch.
+// truth both this JSX and the M4-2 flow tests exercise — no rendering harness.
+// M4-2 / D29.1 removes the screen's earlier inline duplicate of that branch.
 // The local `OnboardingCameraState` type was deleted with the duplicate branch;
 // the type now lives alongside the imported function in cameraState.ts.
 

@@ -15,16 +15,16 @@ Baseline verification is green in the workspace:
 - `npx eslint . --max-warnings 0` → passed
 
 The project has a solid unit-test foundation **that now includes the persistence/repo layer**
-(after QA-1, 2026-09-21). The remaining gaps sit in runtime integration, user-flow coverage,
+(after M4-1, 2026-09-21). The remaining gaps sit in runtime integration, user-flow coverage,
 pose fallback, and browser smoke.
 
 ## Prioritization
 
-### P0 — Repository / SQLite regression coverage — **DONE (QA-1, 2026-09-21)**
+### P0 — Repository / SQLite regression coverage — **DONE (M4-1, 2026-09-21)**
 
 Primary docs:
 
-- [Plans/issues/QA-1.md](../Plans/issues/QA-1.md)
+- [Plans/issues/M4-1.md](../Plans/issues/M4-1.md)
 - [docs/qa-repository-test-plan.md](qa-repository-test-plan.md)
 - [docs/qa-repository-test-checklist.md](qa-repository-test-checklist.md)
 
@@ -44,7 +44,7 @@ Acceptance theme:
 
 Primary doc:
 
-- [Plans/issues/QA-2.md](../Plans/issues/QA-2.md)
+- [Plans/issues/M4-2.md](../Plans/issues/M4-2.md)
 - [docs/qa-screen-test-plan.md](qa-screen-test-plan.md)
 
 Why it is next:
@@ -62,7 +62,7 @@ Acceptance theme:
 
 Primary doc:
 
-- [Plans/issues/QA-3.md](../Plans/issues/QA-3.md)
+- [Plans/issues/M4-3.md](../Plans/issues/M4-3.md)
 - [docs/qa-pose-and-browser-test-plan.md](qa-pose-and-browser-test-plan.md)
 
 Why it is next:
@@ -80,7 +80,7 @@ Acceptance theme:
 
 Primary doc:
 
-- [Plans/issues/QA-4.md](../Plans/issues/QA-4.md)
+- [Plans/issues/M4-4.md](../Plans/issues/M4-4.md)
 - [docs/qa-pose-and-browser-test-plan.md](qa-pose-and-browser-test-plan.md)
 
 Why it is after P2:
@@ -143,7 +143,7 @@ The QA sprint is complete when:
 - [docs/qa-repository-test-plan.md](qa-repository-test-plan.md)
 - [docs/qa-screen-test-plan.md](qa-screen-test-plan.md)
 - [docs/qa-pose-and-browser-test-plan.md](qa-pose-and-browser-test-plan.md)
-- [Plans/issues/QA-1.md](../Plans/issues/QA-1.md)
-- [Plans/issues/QA-2.md](../Plans/issues/QA-2.md)
-- [Plans/issues/QA-3.md](../Plans/issues/QA-3.md)
-- [Plans/issues/QA-4.md](../Plans/issues/QA-4.md)
+- [Plans/issues/M4-1.md](../Plans/issues/M4-1.md)
+- [Plans/issues/M4-2.md](../Plans/issues/M4-2.md)
+- [Plans/issues/M4-3.md](../Plans/issues/M4-3.md)
+- [Plans/issues/M4-4.md](../Plans/issues/M4-4.md)

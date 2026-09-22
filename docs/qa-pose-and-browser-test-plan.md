@@ -170,8 +170,8 @@ The pose + browser QA work is complete when:
 
 - [docs/testing-summary.md](testing-summary.md)
 - [docs/qa-grooming-plan.md](qa-grooming-plan.md)
-- [Plans/issues/QA-3.md](../Plans/issues/QA-3.md)
-- [Plans/issues/QA-4.md](../Plans/issues/QA-4.md)
+- [Plans/issues/M4-3.md](../Plans/issues/M4-3.md)
+- [Plans/issues/M4-4.md](../Plans/issues/M4-4.md)
 - [Plans/issues/M3-5.md](../Plans/issues/M3-5.md)
 - [src/pose](../src/pose)
 - [app/studio.tsx](../app/studio.tsx)

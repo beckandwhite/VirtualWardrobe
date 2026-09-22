@@ -1,12 +1,12 @@
 import type { ShareResult } from './share';
 
 // The studio's save/share notice logic, extracted into a node/jest-importable
-// module (no react-native / expo-reactive imports) so QA-2 can assert the
+// module (no react-native / expo-reactive imports) so M4-2 can assert the
 // "save & share / error rendering" branch without a UI. The studio's `share()`
 // and `persist()` set a `notice` (`info`/`error`) from the composer result — the
 // mapping below is exactly that surface, the gap the composer suites
 // (transform.test.ts / export.test.ts) do not cover (those assert geometry, not
-// the notice). QA-2 / D29.5.
+// the notice). M4-2 / D29.5.
 export type StudioNotice = { kind: 'info' | 'error'; text: string } | null;
 
 // A persisted look must exist before a share starts; the studio returns early on a

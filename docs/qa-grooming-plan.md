@@ -35,7 +35,7 @@ Implementation direction:
 
 Work item:
 
-- [Plans/issues/QA-1.md](../Plans/issues/QA-1.md)
+- [Plans/issues/M4-1.md](../Plans/issues/M4-1.md)
 
 ### 2. Screen-level behavioral coverage
 
@@ -55,7 +55,7 @@ Implementation direction:
 
 Work item:
 
-- [Plans/issues/QA-2.md](../Plans/issues/QA-2.md)
+- [Plans/issues/M4-2.md](../Plans/issues/M4-2.md)
 
 ### 3. Pose fallback and provider resilience
 
@@ -75,7 +75,7 @@ Implementation direction:
 
 Work item:
 
-- [Plans/issues/QA-3.md](../Plans/issues/QA-3.md)
+- [Plans/issues/M4-3.md](../Plans/issues/M4-3.md)
 
 ### 4. Browser smoke validation
 
@@ -94,7 +94,7 @@ Implementation direction:
 
 Work item:
 
-- [Plans/issues/QA-4.md](../Plans/issues/QA-4.md)
+- [Plans/issues/M4-4.md](../Plans/issues/M4-4.md)
 
 ## Recommended execution order
 
@@ -126,7 +126,7 @@ The repo is considered sufficiently groomed for the next QA sprint when:
 
 - [docs/testing-summary.md](testing-summary.md)
 - [docs/testing.md](testing.md)
-- [Plans/issues/QA-1.md](../Plans/issues/QA-1.md)
-- [Plans/issues/QA-2.md](../Plans/issues/QA-2.md)
-- [Plans/issues/QA-3.md](../Plans/issues/QA-3.md)
-- [Plans/issues/QA-4.md](../Plans/issues/QA-4.md)
+- [Plans/issues/M4-1.md](../Plans/issues/M4-1.md)
+- [Plans/issues/M4-2.md](../Plans/issues/M4-2.md)
+- [Plans/issues/M4-3.md](../Plans/issues/M4-3.md)
+- [Plans/issues/M4-4.md](../Plans/issues/M4-4.md)

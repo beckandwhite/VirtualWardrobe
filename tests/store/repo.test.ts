@@ -1,6 +1,6 @@
 import { r } from '../../src/store/repo';
 
-// QA-1 · Repository / SQLite regression suite.
+// M4-1 · Repository / SQLite regression suite.
 //
 // The repository layer (src/store/repo.ts) is the app's persistence boundary:
 // onboarding state, wardrobe items, catalog rows, body photos, and saved
@@ -200,7 +200,7 @@ function seedTryOn(table: ReturnType<typeof makeFakeDb>['tables'], row: Row): vo
     table.try_ons.push(row);
 }
 
-describe('QA-1 · repository / SQLite regressions', () => {
+describe('M4-1 · repository / SQLite regressions', () => {
     let db: ReturnType<typeof makeFakeDb>;
 
     beforeEach(() => {

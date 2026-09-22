@@ -9,7 +9,7 @@ import {
 // replace /wardrobe; on a null result, reset busy and don't navigate. The draft
 // shape + the next-step decision live in src/capture/draft.ts (the single source
 // of truth the screen imports), so these tests exercise that pure logic without a
-// store or router — QA-2 AC1 (capture→wardrobe transition) + AC3 (device-free).
+// store or router — M4-2 AC1 (capture→wardrobe transition) + AC3 (device-free).
 
 const libResult = { uri: 'file:///captures/a.jpg', source: 'library' as const };
 

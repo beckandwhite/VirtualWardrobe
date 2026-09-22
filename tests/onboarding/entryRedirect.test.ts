@@ -1,7 +1,7 @@
 import { entryRedirect, type EntryRoute } from '../../src/onboarding/entryRedirect';
 
 // Entry-screen routing decision (app/index.tsx) extracted into a pure function so
-// the three branches are assertable without expo-router — QA-2 AC1 (screen
+// the three branches are assertable without expo-router — M4-2 AC1 (screen
 // transitions at the route level) + AC3 (a flow verified without a device).
 
 describe('entryRedirect', () => {

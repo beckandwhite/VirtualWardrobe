@@ -47,7 +47,7 @@ export default function WardrobeScreen() {
    );
 
     // The "N of M" / "Clear filters" surface and the empty-state selection are
-    // pure selectors (src/wardrobe/emptyState.ts) the QA-2 flow tests exercise;
+   // pure selectors (src/wardrobe/emptyState.ts) the M4-2 flow tests exercise;
     // this screen is the thin view that renders their result.
    const hasActive = hasActiveCriteria(criteria, query);
     const empty = emptyStateVariant(items, visible);

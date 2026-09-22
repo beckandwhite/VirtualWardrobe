@@ -1,4 +1,4 @@
-// QA-3 · pose-loader single-flight + failed-load regressions.
+// M4-3 · pose-loader single-flight + failed-load regressions.
 //
 // `loadPoseDetector` is the web model init path. It must:
 //   - be single-flight (concurrent callers share one init, no duplicate loads),
@@ -32,7 +32,7 @@ import {
     MOVENET_MODEL_URL,
 } from '../../src/pose/poseLoader';
 
-describe('QA-3 · pose-loader single-flight + failed-load', () => {
+describe('M4-3 · pose-loader single-flight + failed-load', () => {
     beforeEach(async () => {
        createDetector.mockReset();
        await resetPoseDetector();

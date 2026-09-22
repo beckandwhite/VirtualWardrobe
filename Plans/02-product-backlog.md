@@ -1,7 +1,7 @@
 # Product Backlog
 
 Single backlog → maps 1:1 to GitHub issues and a GitHub Project board.
-Milestones: **M0 Foundations · M1 Wardrobe · M2 Try-On · M3 Native+Polish · M6 Language & i18n · M5 Devops · QA**.
+Milestones: **M0 Foundations · M1 Wardrobe · M2 Try-On · M3 Native+Polish · M4 QA · M6 Language & i18n · M5 Devops**.
 Each item below has a full issue body in `Plans/issues/<id>.md`.
 
 ## Label scheme
@@ -155,14 +155,14 @@ Each item below has a full issue body in `Plans/issues/<id>.md`.
 >   machine-readable artifacts, clear failure output, required-check guidance, and rerun/download
 >   documentation so a failing CI run can be diagnosed from GitHub Actions.
 
-## QA · Regression & Coverage
+## M4 QA · Regression & Coverage
 
 | ID        | Title                                                      | Labels                 | Status       |
 |--------|---------------------------------------------------------|-------------------|------------|
-| QA-1       | Repository / SQLite regression tests                      | qa, coverage, M3      | ✅ BUILT (D26) |
-| QA-2       | Screen-level flow tests (onboarding, capture, studio)     | qa, coverage, ux, M3 | ✅ BUILT (D29) |
-| QA-3       | Pose-provider failure & fallback regression tests         | qa, coverage, ml, M3 | ✅ BUILT (D30) |
-| QA-4        | Browser-level smoke tests for the Expo web app             | qa, coverage, tooling, M3 | 🟡 BUILT-waived (D31) |
+| M4-1       | Repository / SQLite regression tests                      | qa, coverage, M4      | ✅ BUILT (D26) |
+| M4-2       | Screen-level flow tests (onboarding, capture, studio)     | qa, coverage, ux, M4 | ✅ BUILT (D29) |
+| M4-3       | Pose-provider failure & fallback regression tests         | qa, coverage, ml, M4  | ✅ BUILT (D30) |
+| M4-4       | Browser-level smoke tests for the Expo web app             | qa, coverage, tooling, M4 | 🟡 BUILT-waived (D31) |
 
 ## Definition of Done (every issue)
 - [ ] Acceptance criteria met and verified (test where applicable).

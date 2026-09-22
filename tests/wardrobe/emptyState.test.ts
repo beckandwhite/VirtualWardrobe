@@ -5,7 +5,7 @@ import { applyFilters, type FilterableItem } from '../../src/wardrobe/filter';
 // snapshot derivation (applyFilters) already lives in src/wardrobe/filter.ts and
 // is covered by tests/wardrobe/filter.test.ts; this suite covers the part that
 // screen owns — which empty view to render and whether a filter is active — via
-// the pure selectors in src/wardrobe/emptyState.ts. QA-2 AC2 (empty-state
+// the pure selectors in src/wardrobe/emptyState.ts. M4-2 AC2 (empty-state
 // branches) + AC1 (wardrobe refresh view logic, device-free).
 
 function wardrobe(n = 3): FilterableItem[] {

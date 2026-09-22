@@ -217,7 +217,7 @@ The repository coverage work is complete when:
 
 ## Related docs
 
-- [Plans/issues/QA-1.md](../Plans/issues/QA-1.md)
+- [Plans/issues/M4-1.md](../Plans/issues/M4-1.md)
 - [docs/testing-summary.md](testing-summary.md)
 - [src/store/repo.ts](../src/store/repo.ts)
 - [src/store/db.ts](../src/store/db.ts)

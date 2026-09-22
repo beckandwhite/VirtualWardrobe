@@ -4,7 +4,7 @@
 // permission the native camera prompt returned. That decision is a pure function
 // of the `PermissionResponse` status + whether we've asked yet — so it lives here
 // (node/jest-importable, no `expo-camera`/`expo-router` in the module graph) as the
-// single source of truth both the JSX and the QA-2 flow tests exercise. QA-2 / D29.1.
+// single source of truth both the JSX and the M4-2 flow tests exercise. M4-2 / D29.1.
 export type OnboardingCameraState = 'none' | 'granted' | 'denied' | 'notgranted';
 
 export interface CameraPermissionStatus {
@@ -25,7 +25,7 @@ export function onboardingCameraState(
 // `finish()` persists `has_onboarded = '1'` via `r.setOnboarded()` and then
 // `router.replace('/wardrobe')` — regardless of the current onboarded value it is
 // idempotent and lands the user in the wardrobe. Modeled here as a pure event so
-// QA-2 can assert the continuation without a router or a store.
+// M4-2 can assert the continuation without a router or a store.
 export const ONBOARDED_KEY = 'has_onboarded';
 export const ONBOARDED_FLAG = '1';
 

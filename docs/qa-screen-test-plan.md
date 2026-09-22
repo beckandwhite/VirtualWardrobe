@@ -172,7 +172,7 @@ The screen-level QA work is complete when:
 
 - [docs/testing-summary.md](testing-summary.md)
 - [docs/qa-grooming-plan.md](qa-grooming-plan.md)
-- [Plans/issues/QA-2.md](../Plans/issues/QA-2.md)
+- [Plans/issues/M4-2.md](../Plans/issues/M4-2.md)
 - [app/index.tsx](../app/index.tsx)
 - [app/onboarding.tsx](../app/onboarding.tsx)
 - [app/capture.tsx](../app/capture.tsx)
