@@ -6,6 +6,50 @@ in-flight, build-time choices.
 
 ---
 
+## 2026-09-22 — M3-7 known-good MoveNet graph lands (D42)
+
+- **D42: M3-7 is DONE; the known-good graph supersedes M3-6's converter output.** Sourced the
+  canonical TFJS MoveNet-singlepose-lite graph from `vladmandic/human-models`
+  (`models/movenet-lightning.json` + `movenet-lightning.bin`, `main`), whose `generatedBy` is the
+  canonical tfhub origin `tfhub.dev/google/movenet/singlepose/lightning/4` — i.e. a *vendored
+  canonical* graph, not a local ONNX→TFJS synthesis (that distinction is the whole point of M3-7 vs
+  M3-6). It was placed into `assets/pose/movenet-singlepose-lite/` (replacing M3-6's 3 converter
+  shards + unverified `model.json`) and mirrored to `public/pose/` (gitignored per ADR-004). Provenance:
+   `model.json` sha256 `df8cbde44d00f533ccc4916a7c6ebc17316532fb3fadad114ec667fef22872e9`
+   (161,813 B), `movenet-lightning.bin` sha256 `bf97bc10d9c8a11200b0190ed64ce039b6252f1aff7cb552aca99b3d191c2f34`
+   (4,650,216 B).
+- **D42.1 — real network-free inference proved, closing M3-6's open inference AC.** New harness
+  `scripts/pose-m37-verify.mjs` (Node 22, CPU backend, `fetch` intercepted so a runtime network is
+  impossible) asserts: pointer `→ /pose/movenet-singlepose-lite/model.json`; `generatedBy` canonical;
+  `tf.loadGraphModel` succeeds network-free; input `[1,192,192,3]` int32 and runtime output
+  `[1,1,17,3]` float32 (exactly the `@tensorflow-models/pose-detection` MoveNet contract); and a
+  forward pass on the bundled `assets/sample/body.png` yields 17 finite COCO keypoints. One-run demo
+  note at `docs/screenshots/last-run.md`.
+- **D42.2 — why not the browser e2e.** `@playwright/test`/Chromium is not installed on this host
+  (D20.5 / D31.4), so M3-7's "minimal TFJS load + `estimatePoses`" path is the allowed substitute;
+  the Node forward pass exercises the same `execute → [1,1,17,3] → 17 keypoints` contract the detector
+  uses, so API-compatibility is proven even without a browser.
+- **D42.3 — M3-6 is superseded and closed.** Per the competition rule, the first independently
+  verified, network-free graph wins the shared `public/pose/` slot. M3-7 lands that graph *and* the
+  inference proof M3-6 lacked; M3-6 is closed as superseded (its unverified converter output is
+  removed from `assets/pose/`). No two production graphs are maintained.
+- **D42.4 — a third-party vendored graph is flagged for human trust review.** The bytes come from
+   `vladmandic/human-models`; source URL + sha256 are recorded (D42) but the trust attestation is out
+  of scope (M3-7 out-of-scope). `public/pose/` stays gitignored (ADR-004); `assets/pose/` holds the
+  committed canonical copy so a fresh clone is reproducible via the recorded hashes.
+- **D42.5 — Board Status "Done" move is blocked by token scope; recorded on the workitem instead.**
+  The user asked to close M3-7 and move it to Done on the project board. Issue #20 was closed with
+   reason `completed` and issue #19 (M3-6) closed as superseded, and the full run/decision record was
+   posted as a comment on #20 — all within the `repo` scope the token has. The project **Board
+   Status** field, however, is mutated only via `gh project item-edit`, which requires
+   `read:project`/`write:project` scopes the GitHub token lacks, and the classic REST `projection`
+   endpoint 404s (ProjectV2-only). So the card could not be flipped to `Done` non-interactively. This
+   is a precise record of what a token with project scope must do: run
+   `gh project item-edit` to set item #20's Board Status to `Done` (and #19 to its terminal column).
+   No half-broken board state was left.
+
+---
+
 ## 2026-09-22 - M5-1 and M5-2 hosted CI
 
 - **D41: split CI ownership by job.** `.github/workflows/ci.yml` keeps M5-1

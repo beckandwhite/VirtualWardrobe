@@ -55,8 +55,8 @@ issue bodies; implementation notes remain here only when they are useful as dura
 | M3-3      | [autonomous] App branding and release asset configuration | feat, ux, M3        | 🚧 PARTIAL*  |
 | M3-4     | [optional] Account + multi-device sync (separately scoped)| feat, M3, debt     | ⏸ (opt)     |
 | M3-5      | Dev-env: headless-browser harness for `ml`/`spike` DoD     | debt, tooling, M3    | 🚧 BUILT*     |
-| M3-6      | [autonomous] Vendor TFJS MoveNet via ONNX→TFJS conversion (fast) | ml, debt, M3, spike | 🚧 PARTIAL*     |
-| M3-7       | [autonomous] Vendor a known-good TFJS MoveNet graph (long-term) | ml, debt, M3, spike | 🚧 BACKLOG     |
+ | M3-6       | [autonomous] Vendor TFJS MoveNet via ONNX→TFJS conversion (fast) | ml, debt, M3, spike | ⛔ SUPERSEDED*  |
+ | M3-7        | [autonomous] Vendor a known-good TFJS MoveNet graph (long-term) | ml, debt, M3, spike | ✅ DONE*       |
 | M3-8       | [autonomous] Docs: Playwright web-test environment setup      | docs, tooling, qa, M3 | 🚧 BACKLOG   |
 | M3-9       | [autonomous] Setup: install + run Playwright on this MacBook  | tooling, qa, M3       | 🚧 BACKLOG   |
 | M3-10      | [autonomous] Docs: Android test-environment setup             | docs, tooling, qa, M3 | 🚧 BACKLOG   |
@@ -111,21 +111,21 @@ issue bodies; implementation notes remain here only when they are useful as dura
 >   device-build verification remains open. The existing two-locale implementation is carried
 >   forward as input to M6-1; the portfolio screenshot kit is M3-15.
 >
-> * **M3-6 / M3-7 — the dead MoveNet source, two ways to a real graph (D24).** `npm run fetch:pose`
->   fails because the canonical TFJS MoveNet graph is gone everywhere public (`tfhub.dev`→Kaggle,
->   `tfhub-public` GCS gone, no jsDelivr mirror). A live **ONNX** copy exists on HuggingFace
->   (`Xenova/movenet-singlepose-lightning`), but `pose-detection` needs **TFJS**. So two autonomous
->   subagent work items, mutually substitutable into the same `public/pose/` drop-in slot:
->     - **M3-6 (PARTIAL, fast):** synthesize a TFJS graph by converting the ONNX with
->       `tensorflowjs_converter`. The graph and three weight shards were generated and mirrored
->       into the `public/pose/` and `assets/pose/` drop-in slots, with matching SHA-256 hashes.
->       Repository gates pass, but Playwright/Chromium is unavailable on this host, so the
->       network-free `estimatePoses` proof and converter op-coverage remain unverified.
->     - **M3-7 (long-term, reliable):** source a *known-good* TFJS graph (teammate cache / a repo
->        that vendors `model.json`+shards), verify API-compat with `pose-detection`, record provenance.
->   Whichever lands first with a *verified* graph wins; the other closes as superseded. Both unblock
->    M2-1's real `ml` DoD. Each issue is a self-contained autonomous brief (no human in loop; logs
->   its own decisions to `Plans/decision-log.md`).
+> * **M3-6 / M3-7 — the dead MoveNet source, two ways to a real graph (D24 → resolved D42).**
+   `npm run fetch:pose` failed because the canonical TFJS MoveNet graph is gone everywhere public
+>    (`tfhub.dev`→Kaggle, `tfhub-public` GCS gone, no jsDelivr mirror). A live **ONNX** copy exists
+>    on HuggingFace (`Xenova/movenet-singlepose-lightning`), but `pose-detection` needs **TFJS**. Two
+>    autonomous subagent work items competed for the same `public/pose/` drop-in slot:
+>      - **M3-6 (fast):** synthesize a TFJS graph by converting the ONNX with
+>       `tensorflowjs_converter`. Produced a graph + 3 weight shards, but the network-free
+>       `estimatePoses` proof and op-coverage stayed unverified (no Playwright/Chromium on host) →
+>       **PARTIAL**, then **SUPERSEDED** by M3-7.
+>      - **M3-7 (reliable):** source a *known-good* TFJS graph → **DONE**. Sourced the canonical
+>       graph from `vladmandic/human-models` (canonical tfhub origin), placed it in
+>       `assets/pose/`+`public/pose/`, and proved network-free inference end-to-end via
+>       `scripts/pose-m37-verify.mjs` (load + `[1,192,192,3]→[1,1,17,3]` + 17 keypoints on the
+>       bundled body fixture). Provenance (URL + sha256) recorded in the decision log (D42).
+>    M3-7 won; M3-6 is closed as superseded. Both unblocked M2-1's real `ml` DoD.
 >
 > * **M3-8 … M3-13 — turn §7's two "can't" limits into buildable envs, doc + setup each (D25).**
 >   `docs/dev-setup.md` §7 names two unmet prerequisites: §7.1 *"can't render a web UI"* (no
