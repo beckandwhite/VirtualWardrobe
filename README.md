@@ -16,7 +16,7 @@ Try on clothes from your own photos + a bundled catalog, with believable
 pose-aware draping — locally, privacy-first, no server.
 
 ## Planning docs (read these first)
-- [`Plans/00-decisions.md`](Plans/00-decisions.md) — the locked ADRs.
+- [`Plans/00-decisions-and-log.md`](Plans/00-decisions-and-log.md) — the locked ADRs and the dated build decision log.
 - [`Plans/01-architecture.md`](Plans/01-architecture.md) — modules + data model.
 - [`Plans/02-product-backlog.md`](Plans/02-product-backlog.md) — milestone → issue map.
 - [`Plans/03-execution-plan.md`](Plans/03-execution-plan.md) — what gets built, in what order.
@@ -50,15 +50,10 @@ Expo + TypeScript + Expo Router · Reanimated ·
 - [`docs/ci.md`](docs/ci.md) — hosted CI checks, artifacts, reruns, and branch protection.
 - [`infra/runner/README.md`](infra/runner/README.md) — optional private Docker runner setup and teardown.
 
-## M4 QA work items
-- [M4-1](https://github.com/beckandwhite/VirtualWardrobe/issues/28) — repository / SQLite regression tests
-- [M4-2](https://github.com/beckandwhite/VirtualWardrobe/issues/29) — screen-level flow tests for onboarding, capture, and studio
-- [M4-3](https://github.com/beckandwhite/VirtualWardrobe/issues/30) — pose-provider failure and fallback regression tests
-- [M4-4](https://github.com/beckandwhite/VirtualWardrobe/issues/31) — browser-level smoke tests for the Expo web app
-
 ## Roadmap (MVP)
 - **M0 Foundations** — scaffold, abstractions, local storage, onboarding.
 - **M1 Wardrobe** — capture, CRUD, gallery/filter, bundled catalog.
 - **M2 Try-On** — web pose + auto-box + manual fine-tune + save/share + manual fallback.
 - **M3 Native + Polish** — on-device pose spike, looks gallery, icons/i18n, optional sync.
 - **M5 Devops** — CI/security workflow and CI/CD test execution/reporting.
+- **M6 Devops** - Support multiple languages

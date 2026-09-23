@@ -1,12 +1,12 @@
 # Product Backlog
 
 Single backlog → maps 1:1 to GitHub issues and a GitHub Project board.
-Milestones: **M0 Foundations · M1 Wardrobe · M2 Try-On · M3 Native+Polish · M4 QA · M6 Language & i18n · M5 Devops**.
+Milestones: **M0 Foundations · M1 Wardrobe · M2 Try-On · M3 Native+Polish · M4 QA · M5 Devops · M6 Language & i18n**.
 Each item below links to its full work-item body in GitHub. Local files intentionally do not mirror
 issue bodies; implementation notes remain here only when they are useful as durable project status.
 
 ## Label scheme
-`feat` · `ux` · `ml` · `qa` · `coverage` · `debt` · `docs` · `spike` · `tooling` · and milestone tags `M0` `M1` `M2` `M3` `M6` `M5`.
+`feat` · `ux` · `ml` · `qa` · `coverage` · `debt` · `docs` · `spike` · `tooling` · and milestone tags `M0` `M1` `M2` `M3` `M4` `M5` `M6`.
 
 ## Board columns
 `Backlog · To Do · In Progress · Done · Shipped`
@@ -15,22 +15,22 @@ issue bodies; implementation notes remain here only when they are useful as dura
 
 ## M0 · Foundations  (repo: VirtualWardrobe) — ✅ Complete
 
-| ID    | Title                                                          | Labels      | Status     |
-|------|--------------------------------------------------------------|-----------|------------|
-| M0-1 | Initialize Expo + TS strict + Expo Router + lint/format       | feat, M0   | ✅ DONE     |
-| M0-2 | Define PoseProvider + Compositor interfaces (abstraction)     | ml, M0     | ✅ DONE     |
-| M0-3 | Local storage: expo-sqlite + Item/BodyPhoto/TryOn/StoreItem   | feat, M0   | ✅ DONE     |
-| M0-4 | Permissions onboarding flow (camera, photos, storage)         | ux, M0     | ✅ DONE     |
-| M0-5 | Studio route + pose→garment demo (manual fallback)             | feat, ux, ml, M0 | ✅ DONE   |
+| ID    | Title                                                          | Labels           | Status    | GH #                                                                         |
+|-------|----------------------------------------------------------------|------------------|-----------|------------------------------------------------------------------------------|
+| M0-1  | Initialize Expo + TS strict + Expo Router + lint/format        | feat, M0         | ✅ DONE   | [#1](https://github.com/beckandwhite/VirtualWardrobe/issues/1)               |
+| M0-2  | Define PoseProvider + Compositor interfaces (abstraction)      | ml, M0           | ✅ DONE   | [#2](https://github.com/beckandwhite/VirtualWardrobe/issues/2)               |
+| M0-3  | Local storage: expo-sqlite + Item/BodyPhoto/TryOn/StoreItem    | feat, M0         | ✅ DONE   | [#3](https://github.com/beckandwhite/VirtualWardrobe/issues/3)               |
+| M0-4  | Permissions onboarding flow (camera, photos, storage)          | ux, M0           | ✅ DONE   | [#4](https://github.com/beckandwhite/VirtualWardrobe/issues/4)               |
+| M0-5  | Studio route + pose→garment demo (manual fallback)             | feat, ux, ml, M0 | ✅ DONE   | [#5](https://github.com/beckandwhite/VirtualWardrobe/issues/5)               |
 
 ## M1 · Wardrobe (vertical slice, no try-on yet) — ✅ Complete (2026-09)
 
-| ID    | Title                                                           | Labels         | Status      |
-|------|----------------------------------------------------------------|---------------|------------|
-| M1-1 | Camera + library capture (expo-camera / image-picker)           | feat, M1       | 🚧 PARTIAL   |
-| M1-2 | Item CRUD + thumbnail gen (expo-image-manipulator)              | feat, M1       | ✅ DONE      |
-| M1-3 | Gallery grid + filter/search (category / color / tag)           | feat, ux, M1   | ✅ DONE      |
-| M1-4 | Bundled store.json catalog + ingester                           | feat, M1       | ✅ DONE      |
+| ID    | Title                                                           | Labels       | Status     | GH #                                                                         |
+|-------|-----------------------------------------------------------------|--------------|------------|------------------------------------------------------------------------------|
+| M1-1  | Camera + library capture (expo-camera / image-picker)           | feat, M1     | 🚧 PARTIAL | [#6](https://github.com/beckandwhite/VirtualWardrobe/issues/6)               |
+| M1-2  | Item CRUD + thumbnail gen (expo-image-manipulator)              | feat, M1     | ✅ DONE    | [#7](https://github.com/beckandwhite/VirtualWardrobe/issues/7)               |
+| M1-3  | Gallery grid + filter/search (category / color / tag)           | feat, ux, M1 | ✅ DONE    | [#8](https://github.com/beckandwhite/VirtualWardrobe/issues/8)               |
+| M1-4  | Bundled store.json catalog + ingester                           | feat, M1     | ✅ DONE    | [#9](https://github.com/beckandwhite/VirtualWardrobe/issues/9)               |
 
 > * **M1-4 note (2026-09-22):** Catalog card placeholder images replaced with inline SVG
 >   illustrations (t-shirt, trousers, dress, jacket, sneaker, tote bag) in
@@ -38,12 +38,12 @@ issue bodies; implementation notes remain here only when they are useful as dura
 
 ## M2 · Try-On Studio — ✅ Complete (2026-09-20, code-complete + gate-green; native runtime not exercised in-sandbox → M3-5)
 
-| ID     | Title                                                         | Labels            | Status       |
-|------|-------------------------------------------------------------|-----------------|------------|
-| M2-1 | Web MoveNet pose integration                                  | ml, M2            | 🚧 BUILT*    |
-| M2-2 | Auto-scaled garment box from keypoints + manual fine-tune      | feat, ux, M2      | ✅ BUILT      |
-| M2-3 | Save/share output to Photos (expo-image-manipulator)          | feat, M2          | ✅ BUILT      |
-| M2-4 | Manual-overlay fallback (no ML) so native is usable pre-ML     | feat, ux, M2      | ✅ BUILT      |
+| ID    | Title                                                          | Labels       | Status        | GH #                                                                         |
+|-------|----------------------------------------------------------------|--------------|---------------|------------------------------------------------------------------------------|
+| M2-1  | Web MoveNet pose integration                                   | ml, M2       | 🚧 BUILT*     | [#10](https://github.com/beckandwhite/VirtualWardrobe/issues/10)             |
+| M2-2  | Auto-scaled garment box from keypoints + manual fine-tune      | feat, ux, M2 | ✅ BUILT      | [#11](https://github.com/beckandwhite/VirtualWardrobe/issues/11)             |
+| M2-3  | Save/share output to Photos (expo-image-manipulator)           | feat, M2     | ✅ BUILT      | [#12](https://github.com/beckandwhite/VirtualWardrobe/issues/12)             |
+| M2-4  | Manual-overlay fallback (no ML) so native is usable pre-ML    | feat, ux, M2 | ✅ BUILT      | [#13](https://github.com/beckandwhite/VirtualWardrobe/issues/13)             |
 
 > *M2-1 is **code-complete and gate-green** (providers/loader/provider/factory +
   skeleton overlay + unit tests). Its `ml`-doD screenshot is waived this session
@@ -52,55 +52,30 @@ issue bodies; implementation notes remain here only when they are useful as dura
 
 ## M3 · Native + Polish (spikes / optional / tooling)
 
-| ID       | Title                                                     | Labels              | Status      |
-|--------|---------------------------------------------------------|-------------------|------------|
-| M3-1     | [spike] EAS prebuilt + Mediapose/Tasks pose for native    | spike, ml, M3       | ⛔ NO-GO*    |
-| M3-2     | Saved-looks gallery + export/share sheet                  | feat, ux, M3        | ✅ BUILT       |
-| M3-3      | [autonomous] App branding and release asset configuration | feat, ux, M3        | 🚧 PARTIAL*  |
-| M3-4     | [optional] Account + multi-device sync (separately scoped)| feat, M3, debt     | ⏸ (opt)     |
-| M3-5      | Dev-env: headless-browser harness for `ml`/`spike` DoD     | debt, tooling, M3    | 🚧 BUILT*     |
- | M3-6       | [autonomous] Vendor TFJS MoveNet via ONNX→TFJS conversion (fast) | ml, debt, M3, spike | ⛔ SUPERSEDED*  |
- | M3-7        | [autonomous] Vendor a known-good TFJS MoveNet graph (long-term) | ml, debt, M3, spike | ✅ DONE*       |
-| M3-8       | [autonomous] Docs: Playwright web-test environment setup      | docs, tooling, qa, M3 | 🚧 BACKLOG   |
-| M3-9       | [autonomous] Setup: install + run Playwright on this MacBook  | tooling, qa, M3       | 🚧 BACKLOG   |
-| M3-10      | [autonomous] Docs: Android test-environment setup             | docs, tooling, qa, M3 | 🚧 BACKLOG   |
-| M3-11      | [autonomous] Setup: Android emulator/device on this MacBook   | tooling, qa, M3       | 🚧 BACKLOG   |
-| M3-12      | [autonomous] Docs: iOS test-environment setup                 | docs, tooling, qa, M3 | 🚧 BACKLOG   |
-| M3-13      | [autonomous] Setup: iOS Simulator on this MacBook             | tooling, qa, M3       | 🚧 BACKLOG   |
-| M3-14      | Storyboard the core wardrobe-to-try-on user journey             | ux, docs, M3          | 🚧 BACKLOG   |
-| M3-15      | [autonomous] Portfolio screenshot kit and demo path             | ux, docs, M3          | 🚧 BACKLOG   |
-| M3-16      | [autonomous] Welcome screen: explain VirtualWardrobe and try-on | feat, ux, M3          | 🚧 BACKLOG   |
-| M3-17      | [autonomous] Improve application navigation and return paths   | feat, ux, M3          | 🚧 BACKLOG   |
+| ID     | Title                                                              | Labels                | Status              | GH #                                                                         |
+|--------|--------------------------------------------------------------------|-----------------------|---------------------|------------------------------------------------------------------------------|
+| M3-1   | [spike] EAS prebuilt + Mediapose/Tasks pose for native             | spike, ml, M3         | ⛔ NO-GO*           | [#14](https://github.com/beckandwhite/VirtualWardrobe/issues/14)             |
+| M3-2   | Saved-looks gallery + export/share sheet                           | feat, ux, M3          | ✅ BUILT            | [#15](https://github.com/beckandwhite/VirtualWardrobe/issues/15)             |
+| M3-3   | [autonomous] App branding and release asset configuration          | feat, ux, M3          | 🚧 PARTIAL*         | [#16](https://github.com/beckandwhite/VirtualWardrobe/issues/16)             |
+| M3-4   | [optional] Account + multi-device sync (separately scoped)        | feat, M3, debt        | ⏸ (opt)            | [#17](https://github.com/beckandwhite/VirtualWardrobe/issues/17)             |
+| M3-5   | Dev-env: headless-browser harness for `ml`/`spike` DoD            | debt, tooling, M3     | 🚧 BUILT*           | [#18](https://github.com/beckandwhite/VirtualWardrobe/issues/18)             |
+| M3-6   | [autonomous] Vendor TFJS MoveNet via ONNX→TFJS conversion (fast)  | ml, debt, M3, spike   | ⛔ SUPERSEDED*      | [#19](https://github.com/beckandwhite/VirtualWardrobe/issues/19)             |
+| M3-7   | [autonomous] Vendor a known-good TFJS MoveNet graph (long-term)   | ml, debt, M3, spike   | ✅ DONE*            | [#20](https://github.com/beckandwhite/VirtualWardrobe/issues/20)             |
+| M3-8   | [autonomous] Docs: Playwright web-test environment setup           | docs, tooling, qa, M3 | 🚧 BACKLOG          | [#26](https://github.com/beckandwhite/VirtualWardrobe/issues/26)             |
+| M3-9   | [autonomous] Setup: install + run Playwright on this MacBook       | tooling, qa, M3       | 🚧 BACKLOG          | [#27](https://github.com/beckandwhite/VirtualWardrobe/issues/27)             |
+| M3-10  | [autonomous] Docs: Android test-environment setup                  | docs, tooling, qa, M3 | 🚧 BACKLOG          | [#21](https://github.com/beckandwhite/VirtualWardrobe/issues/21)             |
+| M3-11  | [autonomous] Setup: Android emulator/device on this MacBook        | tooling, qa, M3       | 🚧 BACKLOG          | [#22](https://github.com/beckandwhite/VirtualWardrobe/issues/22)             |
+| M3-12  | [autonomous] Docs: iOS test-environment setup                      | docs, tooling, qa, M3 | 🚧 BACKLOG          | [#23](https://github.com/beckandwhite/VirtualWardrobe/issues/23)             |
+| M3-13  | [autonomous] Setup: iOS Simulator on this MacBook                  | tooling, qa, M3       | 🚧 BACKLOG          | [#24](https://github.com/beckandwhite/VirtualWardrobe/issues/24)             |
+| M3-14  | Storyboard the core wardrobe-to-try-on user journey                | ux, docs, M3          | 🚧 BACKLOG          | [#34](https://github.com/beckandwhite/VirtualWardrobe/issues/34)             |
+| M3-15  | [autonomous] Portfolio screenshot kit and demo path                | ux, docs, M3          | 🚧 BACKLOG          | [#44](https://github.com/beckandwhite/VirtualWardrobe/issues/44)             |
+| M3-16  | [autonomous] Welcome screen: explain VirtualWardrobe and try-on   | feat, ux, M3          | 🚧 BACKLOG          | [#46](https://github.com/beckandwhite/VirtualWardrobe/issues/46)             |
+| M3-17  | [autonomous] Improve application navigation and return paths       | feat, ux, M3          | 🚧 BACKLOG          | [#47](https://github.com/beckandwhite/VirtualWardrobe/issues/47)             |
+| M3-18  | [autonomous] M2-1 post-M3-7 housekeeping                          | debt, tooling, M3     | 🚧 BACKLOG          | [#49](https://github.com/beckandwhite/VirtualWardrobe/issues/49)             |
+| M3-19  | [autonomous] M2-1 AC4 — native bundle exclusion CI gate           | ml, qa, M3            | 🚧 BACKLOG          | [#50](https://github.com/beckandwhite/VirtualWardrobe/issues/50)             |
 
-## M6 · Language & i18n
-
-| ID       | Title                                                     | Labels              | Status      |
-|--------|---------------------------------------------------------|-------------------|------------|
-| M6-1    | Language/i18n foundation and translation workflow        | docs, ux, M6        | ⚠️ PARTIAL  |
-| M6-2    | English canonical catalog and copy review                | docs, ux, M6        | 🚧 BACKLOG |
-| M6-3    | Hungarian translation                                    | docs, ux, M6        | ⚠️ PARTIAL  |
-| M6-4    | German translation                                       | docs, ux, M6        | 🚧 BACKLOG |
-| M6-5    | Spanish translation completion                           | docs, ux, M6        | 🚧 BACKLOG |
-| M6-6    | Italian translation                                      | docs, ux, M6        | 🚧 BACKLOG |
-| M6-7    | French translation                                       | docs, ux, M6        | 🚧 BACKLOG |
-| M6-8    | Vietnamese translation                                   | docs, ux, M6        | 🚧 BACKLOG |
-| M6-9    | [autonomous] Simplified Chinese translation              | docs, ux, M6        | 🚧 BACKLOG |
-| M6-10   | [autonomous] Traditional Chinese translation             | docs, ux, M6        | 🚧 BACKLOG |
-
-> * **M6-1** establishes the typed nine-locale catalog (`en`, `hu`, `de`, `es`, `it`, `fr`, `vi`,
->   `zh-CN`, `zh-TW`), fallback and formatting rules, coverage
->   checks, persistence behavior, and contributor workflow. M6-2 makes English the reviewed source
->   catalog; M6-3 through M6-10 then deliver Hungarian, German, Spanish completion, Italian,
->   French, Vietnamese, Simplified Chinese, and Traditional Chinese translations.
-
-> * **M6-1 / M6-3 — PARTIAL.** The i18n core now has typed metadata for all nine locales,
->   deterministic fallback and BCP-47 normalization, per-locale coverage reporting, and focused
->   Jest tests. The current canonical catalog is covered in Hungarian. Remaining work is the
->   contributor workflow and interpolation/formatting rules, expansion to every user-facing app
->   surface, and Hungarian storyboard review.
-
-> * **M3-1 — NO-GO (in-sandbox).** See `Plans/spikes/M3-1-mediapipe-native-pose.md` + M3-1
->   issue "Verdict". No device/EAS/camera in the sandbox, so the on-device pose spike
+> * **M3-1 — NO-GO (in-sandbox).** See the M3-1 issue (#14) "Verdict" + its migrated spike detail.
+>   No device/EAS/camera in the sandbox, so the on-device pose spike
 >   (AC1/AC2) cannot be executed; AC3/AC4 are met. M2-4 (manual overlay, ADR-005) stays the
 >    native shipping path; a `MediaPipePoseProvider` is a drop-in when a device appears.
 >
@@ -147,13 +122,22 @@ issue bodies; implementation notes remain here only when they are useful as dura
 >    records a NO-GO/PARTIAL with the exact blocker (the known D20.5/D21.6/M3-1 ceiling) — still
 >    valuable as a precise record.
 
+## M4 QA · Regression & Coverage
+
+| ID    | Title                                                      | Labels                    | Status              | GH #                                                                         |
+|-------|------------------------------------------------------------|---------------------------|---------------------|------------------------------------------------------------------------------|
+| M4-1  | Repository / SQLite regression tests                       | qa, coverage, M4          | ✅ BUILT (D26)      | [#28](https://github.com/beckandwhite/VirtualWardrobe/issues/28)             |
+| M4-2  | Screen-level flow tests (onboarding, capture, studio)      | qa, coverage, ux, M4      | ✅ BUILT (D29)      | [#29](https://github.com/beckandwhite/VirtualWardrobe/issues/29)             |
+| M4-3  | Pose-provider failure & fallback regression tests          | qa, coverage, ml, M4      | ✅ BUILT (D30)      | [#30](https://github.com/beckandwhite/VirtualWardrobe/issues/30)             |
+| M4-4  | Browser-level smoke tests for the Expo web app             | qa, coverage, tooling, M4 | 🟡 BUILT-waived (D31) | [#31](https://github.com/beckandwhite/VirtualWardrobe/issues/31)           |
+
 ## M5 · Devops (CI/CD and delivery confidence)
 
-| ID       | Title                                                     | Labels              | Status       |
-|--------|---------------------------------------------------------|-------------------|------------|
-| M5-1    | [autonomous] GitHub Actions build and security workflow   | tooling, qa, M5      | 🚧 PARTIAL*  |
-| M5-2    | CI/CD test execution and reporting                        | tooling, qa, M5      | ✅ DONE*      |
-| M5-3    | [autonomous] Private GitHub Actions runner from Docker    | tooling, qa, M5      | ✅ CLOSED*    |
+| ID    | Title                                                   | Labels          | Status       | GH #                                                                         |
+|-------|---------------------------------------------------------|-----------------|--------------|------------------------------------------------------------------------------|
+| M5-1  | [autonomous] GitHub Actions build and security workflow | tooling, qa, M5 | 🚧 PARTIAL*  | [#25](https://github.com/beckandwhite/VirtualWardrobe/issues/25)             |
+| M5-2  | CI/CD test execution and reporting                      | tooling, qa, M5 | ✅ DONE*     | [#32](https://github.com/beckandwhite/VirtualWardrobe/issues/32)             |
+| M5-3  | [autonomous] Private GitHub Actions runner from Docker  | tooling, qa, M5 | ✅ CLOSED*   | [#33](https://github.com/beckandwhite/VirtualWardrobe/issues/33)             |
 
 > * **M5-1 - establish a small, trustworthy CI/security baseline.** The workflow should run on
 >   pushes and pull requests, install from the lockfile with `npm ci`, and enforce the repository's
@@ -179,14 +163,32 @@ issue bodies; implementation notes remain here only when they are useful as dura
 >   no runner was registered. The issue is closed as a verified host/permission blocker, with the
 >   exact prerequisites recorded for a future private-runner deployment.
 
-## M4 QA · Regression & Coverage
+## M6 · Language & i18n
 
-| ID        | Title                                                      | Labels                 | Status       |
-|--------|---------------------------------------------------------|-------------------|------------|
-| M4-1       | Repository / SQLite regression tests                      | qa, coverage, M4      | ✅ BUILT (D26) |
-| M4-2       | Screen-level flow tests (onboarding, capture, studio)     | qa, coverage, ux, M4 | ✅ BUILT (D29) |
-| M4-3       | Pose-provider failure & fallback regression tests         | qa, coverage, ml, M4  | ✅ BUILT (D30) |
-| M4-4       | Browser-level smoke tests for the Expo web app             | qa, coverage, tooling, M4 | 🟡 BUILT-waived (D31) |
+| ID     | Title                                        | Labels       | Status      | GH #                                                                         |
+|--------|----------------------------------------------|--------------|-------------|------------------------------------------------------------------------------|
+| M6-1   | Language/i18n foundation and translation workflow | docs, ux, M6 | ⚠️ PARTIAL | [#35](https://github.com/beckandwhite/VirtualWardrobe/issues/35)             |
+| M6-2   | English canonical catalog and copy review    | docs, ux, M6 | 🚧 BACKLOG  | [#36](https://github.com/beckandwhite/VirtualWardrobe/issues/36)             |
+| M6-3   | Hungarian translation                        | docs, ux, M6 | ⚠️ PARTIAL  | [#37](https://github.com/beckandwhite/VirtualWardrobe/issues/37)             |
+| M6-4   | German translation                           | docs, ux, M6 | 🚧 BACKLOG  | [#38](https://github.com/beckandwhite/VirtualWardrobe/issues/38)             |
+| M6-5   | Spanish translation completion               | docs, ux, M6 | 🚧 BACKLOG  | [#39](https://github.com/beckandwhite/VirtualWardrobe/issues/39)             |
+| M6-6   | Italian translation                          | docs, ux, M6 | 🚧 BACKLOG  | [#40](https://github.com/beckandwhite/VirtualWardrobe/issues/40)             |
+| M6-7   | French translation                           | docs, ux, M6 | 🚧 BACKLOG  | [#41](https://github.com/beckandwhite/VirtualWardrobe/issues/41)             |
+| M6-8   | Vietnamese translation                       | docs, ux, M6 | 🚧 BACKLOG  | [#42](https://github.com/beckandwhite/VirtualWardrobe/issues/42)             |
+| M6-9   | [autonomous] Simplified Chinese translation  | docs, ux, M6 | 🚧 BACKLOG  | [#43](https://github.com/beckandwhite/VirtualWardrobe/issues/43)             |
+| M6-10  | [autonomous] Traditional Chinese translation | docs, ux, M6 | 🚧 BACKLOG  | [#45](https://github.com/beckandwhite/VirtualWardrobe/issues/45)             |
+
+> * **M6-1** establishes the typed nine-locale catalog (`en`, `hu`, `de`, `es`, `it`, `fr`, `vi`,
+>   `zh-CN`, `zh-TW`), fallback and formatting rules, coverage checks, persistence behavior, and
+>   contributor workflow. M6-2 makes English the reviewed source catalog; M6-3 through M6-10 then
+>   deliver Hungarian, German, Spanish completion, Italian, French, Vietnamese, Simplified Chinese,
+>   and Traditional Chinese translations.
+
+> * **M6-1 / M6-3 — PARTIAL.** The i18n core now has typed metadata for all nine locales,
+>   deterministic fallback and BCP-47 normalization, per-locale coverage reporting, and focused
+>   Jest tests. The current canonical catalog is covered in Hungarian. Remaining work is the
+>   contributor workflow and interpolation/formatting rules, expansion to every user-facing app
+>   surface, and Hungarian storyboard review.
 
 ## Definition of Done (every issue)
 - [ ] Acceptance criteria met and verified (test where applicable).

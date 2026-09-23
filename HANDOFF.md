@@ -43,7 +43,7 @@ Gates: `npx jest` = 27/27 (4 suites), `npx tsc --noEmit` clean,
 - GitHub issue [M2-1](https://github.com/beckandwhite/VirtualWardrobe/issues/10) — acceptance criteria marked, decision log D20.1–D20.6,
     status BUILT.
 - `Plans/02-product-backlog.md` — status columns + M3-5 + `tooling` label.
-- `Plans/decision-log.md` — D20 entry.
+- `Plans/00-decisions-and-log.md` — D20 entry.
 - `.gitignore` — ignore `public/pose/**` model bytes but keep `.gitkeep`.
 - `package.json` — `fetch:pose` and `gen-placeholders` npm scripts; `expo-sharing`
    added as a dependency (unused yet — M2-3 will use it).
@@ -143,4 +143,4 @@ Gates: `npx jest` = 27/27 (4 suites), `npx tsc --noEmit` clean,
          `tests/autoBox.test.ts` (one filter patched for the union),
           GitHub issue M2-1 (acceptance + D20 + status),
            `Plans/02-product-backlog.md` (status cols, M3-5, `tooling`),
-            `Plans/decision-log.md` (D20 entry).
+            `Plans/00-decisions-and-log.md` (D20 entry).

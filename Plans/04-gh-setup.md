@@ -33,59 +33,12 @@ Or, if you prefer fully manual, the equivalent `gh` commands are documented in
    `Done`, and `Shipped`.
 - The generator checks existing milestones, issues, and project cards before creating them.
 
-## Upload ledger (2026-09-21)
+## Conventions
 
-Uploaded to `beckandwhite/VirtualWardrobe` and added to project 1:
+- **GitHub issues are the source of truth for work items.** Creating a local `Plans/issues/*.md`
+  file is not required and should not be committed. The GH issue body holds the full spec;
+  `Plans/00-decisions-and-log.md` holds build-time decisions. Local files in `Plans/issues/` are scratch
+  only — delete or gitignore them after the issue is created on GitHub.
 
-| Work item | GitHub issue | Uploaded |
-| --- | ---: | :---: |
-| M0-1 | #1 | yes |
-| M0-2 | #2 | yes |
-| M0-3 | #3 | yes |
-| M0-4 | #4 | yes |
-| M0-5 | #5 | yes |
-| M1-1 | #6 | yes |
-| M1-2 | #7 | yes |
-| M1-3 | #8 | yes |
-| M1-4 | #9 | yes |
-| M2-1 | #10 | yes |
-| M2-2 | #11 | yes |
-| M2-3 | #12 | yes |
-| M2-4 | #13 | yes |
-| M3-1 | #14 | yes |
-| M3-2 | #15 | yes |
-| M3-3 | #16 | yes |
-| M3-15 | #44 | yes |
-| M3-16 | #46 | yes |
-| M3-17 | #47 | yes |
-| M3-4 | #17 | yes |
-| M3-5 | #18 | yes |
-| M3-6 | #19 | yes |
-| M3-7 | #20 | yes |
-| M3-8 | #26 | yes |
-| M3-9 | #27 | yes |
-| M3-10 | #21 | yes |
-| M3-11 | #22 | yes |
-| M3-12 | #23 | yes |
-| M3-13 | #24 | yes |
-| M3-14 | #34 | yes |
-| M6-1 | #35 | yes |
-| M6-2 | #36 | yes |
-| M6-3 | #37 | yes |
-| M6-4 | #38 | yes |
-| M6-5 | #39 | yes |
-| M6-6 | #40 | yes |
-| M6-7 | #41 | yes |
-| M6-8 | #42 | yes |
-| M6-9 | #43 | yes |
-| M6-10 | #45 | yes |
-| M5-1 | #25 | yes |
-| M5-2 | #32 | yes |
-| M5-3 | #33 | yes |
-| M4-1 | #28 | yes |
-| M4-2 | #29 | yes |
-| M4-3 | #30 | yes |
-| M4-4 | #31 | yes |
-
-M4 QA items are included under the `M4 QA` milestone. GitHub contains the full issue bodies; this
-ledger records only the issue-number mapping and project-card audit state.
+The issue-number mapping (work item → GH #) is maintained in `Plans/02-product-backlog.md`
+as a `GH #` column on each milestone table. Update it there when new issues are created.

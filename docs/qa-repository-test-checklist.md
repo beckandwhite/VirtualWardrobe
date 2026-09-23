@@ -6,7 +6,7 @@
 > protected: `npx jest` is **76/76 across 8 suites** (was 48/7), `tsc`/`eslint` clean. A few
 > sub-items were adapted to the *actual* production contract rather than an ideal one — notably
 > path fragments (D26.2: `rowToPaths` does not trim whitespace the way `rowToTags` does), which is
-> asserted as-is and recorded in `Plans/decision-log.md` D26.
+> asserted as-is and recorded in `Plans/00-decisions-and-log.md` D26.
 
 ## Objective
 

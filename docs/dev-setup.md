@@ -27,11 +27,11 @@ npm run fetch:pose     # downloads ModelNet-SinglePose-Lite into public/pose/
 
 ### The canonical source is dead — what to do
 
-As of 2025-09 `tfhub.dev` 302-redirects to Kaggle and the old GCS
+As of 2026-09 `tfhub.dev` 302-redirects to Kaggle and the old GCS
 `tfhub-public` bucket no longer exists, so `npm run fetch:pose` may fail. Three
 options, in order of preference (the two active autonomous briefs are
 **M3-6** "synthesize TFJS from the live ONNX, start first" and **M3-7**
-"vendor a known-good TFJS graph" — see `Plans/issues/` + `Plans/decision-log.md` D24):
+"vendor a known-good TFJS graph" — see `Plans/issues/` + `Plans/00-decisions-and-log.md` D24):
 
 1. **Find a mirror and hand-fetch it:**
    ```bash

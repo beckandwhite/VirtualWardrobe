@@ -1,234 +1,92 @@
-# Decision Log
+# Decisions & Decision Log
 
-Run-time decisions while building M0+, each with rationale. Newest at top.
-For durable, locked decisions see `00-decisions.md` (ADRs). This log is for
-in-flight, build-time choices.
+All VirtualWardrobe decisions in one chronological stream, oldest at top — **append newest at the bottom**. Two tiers share the timeline:
 
----
-
-## 2026-09-22 — M3-7 known-good MoveNet graph lands (D42)
-
-- **D42: M3-7 is DONE; the known-good graph supersedes M3-6's converter output.** Sourced the
-  canonical TFJS MoveNet-singlepose-lite graph from `vladmandic/human-models`
-  (`models/movenet-lightning.json` + `movenet-lightning.bin`, `main`), whose `generatedBy` is the
-  canonical tfhub origin `tfhub.dev/google/movenet/singlepose/lightning/4` — i.e. a *vendored
-  canonical* graph, not a local ONNX→TFJS synthesis (that distinction is the whole point of M3-7 vs
-  M3-6). It was placed into `assets/pose/movenet-singlepose-lite/` (replacing M3-6's 3 converter
-  shards + unverified `model.json`) and mirrored to `public/pose/` (gitignored per ADR-004). Provenance:
-   `model.json` sha256 `df8cbde44d00f533ccc4916a7c6ebc17316532fb3fadad114ec667fef22872e9`
-   (161,813 B), `movenet-lightning.bin` sha256 `bf97bc10d9c8a11200b0190ed64ce039b6252f1aff7cb552aca99b3d191c2f34`
-   (4,650,216 B).
-- **D42.1 — real network-free inference proved, closing M3-6's open inference AC.** New harness
-  `scripts/pose-m37-verify.mjs` (Node 22, CPU backend, `fetch` intercepted so a runtime network is
-  impossible) asserts: pointer `→ /pose/movenet-singlepose-lite/model.json`; `generatedBy` canonical;
-  `tf.loadGraphModel` succeeds network-free; input `[1,192,192,3]` int32 and runtime output
-  `[1,1,17,3]` float32 (exactly the `@tensorflow-models/pose-detection` MoveNet contract); and a
-  forward pass on the bundled `assets/sample/body.png` yields 17 finite COCO keypoints. One-run demo
-  note at `docs/screenshots/last-run.md`.
-- **D42.2 — why not the browser e2e.** `@playwright/test`/Chromium is not installed on this host
-  (D20.5 / D31.4), so M3-7's "minimal TFJS load + `estimatePoses`" path is the allowed substitute;
-  the Node forward pass exercises the same `execute → [1,1,17,3] → 17 keypoints` contract the detector
-  uses, so API-compatibility is proven even without a browser.
-- **D42.3 — M3-6 is superseded and closed.** Per the competition rule, the first independently
-  verified, network-free graph wins the shared `public/pose/` slot. M3-7 lands that graph *and* the
-  inference proof M3-6 lacked; M3-6 is closed as superseded (its unverified converter output is
-  removed from `assets/pose/`). No two production graphs are maintained.
-- **D42.4 — a third-party vendored graph is flagged for human trust review.** The bytes come from
-   `vladmandic/human-models`; source URL + sha256 are recorded (D42) but the trust attestation is out
-  of scope (M3-7 out-of-scope). `public/pose/` stays gitignored (ADR-004); `assets/pose/` holds the
-  committed canonical copy so a fresh clone is reproducible via the recorded hashes.
-- **D42.5 — Board Status "Done" move is blocked by token scope; recorded on the workitem instead.**
-  The user asked to close M3-7 and move it to Done on the project board. Issue #20 was closed with
-   reason `completed` and issue #19 (M3-6) closed as superseded, and the full run/decision record was
-   posted as a comment on #20 — all within the `repo` scope the token has. The project **Board
-   Status** field, however, is mutated only via `gh project item-edit`, which requires
-   `read:project`/`write:project` scopes the GitHub token lacks, and the classic REST `projection`
-   endpoint 404s (ProjectV2-only). So the card could not be flipped to `Done` non-interactively. This
-   is a precise record of what a token with project scope must do: run
-   `gh project item-edit` to set item #20's Board Status to `Done` (and #19 to its terminal column).
-   No half-broken board state was left.
+- **Architecture decisions (ADRs)** — the big, durable, locked choices. Referenced by number (`ADR-001` … `ADR-010`) across the codebase. They were locked at the planning phase (the first dated section below).
+- **Build decisions (`D1`, `D2`, …)** — the smaller, in-flight, implementation-level calls made while building each milestone, each with its rationale.
 
 ---
 
-## 2026-09-22 - M5-1 and M5-2 hosted CI
+## 2026-09-18 — Planning phase: architecture decisions locked (ADRs)
 
-- **D41: split CI ownership by job.** `.github/workflows/ci.yml` keeps M5-1
-  responsible for checkout, Node 22 setup, `npm ci`, typecheck, lint, npm
-  audit at the `high` threshold, CodeQL, and pull-request dependency review.
-  M5-2 owns an independent Jest job so test diagnostics are still produced
-  when the quality job fails.
-- **D41.1: use native Jest outputs instead of a new reporter dependency.** The
-  test job runs `npm test -- --coverage --runInBand --json`, writes
-  `artifacts/jest-results.json`, and uploads it with `coverage/`. A short
-  summary is appended to the Actions run summary and artifact upload runs on
-  failure.
-- **D41.2: security-setting limits are documented, not bypassed.** Secret
-  scanning and push protection require repository administration and are
-  documented in `docs/ci.md`; the workflow does not pretend it can enable or
-  verify those settings.
+VirtualWardrobe — a virtual-wardrobe + try-on web/app.
+Status of this document: locked as of planning phase (2026-09-18).
 
----
+### ADR-001: Core try-on mechanism = Compositing / AR overlay
+- **Decision:** For the MVP, the garment is composited onto a body photo with pose-aware
+  auto-scaling and manual fine-tuning. No generative model, no true 3D.
+- **Why:** Fastest path to a "wow" that's understandable and demonstrable. Generative VTO
+  (CatVTON/IDM-VTON) and real 3D are explicitly deferred to post-MVP.
+- **Consequences:** UI must expose manual position/scale/rotation/opacity controls as a
+  first-class feature, not an afterthought.
 
-## 2026-09-22 - M5-3 private runner path
+### ADR-002: Clothing source = "Both" (user wardrobe + bundled catalog)
+- **Decision:** Support user-captured items and a bundled store catalog.
+- **Why:** Makes the product feel complete and gives the studio something to try even on day one.
+- **Consequences:** Data model has both `Item` (user) and `StoreItem` (catalog). Catalog is
+  **bundled** (local JSON + images), not a live API, to honor "fully local".
 
-- **D40: use an ephemeral, non-root Docker runner.** M5-3 adds a pinned Ubuntu
-  24.04 image with GitHub Actions runner `2.328.0`, explicit labels, a
-  read-only root filesystem, dropped capabilities, `no-new-privileges`, no
-  Docker socket, and a named work volume. The runner token is runtime-only;
-  the container configures one `--ephemeral` runner and removes its
-  registration on exit.
-- **D40.1: keep hosted CI independent.** The labeled smoke workflow is
-  `workflow_dispatch`-only and targets `virtualwardrobe-private`; M5-1/M5-2
-  remain the default GitHub-hosted path.
-- **D40.2: PARTIAL on this Windows host.** The offline Compose preflight,
-  PowerShell syntax check, shell syntax check, Compose rendering, and
-  whitespace validation pass. Docker image build and the disposable labeled
-  job remain unverified because the Docker Desktop Linux engine is not running;
-  no GitHub runner was registered and no token was stored.
+### ADR-003: Front-end = Expo (React Native), ships Web + iOS + Android
+- **Decision:** One codebase via Expo Router; all three targets in scope.
+- **Why:** User chose "real app" long-term; Expo covers web + native from one tree.
+- **Consequences:** Hardest part is native on-device ML (see ADR-005). Web is the safe
+  onboarding path.
 
----
+### ADR-004: Data boundary = "Fully local + optional sync"
+- **Decision:** Body photos and wardrobe stay on-device; cloud sync is opt-in and deferred.
+- **Why:** Privacy-first; avoids GDPR personal-data processing in MVP. Portfolio quality.
+- **Consequences:**
+  - No server in MVP. No personal-data upload.
+  - Catalog stays bundled/local.
+  - "Guest now, account later" (ADR-007) is the only near-term auth-ish thing, and it is
+    also deferred.
 
-## 2026-09-22 — welcome and navigation work items
+### ADR-005: Pose-aware drape on Web first; native pose is a spike
+- **Decision:** Ship pose-aware drape on Web via TensorFlow.js MoveNet/MediaPipe for the
+  demo. Native uses **manual overlay** in MVP; on-device MediaPipe is a non-blocking spike (M3).
+- **Why:** Web pose is zero-native-pain and still gives the screenshot-worthy demo. Native
+  on-device ML needs an EAS prebuilt build + a learning curve and would block everything else.
+- **Consequences:**
+  - Must have a clean `PoseProvider` abstraction so web (ML) and native (manual fallback)
+    share the same composer UI.
+  - A manual-overlay fallback is required so the app is fully usable on device without ML.
+  - EAS prebuilt + MediaPipe remains the #1 risk item; tracked as `M3-1 [spike]`.
 
-- **D39: welcome and navigation are separate autonomous slices.** M3-16 owns first-run product
-  orientation, persistence, and welcome copy; M3-17 owns route ownership, return paths, and
-  navigation behavior. Both use M3-14 as the journey source of truth and log material decisions
-  here rather than waiting for approval.
+### ADR-006: Local DB = expo-sqlite now; WatermelonDB only when sync lands
+- **Decision:** Start with `expo-sqlite` for simplicity.
+- **Why:** Side-project velocity; sync is not in MVP.
+- **Consequences:** Migration to a sync-aware store is a future task, not now.
 
-## 2026-09-22 — backlog grilling decisions
+### ADR-007: Auth = Guest now, account later
+- **Decision:** No server auth in MVP. Onboarding is permission-granting, not sign-up.
+- **Why:** With ADR-004 (local data), server auth adds cost and a backend for no MVP value.
+- **Consequences:** "Onboarding + permissions" replaces "auth first". Account/sync is a
+  separate, later milestone (M3-4 [optional]).
 
-- **D32: M3-3 is split by ownership.** M3-3 owns branding/release configuration, M3-15 owns the
-  portfolio screenshot kit, and M6-1 owns the i18n foundation; no issue may silently absorb the
-  others' work.
-- **D33: M3-6 and M3-7 compete for one MoveNet graph.** The first independently verified,
-  network-free graph wins; the other issue is closed as superseded and its evidence is retained.
-- **D34: host-specific setup is honest.** M3-9, M3-11, and M3-13 are future Mac-host briefs;
-  Windows execution records PARTIAL/NO-GO rather than claiming Mac success. M1-1 requires camera
-  permission, capture, import, persistence, draft creation, and screenshot/video evidence on each
-  target.
-- **D35: Playwright is a repository devDependency and required in CI.** The model-absent manual
-  fallback remains valid, but missing Playwright is not a permitted CI skip after setup lands.
-- **D36: CI ownership is separated.** M5-1 owns workflow/install/typecheck/lint/security; M5-2
-  owns Jest, coverage, artifacts, diagnostics, and required-check guidance; M5-3 is an optional
-  private-runner path and never a prerequisite for hosted CI.
-- **D37: M6 supports nine locales.** The set is `en`, `hu`, `de`, `es`, `it`, `fr`, `vi`, `zh-CN`,
-  and `zh-TW`. Translation agents may complete work when automated gates pass; native review is
-  not a separate blocking criterion. Material choices still go in this log.
-- **D38: M3-4 stays parked.** Account/sync implementation is not authorized; the next allowed
-  step is a separately scoped privacy/backend architecture spike.
+### ADR-008: MVP scope = M0 (Foundations) + M1 (Wardrobe) + M2 (Try-On)
+- **Decision:** First shippable milestones are foundations, wardrobe vertical slice, and the
+  try-on studio. Native ML polish is M3.
+- **Why:** Delivers a usable app end-to-end while deferring the riskiest work.
+- **Consequences:** See `02-product-backlog.md` for the full issue list.
 
-## 2026-09-22 — M4 QA sprint lands (M4-2 / M4-3 / M4-4)
+### ADR-009: Target remote = personal github.com (beckandwhite@gmail.com)
+- **Decision:** GitHub project/issues live on the **personal** github.com account, not the
+  corporate `github.tools.sap`.
+- **Why:** Portfolio/side project; should not land on a corporate repo/identity.
+- **Consequences:**
+  - The machine's `gh` is authed only to github.tools.sap. A `github.com` token must be
+    added (see `04-gh-setup.md`). Until then, the project/issues are only local.
+    See 03-execution-plan.md / 04-gh-setup.md.
 
-M4-1 was already committed (76/76). M4-2, M4-3, M4-4 finished this sprint; full suite
-now **129/129 across 15 suites**, with `tsc`, `eslint --max-warnings 0`, `e2e:web:check`,
-and the skippable `e2e:web` all green.
+### ADR-010: Node runtime = LTS (Node 22) for toolchain
+- **Decision:** Run the Expo toolchain under Node 22 LTS via nvm, even though the machine has
+  Node 26.
+- **Why:** Expo SDKs target Node 18/20/22 LTS; Node 26 is bleeding-edge and may break the
+  Expo CLI / Metro.
+- **Consequences:** `nvm use 22` (install first) before `npx create-expo-app`.
 
-- **D28.1 — orchestrator reconciliation: number the QA decisions D29–D31, contiguous after
-  the committed D28.** The three QA agents ran in parallel and independently picked numbers
-  that collided / skipped: M4-2 wrote `D27.x` (collided with M3-6's uncommitted `D27`) and
-  M4-3/M4-4 wrote `D30.x`/`D32.x`. Reconciled to a single contiguous block — **M4-2 → D29.x,
-  M4-3 → D30.x, M4-4 → D31.x** — and the stale `D27.x`/`D32.x` cross-refs in the issue files
-  *and* the new source/test comments were renumbered to match. M4-3's agent timed out before
-  returning its log block; D30.x here is reconstructed from its on-disk work (`tests/pose/`
-  + `M4-3.md` status), which was complete (tests + AC + status verified green). The unrelated
-  `Research/bookmarks.md` edits a QA agent made are out of scope and were left uncommitted.
-
-- **D29.1 — onboarding camera-feedback is one source of truth, not two.** `app/onboarding.tsx`
-  carried an *inline* copy of `onboardingCameraState`/`OnboardingCameraState` that could drift
-  from `src/onboarding/cameraState.ts` (created mid-M4-2). Deleted the inline copy; the screen
-  imports the pure branch and keeps `PermissionResponse` at its call site, while
-  `cameraState.ts` keeps a structural `CameraPermissionStatus` to stay node/jest-importable.
-
-- **D29.2 — extract the *decision*, leave a thin view — no device or rendering harness.** Per
-  repo policy (no `@testing-library/react-native`, no simulator), each screen's decision was
-  pulled into a node-safe `src/` module the screen imports and the test drives: entry redirect
-  → `src/onboarding/entryRedirect.ts` (`'loading'|'/onboarding'|'/wardrobe'`); capture draft/nav
-  → `src/capture/draft.ts` (`buildDraftFromCapture` + `captureNextStep`); wardrobe empty-state →
-   `src/wardrobe/emptyState.ts` (`emptyStateVariant` + `hasActiveCriteria`); studio save/share
-  notice → `src/composer/notice.ts`. Tests assert the pure logic with no router/store/UI — the
-   `tests/catalog/ingest.test.ts` fake style.
-
-- **D29.3 — `captureNextStep` is a typed discriminated union, not a loose flag.** The screen's
-   `router.replace` needs a typed `Href`; the helper returns
-   `{ navigate:true, route:'/wardrobe' } | { navigate:false, route:null }` so a null draft
-   (cancel/denial/error) resets busy and never navigates. The "on error, don't navigate" safety
-  property is the null-draft case; `busy` itself stays a UI side-effect in the view.
-
-- **D29.4 — empty-state is a pure selector over the *snapshot*.** The wardrobe screen already
-  derives `visible = applyFilters(...)` (covered by `tests/wardrobe/filter.test.ts`); M4-2 adds
-  the screen-owned selection `emptyStateVariant` (`none`|`filtered`|`has-items`, snapshot-empty
-  takes priority) + `hasActiveCriteria`, reusing not duplicating the filter test.
-
-- **D29.5 — studio sliders + export already covered; M4-2 adds the *notice* gap.** The critical
-  controls (`clampTransform`, `autoTransformFor` incl. empty-keypoint identity fallback,
-   `serialize`/`deserialize`, `compose` geometry) are regression-tested by
-   `tests/composer/transform.test.ts` + `tests/composer/export.test.ts` (cited, not duplicated).
-   `src/composer/notice.ts` covers the one untested branch: the save/share error-rendering
-   surface. Native `expo-sharing` / browser canvas export are not runtime-exercised (same
-  in-sandbox ceiling as D20.5 / D21.6; M3-5/M3-9 is the path to a real e2e share screenshot).
-
-- **D30.1 — exercise the *real* loader/providers, mock only the `@tensorflow*` boundary.** The
-  pose flow's logic is real code worth covering; only the heavy model boundary is unrunnable in a
-  node/jsdom-less env. The suite mocks `tfjs-backend-webgl`, `tfjs-core`, and
-  `@tensorflow-models/pose-detection` and drives the actual `loadPoseDetector` /
-   `createPoseProvider` / `safeEstimate` — no model bytes, WebGL, or network.
-- **D30.2 — assert call *counts*, not reference identity (single-flight).** `loadPoseDetector` is
-  `async` and wraps the cached promise in a fresh `Promise` per call, so single-flight is asserted
-   via `createDetector` called exactly once across N concurrent callers, and `resetPoseDetector`
-  re-opening init (called twice).
-- **D30.3 — model-absence / invalid-URL guard = "thread the bundled URL, don't fetch".** The
-   loader test pins `createDetector` receives `modelUrl: MOVENET_MODEL_URL` +
-  `modelType: 'lite'`, so a wiring regression is caught; a missing/undecodable model surfaces as
-   `PoseUnavailable` (the fallback signal).
-- **D30.4 — the manual fallback is an end-to-end property.** AC1+AC2 covered by the full chain:
-  throwing provider → `safeEstimate` `[]` → `autoTransformFor([])` → `IDENTITY_TRANSFORM`,
-   proving estimation failure lands on the manual-overlay path (the native shipping path, D21.5),
-  not just that `safeEstimate` returns `[]`.
-- **D30.5 — per-line eslint disables are scoped, not blanket.** `import/no-duplicates` (Expo
-  resolver collapses `providers` + `providers.web`) and `import/first` (the loader's
-  `jest.mock`-before-`import`) are false positives, disabled per-line with rationale so
-   `--max-warnings 0` stays green without weakening other rules.
-
-- **D31.1 — skippable browser smoke harness, mirroring M3-5's `e2e:pose`.** `scripts/
-  web-smoke.mjs` (`e2e:web`) does an optional dynamic `import('@playwright/test')` and skips
-   (exit 0 + demo note + artifact) when Playwright/Chromium is absent — the same in-sandbox
-  ceiling as D22.3. `scripts/web-smoke-path.mjs` (`e2e:web:check`, `--selftest`) holds the pure
-  skip-decision + report builders so CI can gate without a browser. `@playwright/test` is **not**
-   added (ADR-004); `import/no-unresolved` stays off for `scripts/**/*.mjs` (D22.2).
-- **D31.2 — no-fatal-error vs expected-warn is a classification, not a blanket ban.** The happy
-  path asserts **zero fatal** `pageerror`/`console.error`, but the pose-fallback `console.warn`
-   (`safeEstimate`) is **expected** on the model-absent manual path. `classifyConsole` sorts
-   entries into `fatal`/`expected`/`info`; a manual run passes only when `expectedWarns>0` —
-    *asserting the fallback fired*, not that the console is silent.
-- **D31.3 — the manual-fallback path is the in-sandbox default, asserted cleanly (AC3).** With the
-  MoveNet model absent, web `createPoseProvider('movenet')` → `safeEstimate` `[]` →
-  `autoTransformFor([])` → identity, and the studio renders the M2-4 banner; the harness asserts
-   that banner when `decidePath('manual')`, so a model-less run still completes with a PNG + report.
-- **D31.4 — in-sandbox browser ceiling: BUILT-with-waived-browser-pass, not DONE.** No Chromium/
-  Playwright and no model bytes in the sandbox (D20.5 / D21.6 / D22.3), so the browser pass is
-   written for a capable machine and *waived* here: `e2e:web` exits 0 with a SKIP note +
-    `docs/screenshots/web-last-run.{md,json}`, and `e2e:web:check` proves the skip-decision +
-   classification without a browser. No CI workflow was wired (left to the orchestrator; the
-   harness is CI-friendly via exit codes + the JSON artifact).
-
-## 2026-09-21 — M3-6 follow-up
-
-- **D28: M3-6 produced a TFJS graph, but remains PARTIAL pending inference proof.** The graph and
-  three weight shards are present in `public/pose/movenet-singlepose-lite/` and mirrored under
-  `assets/pose/movenet-singlepose-lite/`. TypeScript, ESLint, Jest (76 tests), and the pose-path
-  self-test pass. The browser harness could not run because Playwright/Chromium is not installed;
-  `estimatePoses` and op coverage therefore remain unverified. The earlier Windows TensorFlow DLL
-  import block is retained below as historical context. M3-7 remains the fallback for a known-good
-  graph if inference fails in an approved browser-enabled environment.
-
-## 2026-09-21 — M3-6 conversion attempt
-
-- **D27: M3-6 is PARTIAL on this Windows host.** The Hugging Face MoveNet ONNX source downloaded
-  successfully (9,413,268 bytes). Python 3.12.10 and `tensorflowjs` 3.18.0 with TensorFlow 2.21.0
-  installed, but importing the converter failed before conversion because Windows Application
-  Control blocked TensorFlow's `_pywrap_record_io` native DLL. No model bytes were emitted or
-  added to the repository. Continue in an approved WSL/Linux or CI environment; M3-7 remains the
-  fallback for a known-good TFJS graph.
+### Open questions
+- (none at planning phase — see execution plan).
 
 ## 2026-09-18 — Build execution begins
 
@@ -463,8 +321,8 @@ what M0 shipped. Locked outcomes below; the issue docs are amended to match.
    spike's non-blocking design, the manual fallback (M2-4 / ADR-005) is the shipping native path
    and the UI is untouched. A `MediaPipePoseProvider` scaffold is deferred behind a "device
    available" trigger; a one-day revisit flips this to GO. No ADR change (ADR-005 already encodes
-   "native pose is a spike; manual is the shipping path"). Recorded in `Plans/spikes/M3-1-
-   mediapipe-native-pose.md`.
+   "native pose is a spike; manual is the shipping path"). Full evidence, the drop-in path, and
+   the re-open trigger are on the M3-1 issue (#14).
 ## 2026-09-20 — M3-2 lands + backlog reconciliation
 
 - **D22.1 — unified share sheet (`src/composer/share.ts`) is the single share path.** Both the
@@ -485,19 +343,6 @@ what M0 shipped. Locked outcomes below; the issue docs are amended to match.
   Chromium screenshot (AC1) is only produced on a machine with `@playwright/test` + the model —
    the same in-sandbox ceiling as D20.5/D21.6.
 ## 2026-09-20 — M3-3 lands (i18n + branded splash) + backlog reconciliation
-
-## 2026-09-22 — M6-1 / M6-3 i18n foundation and Hungarian catalog
-
-- **D39.1 — M6 keeps the zero-dependency catalog.** The existing pure TypeScript i18n core was
-  extended rather than replaced: `LOCALES` is the typed nine-locale selection order, English is
-  canonical, and `catalogCoverage()` reports missing and unexpected keys for each locale.
-- **D39.2 — Locale resolution accepts BCP-47 variants.** Exact supported tags such as `zh-CN`
-  and `zh-TW` are preserved; regional variants such as `es-MX` fall back to their supported base
-  locale, while unknown languages fall back to English. Switching remains React state plus the
-  existing persisted setting, with no reload.
-- **D39.3 — M6-3 is partial by design.** Hungarian covers every key in the current canonical
-  catalog and has automated completeness/nonblank checks. The work item remains open until the
-  English catalog covers all user-facing surfaces and the Hungarian core journey is reviewed.
 
 - **D23.1 — i18n is a zero-dependency in-house catalog, not i18next.** M3-3 suggests
    `i18next` + `react-i18next`, but the project's standing philosophy is minimal deps
@@ -521,7 +366,6 @@ what M0 shipped. Locked outcomes below; the issue docs are amended to match.
    AC1 ("builds + launches on both platforms") and the AC3 screenshot kit are **not**
     verifiable in-sandbox (no iOS/Android build / no rendered run — same ceiling as D20.5 /
      D21.6 / M3-1 NO-GO), so M3-3 is recorded **PARTIAL**, not DONE.
-
 ## 2026-09-21 — Dead MoveNet source: two autonomous work items (D24)
 
 Ran `npm run fetch:pose` to vendor the web pose model (M2-1 / M3-5). It failed: `tfhub.dev`
@@ -602,3 +446,236 @@ environment, so all six are net-new.
    real DB.
 - **D26.4 — `jest` baseline moves 48→76 tests (7→8 suites).** The new `store/repo` suite is the
    first persistence-layer coverage; gates (tsc + eslint + jest) stay green.
+## 2026-09-21 — M3-6 conversion attempt
+
+- **D27: M3-6 is PARTIAL on this Windows host.** The Hugging Face MoveNet ONNX source downloaded
+  successfully (9,413,268 bytes). Python 3.12.10 and `tensorflowjs` 3.18.0 with TensorFlow 2.21.0
+  installed, but importing the converter failed before conversion because Windows Application
+  Control blocked TensorFlow's `_pywrap_record_io` native DLL. No model bytes were emitted or
+  added to the repository. Continue in an approved WSL/Linux or CI environment; M3-7 remains the
+  fallback for a known-good TFJS graph.
+
+## 2026-09-21 — M3-6 follow-up
+
+- **D28: M3-6 produced a TFJS graph, but remains PARTIAL pending inference proof.** The graph and
+  three weight shards are present in `public/pose/movenet-singlepose-lite/` and mirrored under
+  `assets/pose/movenet-singlepose-lite/`. TypeScript, ESLint, Jest (76 tests), and the pose-path
+  self-test pass. The browser harness could not run because Playwright/Chromium is not installed;
+  `estimatePoses` and op coverage therefore remain unverified. The earlier Windows TensorFlow DLL
+  import block is retained below as historical context. M3-7 remains the fallback for a known-good
+  graph if inference fails in an approved browser-enabled environment.
+
+## 2026-09-22 — M4 QA sprint lands (M4-2 / M4-3 / M4-4)
+
+M4-1 was already committed (76/76). M4-2, M4-3, M4-4 finished this sprint; full suite
+now **129/129 across 15 suites**, with `tsc`, `eslint --max-warnings 0`, `e2e:web:check`,
+and the skippable `e2e:web` all green.
+
+- **D28.1 — orchestrator reconciliation: number the QA decisions D29–D31, contiguous after
+  the committed D28.** The three QA agents ran in parallel and independently picked numbers
+  that collided / skipped: M4-2 wrote `D27.x` (collided with M3-6's uncommitted `D27`) and
+  M4-3/M4-4 wrote `D30.x`/`D32.x`. Reconciled to a single contiguous block — **M4-2 → D29.x,
+  M4-3 → D30.x, M4-4 → D31.x** — and the stale `D27.x`/`D32.x` cross-refs in the issue files
+  *and* the new source/test comments were renumbered to match. M4-3's agent timed out before
+  returning its log block; D30.x here is reconstructed from its on-disk work (`tests/pose/`
+  + `M4-3.md` status), which was complete (tests + AC + status verified green). The unrelated
+  `Research/bookmarks.md` edits a QA agent made are out of scope and were left uncommitted.
+
+- **D29.1 — onboarding camera-feedback is one source of truth, not two.** `app/onboarding.tsx`
+  carried an *inline* copy of `onboardingCameraState`/`OnboardingCameraState` that could drift
+  from `src/onboarding/cameraState.ts` (created mid-M4-2). Deleted the inline copy; the screen
+  imports the pure branch and keeps `PermissionResponse` at its call site, while
+  `cameraState.ts` keeps a structural `CameraPermissionStatus` to stay node/jest-importable.
+
+- **D29.2 — extract the *decision*, leave a thin view — no device or rendering harness.** Per
+  repo policy (no `@testing-library/react-native`, no simulator), each screen's decision was
+  pulled into a node-safe `src/` module the screen imports and the test drives: entry redirect
+  → `src/onboarding/entryRedirect.ts` (`'loading'|'/onboarding'|'/wardrobe'`); capture draft/nav
+  → `src/capture/draft.ts` (`buildDraftFromCapture` + `captureNextStep`); wardrobe empty-state →
+   `src/wardrobe/emptyState.ts` (`emptyStateVariant` + `hasActiveCriteria`); studio save/share
+  notice → `src/composer/notice.ts`. Tests assert the pure logic with no router/store/UI — the
+   `tests/catalog/ingest.test.ts` fake style.
+
+- **D29.3 — `captureNextStep` is a typed discriminated union, not a loose flag.** The screen's
+   `router.replace` needs a typed `Href`; the helper returns
+   `{ navigate:true, route:'/wardrobe' } | { navigate:false, route:null }` so a null draft
+   (cancel/denial/error) resets busy and never navigates. The "on error, don't navigate" safety
+  property is the null-draft case; `busy` itself stays a UI side-effect in the view.
+
+- **D29.4 — empty-state is a pure selector over the *snapshot*.** The wardrobe screen already
+  derives `visible = applyFilters(...)` (covered by `tests/wardrobe/filter.test.ts`); M4-2 adds
+  the screen-owned selection `emptyStateVariant` (`none`|`filtered`|`has-items`, snapshot-empty
+  takes priority) + `hasActiveCriteria`, reusing not duplicating the filter test.
+
+- **D29.5 — studio sliders + export already covered; M4-2 adds the *notice* gap.** The critical
+  controls (`clampTransform`, `autoTransformFor` incl. empty-keypoint identity fallback,
+   `serialize`/`deserialize`, `compose` geometry) are regression-tested by
+   `tests/composer/transform.test.ts` + `tests/composer/export.test.ts` (cited, not duplicated).
+   `src/composer/notice.ts` covers the one untested branch: the save/share error-rendering
+   surface. Native `expo-sharing` / browser canvas export are not runtime-exercised (same
+  in-sandbox ceiling as D20.5 / D21.6; M3-5/M3-9 is the path to a real e2e share screenshot).
+
+- **D30.1 — exercise the *real* loader/providers, mock only the `@tensorflow*` boundary.** The
+  pose flow's logic is real code worth covering; only the heavy model boundary is unrunnable in a
+  node/jsdom-less env. The suite mocks `tfjs-backend-webgl`, `tfjs-core`, and
+  `@tensorflow-models/pose-detection` and drives the actual `loadPoseDetector` /
+   `createPoseProvider` / `safeEstimate` — no model bytes, WebGL, or network.
+- **D30.2 — assert call *counts*, not reference identity (single-flight).** `loadPoseDetector` is
+  `async` and wraps the cached promise in a fresh `Promise` per call, so single-flight is asserted
+   via `createDetector` called exactly once across N concurrent callers, and `resetPoseDetector`
+  re-opening init (called twice).
+- **D30.3 — model-absence / invalid-URL guard = "thread the bundled URL, don't fetch".** The
+   loader test pins `createDetector` receives `modelUrl: MOVENET_MODEL_URL` +
+  `modelType: 'lite'`, so a wiring regression is caught; a missing/undecodable model surfaces as
+   `PoseUnavailable` (the fallback signal).
+- **D30.4 — the manual fallback is an end-to-end property.** AC1+AC2 covered by the full chain:
+  throwing provider → `safeEstimate` `[]` → `autoTransformFor([])` → `IDENTITY_TRANSFORM`,
+   proving estimation failure lands on the manual-overlay path (the native shipping path, D21.5),
+  not just that `safeEstimate` returns `[]`.
+- **D30.5 — per-line eslint disables are scoped, not blanket.** `import/no-duplicates` (Expo
+  resolver collapses `providers` + `providers.web`) and `import/first` (the loader's
+  `jest.mock`-before-`import`) are false positives, disabled per-line with rationale so
+   `--max-warnings 0` stays green without weakening other rules.
+
+- **D31.1 — skippable browser smoke harness, mirroring M3-5's `e2e:pose`.** `scripts/
+  web-smoke.mjs` (`e2e:web`) does an optional dynamic `import('@playwright/test')` and skips
+   (exit 0 + demo note + artifact) when Playwright/Chromium is absent — the same in-sandbox
+  ceiling as D22.3. `scripts/web-smoke-path.mjs` (`e2e:web:check`, `--selftest`) holds the pure
+  skip-decision + report builders so CI can gate without a browser. `@playwright/test` is **not**
+   added (ADR-004); `import/no-unresolved` stays off for `scripts/**/*.mjs` (D22.2).
+- **D31.2 — no-fatal-error vs expected-warn is a classification, not a blanket ban.** The happy
+  path asserts **zero fatal** `pageerror`/`console.error`, but the pose-fallback `console.warn`
+   (`safeEstimate`) is **expected** on the model-absent manual path. `classifyConsole` sorts
+   entries into `fatal`/`expected`/`info`; a manual run passes only when `expectedWarns>0` —
+    *asserting the fallback fired*, not that the console is silent.
+- **D31.3 — the manual-fallback path is the in-sandbox default, asserted cleanly (AC3).** With the
+  MoveNet model absent, web `createPoseProvider('movenet')` → `safeEstimate` `[]` →
+  `autoTransformFor([])` → identity, and the studio renders the M2-4 banner; the harness asserts
+   that banner when `decidePath('manual')`, so a model-less run still completes with a PNG + report.
+- **D31.4 — in-sandbox browser ceiling: BUILT-with-waived-browser-pass, not DONE.** No Chromium/
+  Playwright and no model bytes in the sandbox (D20.5 / D21.6 / D22.3), so the browser pass is
+   written for a capable machine and *waived* here: `e2e:web` exits 0 with a SKIP note +
+    `docs/screenshots/web-last-run.{md,json}`, and `e2e:web:check` proves the skip-decision +
+   classification without a browser. No CI workflow was wired (left to the orchestrator; the
+   harness is CI-friendly via exit codes + the JSON artifact).
+
+## 2026-09-22 — backlog grilling decisions
+
+- **D32: M3-3 is split by ownership.** M3-3 owns branding/release configuration, M3-15 owns the
+  portfolio screenshot kit, and M6-1 owns the i18n foundation; no issue may silently absorb the
+  others' work.
+- **D33: M3-6 and M3-7 compete for one MoveNet graph.** The first independently verified,
+  network-free graph wins; the other issue is closed as superseded and its evidence is retained.
+- **D34: host-specific setup is honest.** M3-9, M3-11, and M3-13 are future Mac-host briefs;
+  Windows execution records PARTIAL/NO-GO rather than claiming Mac success. M1-1 requires camera
+  permission, capture, import, persistence, draft creation, and screenshot/video evidence on each
+  target.
+- **D35: Playwright is a repository devDependency and required in CI.** The model-absent manual
+  fallback remains valid, but missing Playwright is not a permitted CI skip after setup lands.
+- **D36: CI ownership is separated.** M5-1 owns workflow/install/typecheck/lint/security; M5-2
+  owns Jest, coverage, artifacts, diagnostics, and required-check guidance; M5-3 is an optional
+  private-runner path and never a prerequisite for hosted CI.
+- **D37: M6 supports nine locales.** The set is `en`, `hu`, `de`, `es`, `it`, `fr`, `vi`, `zh-CN`,
+  and `zh-TW`. Translation agents may complete work when automated gates pass; native review is
+  not a separate blocking criterion. Material choices still go in this log.
+- **D38: M3-4 stays parked.** Account/sync implementation is not authorized; the next allowed
+  step is a separately scoped privacy/backend architecture spike.
+
+## 2026-09-22 — welcome and navigation work items
+
+- **D39: welcome and navigation are separate autonomous slices.** M3-16 owns first-run product
+  orientation, persistence, and welcome copy; M3-17 owns route ownership, return paths, and
+  navigation behavior. Both use M3-14 as the journey source of truth and log material decisions
+  here rather than waiting for approval.
+
+## 2026-09-22 — M6-1 / M6-3 i18n foundation and Hungarian catalog
+
+- **D39.1 — M6 keeps the zero-dependency catalog.** The existing pure TypeScript i18n core was
+  extended rather than replaced: `LOCALES` is the typed nine-locale selection order, English is
+  canonical, and `catalogCoverage()` reports missing and unexpected keys for each locale.
+- **D39.2 — Locale resolution accepts BCP-47 variants.** Exact supported tags such as `zh-CN`
+  and `zh-TW` are preserved; regional variants such as `es-MX` fall back to their supported base
+  locale, while unknown languages fall back to English. Switching remains React state plus the
+  existing persisted setting, with no reload.
+- **D39.3 — M6-3 is partial by design.** Hungarian covers every key in the current canonical
+  catalog and has automated completeness/nonblank checks. The work item remains open until the
+  English catalog covers all user-facing surfaces and the Hungarian core journey is reviewed.
+## 2026-09-22 - M5-3 private runner path
+
+- **D40: use an ephemeral, non-root Docker runner.** M5-3 adds a pinned Ubuntu
+  24.04 image with GitHub Actions runner `2.328.0`, explicit labels, a
+  read-only root filesystem, dropped capabilities, `no-new-privileges`, no
+  Docker socket, and a named work volume. The runner token is runtime-only;
+  the container configures one `--ephemeral` runner and removes its
+  registration on exit.
+- **D40.1: keep hosted CI independent.** The labeled smoke workflow is
+  `workflow_dispatch`-only and targets `virtualwardrobe-private`; M5-1/M5-2
+  remain the default GitHub-hosted path.
+- **D40.2: PARTIAL on this Windows host.** The offline Compose preflight,
+  PowerShell syntax check, shell syntax check, Compose rendering, and
+  whitespace validation pass. Docker image build and the disposable labeled
+  job remain unverified because the Docker Desktop Linux engine is not running;
+  no GitHub runner was registered and no token was stored.
+
+---
+
+## 2026-09-22 - M5-1 and M5-2 hosted CI
+
+- **D41: split CI ownership by job.** `.github/workflows/ci.yml` keeps M5-1
+  responsible for checkout, Node 22 setup, `npm ci`, typecheck, lint, npm
+  audit at the `high` threshold, CodeQL, and pull-request dependency review.
+  M5-2 owns an independent Jest job so test diagnostics are still produced
+  when the quality job fails.
+- **D41.1: use native Jest outputs instead of a new reporter dependency.** The
+  test job runs `npm test -- --coverage --runInBand --json`, writes
+  `artifacts/jest-results.json`, and uploads it with `coverage/`. A short
+  summary is appended to the Actions run summary and artifact upload runs on
+  failure.
+- **D41.2: security-setting limits are documented, not bypassed.** Secret
+  scanning and push protection require repository administration and are
+  documented in `docs/ci.md`; the workflow does not pretend it can enable or
+  verify those settings.
+
+---
+
+## 2026-09-22 — M3-7 known-good MoveNet graph lands (D42)
+
+- **D42: M3-7 is DONE; the known-good graph supersedes M3-6's converter output.** Sourced the
+  canonical TFJS MoveNet-singlepose-lite graph from `vladmandic/human-models`
+  (`models/movenet-lightning.json` + `movenet-lightning.bin`, `main`), whose `generatedBy` is the
+  canonical tfhub origin `tfhub.dev/google/movenet/singlepose/lightning/4` — i.e. a *vendored
+  canonical* graph, not a local ONNX→TFJS synthesis (that distinction is the whole point of M3-7 vs
+  M3-6). It was placed into `assets/pose/movenet-singlepose-lite/` (replacing M3-6's 3 converter
+  shards + unverified `model.json`) and mirrored to `public/pose/` (gitignored per ADR-004). Provenance:
+   `model.json` sha256 `df8cbde44d00f533ccc4916a7c6ebc17316532fb3fadad114ec667fef22872e9`
+   (161,813 B), `movenet-lightning.bin` sha256 `bf97bc10d9c8a11200b0190ed64ce039b6252f1aff7cb552aca99b3d191c2f34`
+   (4,650,216 B).
+- **D42.1 — real network-free inference proved, closing M3-6's open inference AC.** New harness
+  `scripts/pose-m37-verify.mjs` (Node 22, CPU backend, `fetch` intercepted so a runtime network is
+  impossible) asserts: pointer `→ /pose/movenet-singlepose-lite/model.json`; `generatedBy` canonical;
+  `tf.loadGraphModel` succeeds network-free; input `[1,192,192,3]` int32 and runtime output
+  `[1,1,17,3]` float32 (exactly the `@tensorflow-models/pose-detection` MoveNet contract); and a
+  forward pass on the bundled `assets/sample/body.png` yields 17 finite COCO keypoints. One-run demo
+  note at `docs/screenshots/last-run.md`.
+- **D42.2 — why not the browser e2e.** `@playwright/test`/Chromium is not installed on this host
+  (D20.5 / D31.4), so M3-7's "minimal TFJS load + `estimatePoses`" path is the allowed substitute;
+  the Node forward pass exercises the same `execute → [1,1,17,3] → 17 keypoints` contract the detector
+  uses, so API-compatibility is proven even without a browser.
+- **D42.3 — M3-6 is superseded and closed.** Per the competition rule, the first independently
+  verified, network-free graph wins the shared `public/pose/` slot. M3-7 lands that graph *and* the
+  inference proof M3-6 lacked; M3-6 is closed as superseded (its unverified converter output is
+  removed from `assets/pose/`). No two production graphs are maintained.
+- **D42.4 — a third-party vendored graph is flagged for human trust review.** The bytes come from
+   `vladmandic/human-models`; source URL + sha256 are recorded (D42) but the trust attestation is out
+  of scope (M3-7 out-of-scope). `public/pose/` stays gitignored (ADR-004); `assets/pose/` holds the
+  committed canonical copy so a fresh clone is reproducible via the recorded hashes.
+- **D42.5 — Board Status "Done" move is blocked by token scope; recorded on the workitem instead.**
+  The user asked to close M3-7 and move it to Done on the project board. Issue #20 was closed with
+   reason `completed` and issue #19 (M3-6) closed as superseded, and the full run/decision record was
+   posted as a comment on #20 — all within the `repo` scope the token has. The project **Board
+   Status** field, however, is mutated only via `gh project item-edit`, which requires
+   `read:project`/`write:project` scopes the GitHub token lacks, and the classic REST `projection`
+   endpoint 404s (ProjectV2-only). So the card could not be flipped to `Done` non-interactively. This
+   is a precise record of what a token with project scope must do: run
+   `gh project item-edit` to set item #20's Board Status to `Done` (and #19 to its terminal column).
+   No half-broken board state was left.
