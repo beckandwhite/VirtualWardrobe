@@ -45,8 +45,7 @@ gh issue list --repo $repo --milestone 'M5 Devops' --state all --limit 100 --jso
 When adding or renaming a work item:
 
 1. Update the GitHub issue first, including its body, milestone, labels, and state.
-2. Update the concise local summary in `Plans/02-product-backlog.md` and the upload ledger in
-  `Plans/04-gh-setup.md` when identifiers or durable status change.
+2. Update the concise local summary and the ledger in `Plans/02-product-backlog.md` when identifiers or durable status change.
 3. Record material implementation decisions in `Plans/00-decisions-and-log.md`.
 4. Verify issue count, project-card count, milestone assignment, and live body state.
 

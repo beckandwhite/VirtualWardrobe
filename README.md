@@ -21,7 +21,6 @@ pose-aware draping — locally, privacy-first, no server.
 - [`Plans/02-product-backlog.md`](Plans/02-product-backlog.md) — milestone → issue map.
 - [`Plans/03-execution-plan.md`](Plans/03-execution-plan.md) — what gets built, in what order.
 - [`Plans/04-gh-setup.md`](Plans/04-gh-setup.md) — the one manual step to push to github.com.
-- [`Plans/issues/`](Plans/issues/) — local issue specifications mirrored to GitHub.
 
 ## Stack (target)
 Expo + TypeScript + Expo Router · Reanimated ·
