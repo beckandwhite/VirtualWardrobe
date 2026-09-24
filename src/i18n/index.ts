@@ -9,6 +9,7 @@ export {
   isValidLocale,
   translate,
   catalogCoverage,
+  placeholderMismatches,
+  tokensIn,
 } from './strings';
 export type { Locale, Dict } from './strings';
-

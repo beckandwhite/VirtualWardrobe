@@ -679,3 +679,35 @@ and the skippable `e2e:web` all green.
    is a precise record of what a token with project scope must do: run
    `gh project item-edit` to set item #20's Board Status to `Done` (and #19 to its terminal column).
    No half-broken board state was left.
+
+## M6 Language & i18n (translation catalog expansion)
+
+- **D43.1 — canonical catalog split into per-locale files.** The monolithic
+  `CATALOG` in `src/i18n/strings.ts` was refactored so English lives in
+  `src/i18n/locales/en.ts` (source of truth) and each other locale in its own
+  `src/i18n/locales/<locale>.ts`. Rationale: the M6-3..M6-10 translation work
+  items are independent and were executed in parallel; one file per locale means
+  translators never collide on the same file. `strings.ts` now assembles the
+  files into `CATALOG` and keeps the pure helpers. Zero new dependencies.
+- **D43.2 — minimal `{token}` interpolation added.** Expanding the English
+  catalog (M6-2) introduced dynamic strings (`Look #{id}`, `{visible} of {total}`,
+  `Share failed: {error}`, `Reopened look #{id}`, `Look #{id} · {date}`).
+  `translate(locale, key, params?)` now substitutes `{token}` placeholders;
+  unknown tokens are left in place so a missing param is visible in QA. A new
+  `placeholderMismatches(locale)` gate fails the build if a translation drops or
+  renames a token. This closes the previously-deferred M6-1 interpolation ACs.
+- **D43.3 — English canonical catalog expanded to all screens (M6-2).** Every
+  user-visible inline string across index, onboarding, tabs, wardrobe, catalog,
+  capture, item, studio, and looks was moved into `en.ts` and the screens rewired
+  to `t()`. Bounded enums (garment `category.*`, `color.*`) are translated too,
+  including swatch `accessibilityLabel`s. Deferred, documented follow-up: the
+  pure `src/composer/notice.ts` export/share notice copy stays English-sourced —
+  it is consumed outside the React tree and asserted verbatim by the M4-2 notice
+  tests, so translating it there would need a larger refactor of the notice
+  contract. Tracked as a known limitation, not a regression.
+- **D43.4 — translator workflow documented.** `Plans/translation-workflow.md`
+  describes the file layout, the key/placeholder rules, terminology, how to add a
+  new locale, and the verification commands. Linked from the product backlog.
+- **D43.5 — coverage/placeholder gates run across all nine locales.**
+  `tests/i18n/strings.test.ts` iterates every non-English locale for full
+  non-blank coverage and token preservation, instead of spot-checking one locale.
