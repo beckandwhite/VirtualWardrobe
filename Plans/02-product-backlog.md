@@ -167,16 +167,16 @@ issue bodies; implementation notes remain here only when they are useful as dura
 
 | ID     | Title                                        | Labels       | Status      | GH #                                                                         |
 |--------|----------------------------------------------|--------------|-------------|------------------------------------------------------------------------------|
-| M6-1   | Language/i18n foundation and translation workflow | docs, ux, M6 | ⚠️ PARTIAL | [#35](https://github.com/beckandwhite/VirtualWardrobe/issues/35)             |
-| M6-2   | English canonical catalog and copy review    | docs, ux, M6 | 🚧 BACKLOG  | [#36](https://github.com/beckandwhite/VirtualWardrobe/issues/36)             |
-| M6-3   | Hungarian translation                        | docs, ux, M6 | ⚠️ PARTIAL  | [#37](https://github.com/beckandwhite/VirtualWardrobe/issues/37)             |
-| M6-4   | German translation                           | docs, ux, M6 | 🚧 BACKLOG  | [#38](https://github.com/beckandwhite/VirtualWardrobe/issues/38)             |
-| M6-5   | Spanish translation completion               | docs, ux, M6 | 🚧 BACKLOG  | [#39](https://github.com/beckandwhite/VirtualWardrobe/issues/39)             |
-| M6-6   | Italian translation                          | docs, ux, M6 | 🚧 BACKLOG  | [#40](https://github.com/beckandwhite/VirtualWardrobe/issues/40)             |
-| M6-7   | French translation                           | docs, ux, M6 | 🚧 BACKLOG  | [#41](https://github.com/beckandwhite/VirtualWardrobe/issues/41)             |
-| M6-8   | Vietnamese translation                       | docs, ux, M6 | 🚧 BACKLOG  | [#42](https://github.com/beckandwhite/VirtualWardrobe/issues/42)             |
-| M6-9   | [autonomous] Simplified Chinese translation  | docs, ux, M6 | 🚧 BACKLOG  | [#43](https://github.com/beckandwhite/VirtualWardrobe/issues/43)             |
-| M6-10  | [autonomous] Traditional Chinese translation | docs, ux, M6 | 🚧 BACKLOG  | [#45](https://github.com/beckandwhite/VirtualWardrobe/issues/45)             |
+| M6-1   | Language/i18n foundation and translation workflow | docs, ux, M6 | ✅ DONE | [#35](https://github.com/beckandwhite/VirtualWardrobe/issues/35)             |
+| M6-2   | English canonical catalog and copy review    | docs, ux, M6 | ✅ DONE  | [#36](https://github.com/beckandwhite/VirtualWardrobe/issues/36)             |
+| M6-3   | Hungarian translation                        | docs, ux, M6 | ✅ DONE  | [#37](https://github.com/beckandwhite/VirtualWardrobe/issues/37)             |
+| M6-4   | German translation                           | docs, ux, M6 | ✅ DONE  | [#38](https://github.com/beckandwhite/VirtualWardrobe/issues/38)             |
+| M6-5   | Spanish translation completion               | docs, ux, M6 | ✅ DONE  | [#39](https://github.com/beckandwhite/VirtualWardrobe/issues/39)             |
+| M6-6   | Italian translation                          | docs, ux, M6 | ✅ DONE  | [#40](https://github.com/beckandwhite/VirtualWardrobe/issues/40)             |
+| M6-7   | French translation                           | docs, ux, M6 | ✅ DONE  | [#41](https://github.com/beckandwhite/VirtualWardrobe/issues/41)             |
+| M6-8   | Vietnamese translation                       | docs, ux, M6 | ✅ DONE  | [#42](https://github.com/beckandwhite/VirtualWardrobe/issues/42)             |
+| M6-9   | [autonomous] Simplified Chinese translation  | docs, ux, M6 | ✅ DONE  | [#43](https://github.com/beckandwhite/VirtualWardrobe/issues/43)             |
+| M6-10  | [autonomous] Traditional Chinese translation | docs, ux, M6 | ✅ DONE  | [#45](https://github.com/beckandwhite/VirtualWardrobe/issues/45)             |
 
 > * **M6-1** establishes the typed nine-locale catalog (`en`, `hu`, `de`, `es`, `it`, `fr`, `vi`,
 >   `zh-CN`, `zh-TW`), fallback and formatting rules, coverage checks, persistence behavior, and
@@ -189,6 +189,16 @@ issue bodies; implementation notes remain here only when they are useful as dura
 >   Jest tests. The current canonical catalog is covered in Hungarian. Remaining work is the
 >   contributor workflow and interpolation/formatting rules, expansion to every user-facing app
 >   surface, and Hungarian storyboard review.
+
+> * **M6 — DONE (branch `m6-translations`, commit `e5ef9f8`, pending merge).** The canonical
+>   English catalog was expanded to every user-facing surface and split into per-locale files
+>   (`src/i18n/locales/`), every screen wired to `t()`, and `{token}` interpolation plus a
+>   `placeholderMismatches` gate added. All eight non-English locales are fully translated; the
+>   translator workflow is documented (`Plans/translation-workflow.md`) and decisions logged
+>   (D43.1–D43.5). Gates iterate all nine locales — typecheck/lint clean, 148 Jest tests pass.
+>   One open item on M6-3..M6-7: a human native/visual review of the running app per locale.
+>   Board Status cards could not be moved to `Done` automatically (token lacks project scope, cf.
+>   D42.5); a project-scoped token should run `gh project item-edit`.
 
 ## Definition of Done (every issue)
 - [ ] Acceptance criteria met and verified (test where applicable).
