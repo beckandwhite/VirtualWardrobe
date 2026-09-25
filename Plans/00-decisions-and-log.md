@@ -679,3 +679,71 @@ and the skippable `e2e:web` all green.
    is a precise record of what a token with project scope must do: run
    `gh project item-edit` to set item #20's Board Status to `Done` (and #19 to its terminal column).
    No half-broken board state was left.
+
+## M6 Language & i18n (translation catalog expansion)
+
+- **D43.1 — canonical catalog split into per-locale files.** The monolithic
+  `CATALOG` in `src/i18n/strings.ts` was refactored so English lives in
+  `src/i18n/locales/en.ts` (source of truth) and each other locale in its own
+  `src/i18n/locales/<locale>.ts`. Rationale: the M6-3..M6-10 translation work
+  items are independent and were executed in parallel; one file per locale means
+  translators never collide on the same file. `strings.ts` now assembles the
+  files into `CATALOG` and keeps the pure helpers. Zero new dependencies.
+- **D43.2 — minimal `{token}` interpolation added.** Expanding the English
+  catalog (M6-2) introduced dynamic strings (`Look #{id}`, `{visible} of {total}`,
+  `Share failed: {error}`, `Reopened look #{id}`, `Look #{id} · {date}`).
+  `translate(locale, key, params?)` now substitutes `{token}` placeholders;
+  unknown tokens are left in place so a missing param is visible in QA. A new
+  `placeholderMismatches(locale)` gate fails the build if a translation drops or
+  renames a token. This closes the previously-deferred M6-1 interpolation ACs.
+- **D43.3 — English canonical catalog expanded to all screens (M6-2).** Every
+  user-visible inline string across index, onboarding, tabs, wardrobe, catalog,
+  capture, item, studio, and looks was moved into `en.ts` and the screens rewired
+  to `t()`. Bounded enums (garment `category.*`, `color.*`) are translated too,
+  including swatch `accessibilityLabel`s. Deferred, documented follow-up: the
+  pure `src/composer/notice.ts` export/share notice copy stays English-sourced —
+  it is consumed outside the React tree and asserted verbatim by the M4-2 notice
+  tests, so translating it there would need a larger refactor of the notice
+  contract. Tracked as a known limitation, not a regression.
+- **D43.4 — translator workflow documented.** `Plans/translation-workflow.md`
+  describes the file layout, the key/placeholder rules, terminology, how to add a
+  new locale, and the verification commands. Linked from the product backlog.
+- **D43.5 — coverage/placeholder gates run across all nine locales.**
+   `tests/i18n/strings.test.ts` iterates every non-English locale for full
+  non-blank coverage and token preservation, instead of spot-checking one locale.
+
+## M3-16 — first-run welcome orientation
+
+- **D44.1 — a separate `has_seen_welcome` flag, not a reuse of `has_onboarded`.**
+  The welcome is gated on its own persisted setting (`has_seen_welcome`, bootstrapped
+   in `db.ts` alongside `has_onboarded`) so a user who bypasses M0-4 onboarding still
+  sees the orientation at most once, and a bypass of the welcome cannot reopen onboarding.
+  A shared `useBoolSetting(key, onError)` helper backs both `useOnboarding` and the new
+   `useSeenWelcome`, so the two read one shared loader rather than duplicating the async
+   init pattern.
+- **D44.2 — the welcome is a flat modal-less stack screen, reached before onboarding.**
+  `app/welcome.tsx` is registered in `app/_layout.tsx` between `onboarding` and `(tabs)`.
+  The entry routing decision moved from `entryRedirect(onboarded)` to
+   `welcomeGate(onboarded, seenWelcome)`, a pure function (mirrors `entryRedirect.ts` /
+   D29.2) so the four branches — `loading` / `/welcome` / `/onboarding` / `/wardrobe` —
+   assert without a router. The welcome shows only when **both** flags are false; the
+   `!onboarded` guard means a settled user is never re-shown it. `welcomeGate` supersedes
+   `entryRedirect` (the latter stays for the M4-2 entry-branch assertions; no caller
+   imports it except its test).
+- **D44.3 — Continue and Skip collapse to one continuation.** The welcome is a single
+   screen, so both actions persist `has_seen_welcome = '1'` and replace into the same next
+   step — `/onboarding` for a not-yet-onboarded user, else `/wardrobe` (the M0-4 flow,
+    then the main app). `continueWelcomeTransition` is the pure event the test asserts;
+   the screen differs only by button emphasis. This keeps the first-run deterministic and
+   avoids inventing a multi-step flow.
+- **D44.4 — honest manual-fallback copy, no native-pose promise; all copy in the i18n
+   catalog.** The four-step model and a fallback note are the whole message; the copy
+   concedes automatic placement "may be unavailable on some devices" and names the manual
+   move/scale/rotate path, never promising native pose (M3-1 stays NO-GO). Every visible
+   string (`welcome.*`, 14 keys) lives in `en.ts` and all eight non-English locales — no
+   new locale is added. `tests/onboarding/welcomeGate.test.ts` gates: every route branch,
+   the continue/skip transition, the canonical flag key/value, non-blank coverage of all
+   `welcome.*` keys in every locale, and a forbidden-phrase guard (`native`/`ML`/
+    `automatic pose`/`pose detection`) over the fallback string. `setSeenWelcome` is
+   covered by `tests/store/repo.test.ts`. 165 tests / 16 suites pass; typecheck and lint
+   are clean.

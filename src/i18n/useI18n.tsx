@@ -15,13 +15,13 @@ import {
 
 export interface I18n {
   locale: Locale;
-  t: (key: string) => string;
+  t: (key: string, params?: Record<string, string | number>) => string;
   setLocale: (locale: Locale) => void;
 }
 
 const I18nContext = createContext<I18n>({
   locale: DEFAULT_LOCALE,
-  t: (key) => translate(DEFAULT_LOCALE, key),
+  t: (key, params) => translate(DEFAULT_LOCALE, key, params),
   setLocale: () => undefined,
 });
 
@@ -50,7 +50,10 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
-  const t = useCallback((key: string) => translate(locale, key), [locale]);
+  const t = useCallback(
+    (key: string, params?: Record<string, string | number>) => translate(locale, key, params),
+    [locale],
+  );
 
   const setLocale = useCallback(
     async (next: Locale) => {

@@ -6,10 +6,16 @@ import {
   LOCALE_LABELS,
   DEFAULT_LOCALE,
   catalogCoverage,
+  placeholderMismatches,
+  tokensIn,
   LOCALES,
 } from '../../src/i18n/strings';
 
 const sampleKey = 'onboarding.welcome';
+
+// Every non-English locale, used to run the coverage/placeholder gates across
+// the whole catalog rather than a single hand-picked locale.
+const NON_DEFAULT = LOCALES.filter((l) => l !== DEFAULT_LOCALE);
 
 describe('translate', () => {
   it('returns English for the default locale', () => {
@@ -28,6 +34,22 @@ describe('translate', () => {
   it('falls back to English when an unknown locale is passed via resolveLocale', () => {
     expect(translate(resolveLocale('ja'), sampleKey)).toBe(CATALOG.en[sampleKey]);
   });
+
+  it('interpolates {token} placeholders with the supplied params', () => {
+    expect(translate('en', 'studio.lookNumber', { id: 7 })).toBe('Look #7');
+    expect(translate('en', 'wardrobe.count', { visible: 2, total: 9 })).toBe('2 of 9');
+  });
+
+  it('leaves an unknown token untouched rather than dropping it', () => {
+    expect(translate('en', 'looks.shareFailed', {})).toBe('Share failed: {error}');
+  });
+
+  it('interpolates against the localized template', () => {
+    // Spanish should still substitute the same {id} token in its own wording.
+    const es = translate('es', 'studio.lookNumber', { id: 3 });
+    expect(es).toContain('3');
+    expect(es).not.toContain('{id}');
+  });
 });
 
 describe('resolveLocale', () => {
@@ -39,6 +61,12 @@ describe('resolveLocale', () => {
     expect(resolveLocale('ja')).toBe(DEFAULT_LOCALE);
     expect(resolveLocale(null)).toBe(DEFAULT_LOCALE);
     expect(resolveLocale(undefined)).toBe(DEFAULT_LOCALE);
+  });
+
+  it('normalizes BCP-47 region subtags to the base locale', () => {
+    expect(resolveLocale('es-MX')).toBe('es');
+    expect(resolveLocale('de_DE')).toBe('de');
+    expect(resolveLocale('zh-CN')).toBe('zh-CN');
   });
 });
 
@@ -62,17 +90,25 @@ describe('catalogs', () => {
     expect(LOCALE_LABELS['zh-CN']).toBe('简体中文');
   });
 
-  it('reports missing and unexpected keys for a locale', () => {
-    const result = catalogCoverage('hu');
-    expect(result.missing).toEqual([]);
-    expect(result.unexpected).toEqual([]);
+  it.each(NON_DEFAULT)('has full, non-blank coverage for %s', (locale) => {
+    const { missing, unexpected } = catalogCoverage(locale);
+    expect(missing).toEqual([]);
+    expect(unexpected).toEqual([]);
+    for (const key of Object.keys(CATALOG.en)) {
+      const value = CATALOG[locale][key];
+      expect(typeof value).toBe('string');
+      expect(value.length).toBeGreaterThan(0);
+    }
   });
 
-  it('does not leave any English key blank in the Hungarian catalog', () => {
-    for (const key of Object.keys(CATALOG.en)) {
-      expect(CATALOG.hu[key]).toBeDefined();
-      expect(typeof CATALOG.hu[key]).toBe('string');
-      expect(CATALOG.hu[key].length).toBeGreaterThan(0);
-    }
+  it.each(NON_DEFAULT)('preserves every interpolation token for %s', (locale) => {
+    expect(placeholderMismatches(locale)).toEqual([]);
+  });
+
+  it('detects a dropped placeholder token', () => {
+    expect(tokensIn('Look #{id} · {date}')).toEqual(['date', 'id']);
+    // A hand-built broken dict is flagged (guards the placeholder gate itself).
+    const good = tokensIn(CATALOG.en['wardrobe.count']).join(',');
+    expect(good).toBe('total,visible');
   });
 });

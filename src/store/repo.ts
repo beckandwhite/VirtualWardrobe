@@ -51,9 +51,10 @@ export interface NewItem {
 }
 
 export interface Repo {
-   getSetting(key: string): Promise<string | undefined>;
-   setSetting(key: string, value: string): Promise<void>;
-   setOnboarded(): Promise<void>;
+    getSetting(key: string): Promise<string | undefined>;
+    setSetting(key: string, value: string): Promise<void>;
+    setOnboarded(): Promise<void>;
+    setSeenWelcome(): Promise<void>;
    insertItem(input: NewItem): Promise<Item>;
    updateItem(id: number, patch: Partial<NewItem>): Promise<void>;
    deleteItem(id: number): Promise<void>;
@@ -79,11 +80,15 @@ function build(): Repo {
       await db.runAsync('INSERT OR REPLACE INTO app_settings (key, value) VALUES (?, ?)', [key, value]);
       }
 
-   async function setOnboarded(): Promise<void> {
-      await setSetting('has_onboarded', '1');
-      }
+    async function setOnboarded(): Promise<void> {
+       await setSetting('has_onboarded', '1');
+         }
 
-   async function insertItem(input: NewItem): Promise<Item> {
+    async function setSeenWelcome(): Promise<void> {
+       await setSetting('has_seen_welcome', '1');
+         }
+
+    async function insertItem(input: NewItem): Promise<Item> {
       const db = await getDb();
       const res = await db.runAsync(
       'INSERT INTO items (type, name, color, tags, image_path, thumbnail_path, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
@@ -209,9 +214,10 @@ function build(): Repo {
 
    return {
       getSetting,
-      setSetting,
-      setOnboarded,
-      insertItem,
+       setSetting,
+       setOnboarded,
+       setSeenWelcome,
+       insertItem,
       updateItem,
       deleteItem,
       listItems,

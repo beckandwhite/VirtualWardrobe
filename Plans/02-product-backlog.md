@@ -69,7 +69,7 @@ issue bodies; implementation notes remain here only when they are useful as dura
 | M3-13  | [autonomous] Setup: iOS Simulator on this MacBook                  | tooling, qa, M3       | 🚧 BACKLOG          | [#24](https://github.com/beckandwhite/VirtualWardrobe/issues/24)             |
 | M3-14  | Storyboard the core wardrobe-to-try-on user journey                | ux, docs, M3          | 🚧 BACKLOG          | [#34](https://github.com/beckandwhite/VirtualWardrobe/issues/34)             |
 | M3-15  | [autonomous] Portfolio screenshot kit and demo path                | ux, docs, M3          | 🚧 BACKLOG          | [#44](https://github.com/beckandwhite/VirtualWardrobe/issues/44)             |
-| M3-16  | [autonomous] Welcome screen: explain VirtualWardrobe and try-on   | feat, ux, M3          | 🚧 BACKLOG          | [#46](https://github.com/beckandwhite/VirtualWardrobe/issues/46)             |
+| M3-16   | [autonomous] Welcome screen: explain VirtualWardrobe and try-on    | feat, ux, M3           | ✅ DONE*             | [#46](https://github.com/beckandwhite/VirtualWardrobe/issues/46)              |
 | M3-17  | [autonomous] Improve application navigation and return paths       | feat, ux, M3          | 🚧 BACKLOG          | [#47](https://github.com/beckandwhite/VirtualWardrobe/issues/47)             |
 | M3-18  | [autonomous] M2-1 post-M3-7 housekeeping                          | debt, tooling, M3     | 🚧 BACKLOG          | [#49](https://github.com/beckandwhite/VirtualWardrobe/issues/49)             |
 | M3-19  | [autonomous] M2-1 AC4 — native bundle exclusion CI gate           | ml, qa, M3            | 🚧 BACKLOG          | [#50](https://github.com/beckandwhite/VirtualWardrobe/issues/50)             |
@@ -121,6 +121,18 @@ issue bodies; implementation notes remain here only when they are useful as dura
 >    only — on-device *pose* stays M3-1 (NO-GO in-sandbox). A `setup` item that can't run here
 >    records a NO-GO/PARTIAL with the exact blocker (the known D20.5/D21.6/M3-1 ceiling) — still
 >    valuable as a precise record.
+>
+> * **M3-16 — first-run welcome orientation, DONE (D44.1–D44.4).** A flat `app/welcome.tsx`
+>   screen, gated on a new `has_seen_welcome` flag (separate from `has_onboarded`, so the
+>    orientation shows at most once even if M0-4 is bypassed). The entry routing decision moved
+>    to the pure `welcomeGate(onboarded, seenWelcome)` (superseding `entryRedirect`, which the
+>    M4-2 entry-branch test still asserts). It presents the four-step model, an honest
+>    manual-fallback note (no native-pose promise, M3-1 NO-GO), and Continue/Skip — both
+>    collapse to one continuation. All 14 `welcome.*` strings are in every locale (no new
+>    locale). Covered by `tests/onboarding/welcomeGate.test.ts` + the `setSeenWelcome` repo
+>    test; 165 tests, typecheck, and lint pass. On-device/simulator *rendering* is not exercised
+>    in-sandbox (the known M3-1/D20.5 ceiling); the routing + persistence + copy logic is fully
+>    asserted unit-free of a device.
 
 ## M4 QA · Regression & Coverage
 
@@ -167,16 +179,16 @@ issue bodies; implementation notes remain here only when they are useful as dura
 
 | ID     | Title                                        | Labels       | Status      | GH #                                                                         |
 |--------|----------------------------------------------|--------------|-------------|------------------------------------------------------------------------------|
-| M6-1   | Language/i18n foundation and translation workflow | docs, ux, M6 | ⚠️ PARTIAL | [#35](https://github.com/beckandwhite/VirtualWardrobe/issues/35)             |
-| M6-2   | English canonical catalog and copy review    | docs, ux, M6 | 🚧 BACKLOG  | [#36](https://github.com/beckandwhite/VirtualWardrobe/issues/36)             |
-| M6-3   | Hungarian translation                        | docs, ux, M6 | ⚠️ PARTIAL  | [#37](https://github.com/beckandwhite/VirtualWardrobe/issues/37)             |
-| M6-4   | German translation                           | docs, ux, M6 | 🚧 BACKLOG  | [#38](https://github.com/beckandwhite/VirtualWardrobe/issues/38)             |
-| M6-5   | Spanish translation completion               | docs, ux, M6 | 🚧 BACKLOG  | [#39](https://github.com/beckandwhite/VirtualWardrobe/issues/39)             |
-| M6-6   | Italian translation                          | docs, ux, M6 | 🚧 BACKLOG  | [#40](https://github.com/beckandwhite/VirtualWardrobe/issues/40)             |
-| M6-7   | French translation                           | docs, ux, M6 | 🚧 BACKLOG  | [#41](https://github.com/beckandwhite/VirtualWardrobe/issues/41)             |
-| M6-8   | Vietnamese translation                       | docs, ux, M6 | 🚧 BACKLOG  | [#42](https://github.com/beckandwhite/VirtualWardrobe/issues/42)             |
-| M6-9   | [autonomous] Simplified Chinese translation  | docs, ux, M6 | 🚧 BACKLOG  | [#43](https://github.com/beckandwhite/VirtualWardrobe/issues/43)             |
-| M6-10  | [autonomous] Traditional Chinese translation | docs, ux, M6 | 🚧 BACKLOG  | [#45](https://github.com/beckandwhite/VirtualWardrobe/issues/45)             |
+| M6-1   | Language/i18n foundation and translation workflow | docs, ux, M6 | ✅ DONE | [#35](https://github.com/beckandwhite/VirtualWardrobe/issues/35)             |
+| M6-2   | English canonical catalog and copy review    | docs, ux, M6 | ✅ DONE  | [#36](https://github.com/beckandwhite/VirtualWardrobe/issues/36)             |
+| M6-3   | Hungarian translation                        | docs, ux, M6 | ✅ DONE  | [#37](https://github.com/beckandwhite/VirtualWardrobe/issues/37)             |
+| M6-4   | German translation                           | docs, ux, M6 | ✅ DONE  | [#38](https://github.com/beckandwhite/VirtualWardrobe/issues/38)             |
+| M6-5   | Spanish translation completion               | docs, ux, M6 | ✅ DONE  | [#39](https://github.com/beckandwhite/VirtualWardrobe/issues/39)             |
+| M6-6   | Italian translation                          | docs, ux, M6 | ✅ DONE  | [#40](https://github.com/beckandwhite/VirtualWardrobe/issues/40)             |
+| M6-7   | French translation                           | docs, ux, M6 | ✅ DONE  | [#41](https://github.com/beckandwhite/VirtualWardrobe/issues/41)             |
+| M6-8   | Vietnamese translation                       | docs, ux, M6 | ✅ DONE  | [#42](https://github.com/beckandwhite/VirtualWardrobe/issues/42)             |
+| M6-9   | [autonomous] Simplified Chinese translation  | docs, ux, M6 | ✅ DONE  | [#43](https://github.com/beckandwhite/VirtualWardrobe/issues/43)             |
+| M6-10  | [autonomous] Traditional Chinese translation | docs, ux, M6 | ✅ DONE  | [#45](https://github.com/beckandwhite/VirtualWardrobe/issues/45)             |
 
 > * **M6-1** establishes the typed nine-locale catalog (`en`, `hu`, `de`, `es`, `it`, `fr`, `vi`,
 >   `zh-CN`, `zh-TW`), fallback and formatting rules, coverage checks, persistence behavior, and
@@ -189,6 +201,16 @@ issue bodies; implementation notes remain here only when they are useful as dura
 >   Jest tests. The current canonical catalog is covered in Hungarian. Remaining work is the
 >   contributor workflow and interpolation/formatting rules, expansion to every user-facing app
 >   surface, and Hungarian storyboard review.
+
+> * **M6 — DONE (branch `m6-translations`, commit `e5ef9f8`, pending merge).** The canonical
+>   English catalog was expanded to every user-facing surface and split into per-locale files
+>   (`src/i18n/locales/`), every screen wired to `t()`, and `{token}` interpolation plus a
+>   `placeholderMismatches` gate added. All eight non-English locales are fully translated; the
+>   translator workflow is documented (`Plans/translation-workflow.md`) and decisions logged
+>   (D43.1–D43.5). Gates iterate all nine locales — typecheck/lint clean, 148 Jest tests pass.
+>   One open item on M6-3..M6-7: a human native/visual review of the running app per locale.
+>   Board Status cards could not be moved to `Done` automatically (token lacks project scope, cf.
+>   D42.5); a project-scoped token should run `gh project item-edit`.
 
 ## Definition of Done (every issue)
 - [ ] Acceptance criteria met and verified (test where applicable).
