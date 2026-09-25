@@ -212,6 +212,20 @@ issue bodies; implementation notes remain here only when they are useful as dura
 >   Board Status cards could not be moved to `Done` automatically (token lacks project scope, cf.
 >   D42.5); a project-scoped token should run `gh project item-edit`.
 
+## Autonomous delivery workflow
+- Start each autonomous work item from the latest `main` on a unique branch named
+  `work/<issue-number>-<short-slug>`; never work directly on `main` or share a branch with another agent.
+- Keep the GitHub issue current: record the branch and progress, move `Board Status` to `In Progress`
+  when permitted, and add verification results, blockers, and the PR link. Do not close the issue or
+  mark it complete until its PR is merged; update the issue and board after merge if automation has
+  not already done so.
+- Update the relevant row or concise status note in this backlog as part of the same branch/PR; do
+  not duplicate the full issue specification here.
+- Commit the scoped implementation and backlog update, then open a PR to `main` that links the issue
+  and reports the checks run. Request automerge only when repository settings support it and required
+  checks/reviews pass; never bypass a gate or change repository settings. If automerge is unavailable,
+  leave the PR open and record the blocker.
+
 ## Definition of Done (every issue)
 - [ ] Acceptance criteria met and verified (test where applicable).
 - [ ] Type-clean (tsc), lint-clean (eslint).
