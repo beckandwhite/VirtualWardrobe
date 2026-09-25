@@ -10,7 +10,7 @@ import { router } from 'expo-router';
 import { type Href } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { r } from '@/store';
-import { useOnboarding } from '@/store/onboarding';
+import { useOnboarding, useSeenWelcome } from '@/store/onboarding';
 import { continueWelcomeTransition } from '@/onboarding/welcomeGate';
 import { useI18n } from '@/i18n/useI18n';
 import LanguageSwitcher from '@/i18n/LanguageSwitcher';
@@ -36,7 +36,16 @@ const STEP_KEYS = [
 export default function WelcomeScreen() {
   const { t } = useI18n();
   const onboarded = useOnboarding();
+  const seenWelcome = useSeenWelcome();
   const [busy, setBusy] = useState(false);
+
+  // Welcome is now a permanent tab (not hidden after first use). The Continue/Skip
+  // footer is the first-run continuation into onboarding/wardrobe, so it only makes
+  // sense before the flag is set. A returning user (seenWelcome === true) sees the
+  // same orientation as a footer-less reference page. `null` = still loading; we
+  // don't render the footer until we know, so a first-run user isn't shown a
+  // dead-end page for a frame.
+  const firstRun = seenWelcome === false;
 
    // Continue / Skip both persist the seen flag and advance. The destination is a
    // pure function of the resolved onboarding flag, so the route is deterministic.
@@ -85,28 +94,30 @@ export default function WelcomeScreen() {
 
         <LanguageSwitcher />
 
-        <View style={styles.footer}>
-          <TouchableOpacity
-            style={styles.primaryButton}
-            accessibilityRole="button"
-            accessibilityState={{ busy }}
-            disabled={busy}
-            activeOpacity={0.8}
-            onPress={advance}
-          >
-            <Text style={styles.primaryText}>{t('welcome.continue')}</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.skipButton}
-            accessibilityRole="button"
-            accessibilityState={{ busy }}
-            disabled={busy}
-            activeOpacity={0.8}
-            onPress={advance}
-          >
-            <Text style={styles.skipText}>{t('welcome.skip')}</Text>
-          </TouchableOpacity>
-        </View>
+        {firstRun && (
+          <View style={styles.footer}>
+            <TouchableOpacity
+              style={styles.primaryButton}
+              accessibilityRole="button"
+              accessibilityState={{ busy }}
+              disabled={busy}
+              activeOpacity={0.8}
+              onPress={advance}
+            >
+              <Text style={styles.primaryText}>{t('welcome.continue')}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.skipButton}
+              accessibilityRole="button"
+              accessibilityState={{ busy }}
+              disabled={busy}
+              activeOpacity={0.8}
+              onPress={advance}
+            >
+              <Text style={styles.skipText}>{t('welcome.skip')}</Text>
+            </TouchableOpacity>
+          </View>
+        )}
       </View>
      </ScrollView>
    );

@@ -47,7 +47,18 @@ export const zhTW: Dict = {
       'tabs.wardrobe': '衣櫃',
   'tabs.catalog': '目錄',
   'tabs.looks': '造型',
+  'tabs.welcome': '歡迎',
+  'tabs.me': '我',
+  'tabs.studio': '工作室',
   'language.title': '語言',
+
+  // Me / profile + settings
+  'me.header': '你的資料',
+  'me.photo.title': '你的照片',
+  'me.photo.hint': '設定一張你的照片，用作試穿時的身體。',
+  'me.photo.set': '設定照片',
+  'me.photo.change': '更換照片',
+  'me.photo.empty': '尚未設定照片。',
   'wardrobe.header': '您的衣櫥',
   'wardrobe.search': '搜尋名稱或標籤',
   'wardrobe.count': '{total} 件中的 {visible} 件',

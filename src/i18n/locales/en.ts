@@ -64,12 +64,23 @@ export const en: Dict = {
     'welcome.skip': 'Skip',
 
     // Tabs
+  'tabs.welcome': 'Welcome',
+  'tabs.me': 'Me',
   'tabs.wardrobe': 'Wardrobe',
   'tabs.catalog': 'Catalog',
+  'tabs.studio': 'Studio',
   'tabs.looks': 'Looks',
 
   // Language switcher
   'language.title': 'Language',
+
+  // Me / profile + settings
+  'me.header': 'Your profile',
+  'me.photo.title': 'Your photo',
+  'me.photo.hint': 'Set a photo of yourself to use as the body for try-on.',
+  'me.photo.set': 'Set photo',
+  'me.photo.change': 'Change photo',
+  'me.photo.empty': 'No photo set yet.',
 
   // Wardrobe screen
   'wardrobe.header': 'Your wardrobe',

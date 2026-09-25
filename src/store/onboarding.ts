@@ -38,3 +38,34 @@ export function useOnboarding(): boolean | null {
 export function useSeenWelcome(): boolean | null {
   return useBoolSetting('has_seen_welcome', 'useSeenWelcome failed');
 }
+
+// The user's body photo, persisted in the generic `app_settings` table and reused
+// as the default try-on body in the studio. A plain string setting (not a boolean),
+// so it has its own small read hook rather than reusing useBoolSetting.
+export const PERSON_PHOTO_KEY = 'person_photo_uri';
+
+// Read the persisted person photo as `string | null`: `null` while the store
+// resolves or when unset. `reloadKey` lets a writer (the Me screen) force a re-read
+// after it persists a new photo, so the displayed image updates without a remount.
+export function usePersonPhoto(reloadKey = 0): string | null {
+  const [uri, setUri] = useState<string | null>(null);
+
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        await initStore();
+        const raw = await r.getSetting(PERSON_PHOTO_KEY);
+        if (alive) setUri(raw ?? null);
+      } catch (e) {
+        console.error('usePersonPhoto failed', e);
+        if (alive) setUri(null);
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+  }, [reloadKey]);
+
+  return uri;
+}

@@ -49,7 +49,18 @@ export const vi: Dict = {
          'tabs.wardrobe': 'Tủ quần áo',
   'tabs.catalog': 'Danh mục',
   'tabs.looks': 'Looks',
+  'tabs.welcome': 'Chào mừng',
+  'tabs.me': 'Tôi',
+  'tabs.studio': 'Studio',
   'language.title': 'Ngôn ngữ',
+
+  // Me / profile + settings
+  'me.header': 'Hồ sơ của bạn',
+  'me.photo.title': 'Ảnh của bạn',
+  'me.photo.hint': 'Đặt ảnh của bạn để dùng làm cơ thể khi thử đồ.',
+  'me.photo.set': 'Đặt ảnh',
+  'me.photo.change': 'Đổi ảnh',
+  'me.photo.empty': 'Chưa đặt ảnh.',
   'wardrobe.header': 'Tủ quần áo của bạn',
   'wardrobe.search': 'Tìm theo tên hoặc thẻ',
   'wardrobe.count': '{visible} trên {total}',

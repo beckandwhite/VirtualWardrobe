@@ -18,12 +18,12 @@ return (
       <I18nProvider>
          <Stack screenOptions={{ headerShown: false }}>
               <Stack.Screen name="onboarding" />
-              <Stack.Screen name="welcome" />
               <Stack.Screen name="(tabs)" />
-             {/* Flat modals (D19.4): full-screen, reached by push/replace. */}
+             {/* Flat modals (D19.4): full-screen, reached by push/replace.
+                 welcome + studio now live inside the (tabs) group as persistent
+                 tabs, so they're no longer registered here. */}
              <Stack.Screen name="capture" options={{ presentation: 'modal' }} />
              <Stack.Screen name="item" options={{ presentation: 'modal' }} />
-             <Stack.Screen name="studio" options={{ presentation: 'modal' }} />
           </Stack>
       </I18nProvider>
    );

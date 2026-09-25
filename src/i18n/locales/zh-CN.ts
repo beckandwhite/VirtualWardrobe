@@ -47,7 +47,18 @@ export const zhCN: Dict = {
      'tabs.wardrobe': '衣橱',
   'tabs.catalog': '目录',
   'tabs.looks': '造型',
+  'tabs.welcome': '欢迎',
+  'tabs.me': '我',
+  'tabs.studio': '工作室',
   'language.title': '语言',
+
+  // Me / profile + settings
+  'me.header': '你的资料',
+  'me.photo.title': '你的照片',
+  'me.photo.hint': '设置一张你的照片，用作试穿时的身体。',
+  'me.photo.set': '设置照片',
+  'me.photo.change': '更换照片',
+  'me.photo.empty': '尚未设置照片。',
   'wardrobe.header': '我的衣橱',
   'wardrobe.search': '搜索名称或标签',
   'wardrobe.count': '{total} 件中的 {visible} 件',

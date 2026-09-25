@@ -49,7 +49,18 @@ export const es: Dict = {
      'tabs.wardrobe': 'Guardarropa',
   'tabs.catalog': 'Catálogo',
   'tabs.looks': 'Looks',
+  'tabs.welcome': 'Bienvenida',
+  'tabs.me': 'Yo',
+  'tabs.studio': 'Estudio',
   'language.title': 'Idioma',
+
+  // Me / profile + settings
+  'me.header': 'Tu perfil',
+  'me.photo.title': 'Tu foto',
+  'me.photo.hint': 'Elige una foto tuya para usarla como cuerpo en la prueba.',
+  'me.photo.set': 'Elegir foto',
+  'me.photo.change': 'Cambiar foto',
+  'me.photo.empty': 'Aún no hay foto.',
   'wardrobe.header': 'Tu guardarropa',
   'wardrobe.search': 'Busca por nombre o etiquetas',
   'wardrobe.count': '{visible} de {total}',

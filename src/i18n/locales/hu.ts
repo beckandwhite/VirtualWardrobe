@@ -48,7 +48,18 @@ export const hu: Dict = {
     'tabs.wardrobe': 'Szekrény',
   'tabs.catalog': 'Katalógus',
   'tabs.looks': 'Lookok',
+  'tabs.welcome': 'Üdvözlet',
+  'tabs.me': 'Én',
+  'tabs.studio': 'Stúdió',
   'language.title': 'Nyelv',
+
+  // Me / profile + settings
+  'me.header': 'A profilod',
+  'me.photo.title': 'A fotód',
+  'me.photo.hint': 'Állíts be egy fotót magadról, amit a felpróbáláshoz használunk.',
+  'me.photo.set': 'Fotó beállítása',
+  'me.photo.change': 'Fotó módosítása',
+  'me.photo.empty': 'Még nincs fotó beállítva.',
   'wardrobe.header': 'A szekrénye',
   'wardrobe.search': 'Keresés név vagy címke szerint',
   'wardrobe.count': '{visible} / {total}',

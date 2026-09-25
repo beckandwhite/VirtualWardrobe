@@ -43,8 +43,9 @@ import {
 import { noticeForShare, EXPORT_ERROR_NOTICE } from '@/composer/notice';
 import { useI18n } from '@/i18n/useI18n';
 import type { Keypoint, Transform } from '@/pose';
-import sampleBody from '../assets/sample/body.png';
-import sampleGarment from '../assets/sample/garment.png';
+import sampleBody from '../../assets/sample/body.png';
+import sampleGarment from '../../assets/sample/garment.png';
+import { PERSON_PHOTO_KEY } from '@/store/onboarding';
 
 // A garment to overlay: either a wardrobe Item or a catalog StoreItem, normalized
 // to a common shape the studio only ever talks to.
@@ -154,6 +155,27 @@ export default function StudioScreen() {
   useEffect(() => {
     refreshRecent().catch((e) => console.error('studio: recent looks', e));
   }, [refreshRecent]);
+
+  // Seed the try-on body from the user's saved profile photo (the Me tab persists
+  // `person_photo_uri`). Runs once on mount; a per-session "Pick photo" override or
+  // a reopened look still wins after. Falls back to the bundled sample when unset.
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        const uri = await r.getSetting(PERSON_PHOTO_KEY);
+        if (uri && alive) {
+          setBodySource({ uri });
+          setBodyPath(uri);
+        }
+      } catch (e) {
+        console.error('studio: person photo load', e);
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+  }, []);
 
   // The transform, split into one numeric shared value per field. Each field
   // is a Reanimated `AnimatableValue` (a number), so slider/drag edits animate
