@@ -38,9 +38,32 @@ export const en: Dict = {
   'onboarding.camera.enable': 'Enable camera',
   'onboarding.camera.hint':
     'Camera lets you photograph clothes. The wardrobe works without it.',
-  'onboarding.start': 'Start →',
+    'onboarding.start': 'Start →',
 
-  // Tabs
+     // Welcome (first-run orientation — M3-16). The four steps mirror the product
+     // model; the manual-fallback copy is deliberate: automatic placement may be
+     // unavailable on some devices, so we never promise native pose support.
+    'welcome.title': 'Welcome to VirtualWardrobe',
+    'welcome.subtitle':
+      'See how clothes look on you, from photos you take and a curated catalog — all on your device, nothing uploaded.',
+    'welcome.steps.heading': 'How it works',
+    'welcome.step1.title': 'Add a garment',
+    'welcome.step1.body':
+      'Take a photo with the camera or choose one from your library.',
+    'welcome.step2.title': 'Try it on',
+    'welcome.step2.body':
+      'Pick a garment and a body photo in the studio to compose a look.',
+    'welcome.step3.title': 'Adjust when needed',
+    'welcome.step3.body':
+      'If automatic placement is unavailable, position the garment by hand.',
+    'welcome.step4.title': 'Save or share',
+    'welcome.step4.body': 'Keep the look in your gallery or share it.',
+    'welcome.fallback':
+      'Automatic placement may be unavailable on some devices. When it is, you can always move, scale, and rotate the garment yourself — the manual path gives you the same result.',
+    'welcome.continue': 'Continue →',
+    'welcome.skip': 'Skip',
+
+    // Tabs
   'tabs.wardrobe': 'Wardrobe',
   'tabs.catalog': 'Catalog',
   'tabs.looks': 'Looks',

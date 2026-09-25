@@ -69,7 +69,7 @@ issue bodies; implementation notes remain here only when they are useful as dura
 | M3-13  | [autonomous] Setup: iOS Simulator on this MacBook                  | tooling, qa, M3       | 🚧 BACKLOG          | [#24](https://github.com/beckandwhite/VirtualWardrobe/issues/24)             |
 | M3-14  | Storyboard the core wardrobe-to-try-on user journey                | ux, docs, M3          | 🚧 BACKLOG          | [#34](https://github.com/beckandwhite/VirtualWardrobe/issues/34)             |
 | M3-15  | [autonomous] Portfolio screenshot kit and demo path                | ux, docs, M3          | 🚧 BACKLOG          | [#44](https://github.com/beckandwhite/VirtualWardrobe/issues/44)             |
-| M3-16  | [autonomous] Welcome screen: explain VirtualWardrobe and try-on   | feat, ux, M3          | 🚧 BACKLOG          | [#46](https://github.com/beckandwhite/VirtualWardrobe/issues/46)             |
+| M3-16   | [autonomous] Welcome screen: explain VirtualWardrobe and try-on    | feat, ux, M3           | ✅ DONE*             | [#46](https://github.com/beckandwhite/VirtualWardrobe/issues/46)              |
 | M3-17  | [autonomous] Improve application navigation and return paths       | feat, ux, M3          | 🚧 BACKLOG          | [#47](https://github.com/beckandwhite/VirtualWardrobe/issues/47)             |
 | M3-18  | [autonomous] M2-1 post-M3-7 housekeeping                          | debt, tooling, M3     | 🚧 BACKLOG          | [#49](https://github.com/beckandwhite/VirtualWardrobe/issues/49)             |
 | M3-19  | [autonomous] M2-1 AC4 — native bundle exclusion CI gate           | ml, qa, M3            | 🚧 BACKLOG          | [#50](https://github.com/beckandwhite/VirtualWardrobe/issues/50)             |
@@ -121,6 +121,18 @@ issue bodies; implementation notes remain here only when they are useful as dura
 >    only — on-device *pose* stays M3-1 (NO-GO in-sandbox). A `setup` item that can't run here
 >    records a NO-GO/PARTIAL with the exact blocker (the known D20.5/D21.6/M3-1 ceiling) — still
 >    valuable as a precise record.
+>
+> * **M3-16 — first-run welcome orientation, DONE (D44.1–D44.4).** A flat `app/welcome.tsx`
+>   screen, gated on a new `has_seen_welcome` flag (separate from `has_onboarded`, so the
+>    orientation shows at most once even if M0-4 is bypassed). The entry routing decision moved
+>    to the pure `welcomeGate(onboarded, seenWelcome)` (superseding `entryRedirect`, which the
+>    M4-2 entry-branch test still asserts). It presents the four-step model, an honest
+>    manual-fallback note (no native-pose promise, M3-1 NO-GO), and Continue/Skip — both
+>    collapse to one continuation. All 14 `welcome.*` strings are in every locale (no new
+>    locale). Covered by `tests/onboarding/welcomeGate.test.ts` + the `setSeenWelcome` repo
+>    test; 165 tests, typecheck, and lint pass. On-device/simulator *rendering* is not exercised
+>    in-sandbox (the known M3-1/D20.5 ceiling); the routing + persistence + copy logic is fully
+>    asserted unit-free of a device.
 
 ## M4 QA · Regression & Coverage
 

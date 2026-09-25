@@ -17,8 +17,9 @@ export default function RootLayout() {
 return (
       <I18nProvider>
          <Stack screenOptions={{ headerShown: false }}>
-             <Stack.Screen name="onboarding" />
-             <Stack.Screen name="(tabs)" />
+              <Stack.Screen name="onboarding" />
+              <Stack.Screen name="welcome" />
+              <Stack.Screen name="(tabs)" />
              {/* Flat modals (D19.4): full-screen, reached by push/replace. */}
              <Stack.Screen name="capture" options={{ presentation: 'modal' }} />
              <Stack.Screen name="item" options={{ presentation: 'modal' }} />

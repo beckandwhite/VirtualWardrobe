@@ -709,5 +709,41 @@ and the skippable `e2e:web` all green.
   describes the file layout, the key/placeholder rules, terminology, how to add a
   new locale, and the verification commands. Linked from the product backlog.
 - **D43.5 — coverage/placeholder gates run across all nine locales.**
-  `tests/i18n/strings.test.ts` iterates every non-English locale for full
+   `tests/i18n/strings.test.ts` iterates every non-English locale for full
   non-blank coverage and token preservation, instead of spot-checking one locale.
+
+## M3-16 — first-run welcome orientation
+
+- **D44.1 — a separate `has_seen_welcome` flag, not a reuse of `has_onboarded`.**
+  The welcome is gated on its own persisted setting (`has_seen_welcome`, bootstrapped
+   in `db.ts` alongside `has_onboarded`) so a user who bypasses M0-4 onboarding still
+  sees the orientation at most once, and a bypass of the welcome cannot reopen onboarding.
+  A shared `useBoolSetting(key, onError)` helper backs both `useOnboarding` and the new
+   `useSeenWelcome`, so the two read one shared loader rather than duplicating the async
+   init pattern.
+- **D44.2 — the welcome is a flat modal-less stack screen, reached before onboarding.**
+  `app/welcome.tsx` is registered in `app/_layout.tsx` between `onboarding` and `(tabs)`.
+  The entry routing decision moved from `entryRedirect(onboarded)` to
+   `welcomeGate(onboarded, seenWelcome)`, a pure function (mirrors `entryRedirect.ts` /
+   D29.2) so the four branches — `loading` / `/welcome` / `/onboarding` / `/wardrobe` —
+   assert without a router. The welcome shows only when **both** flags are false; the
+   `!onboarded` guard means a settled user is never re-shown it. `welcomeGate` supersedes
+   `entryRedirect` (the latter stays for the M4-2 entry-branch assertions; no caller
+   imports it except its test).
+- **D44.3 — Continue and Skip collapse to one continuation.** The welcome is a single
+   screen, so both actions persist `has_seen_welcome = '1'` and replace into the same next
+   step — `/onboarding` for a not-yet-onboarded user, else `/wardrobe` (the M0-4 flow,
+    then the main app). `continueWelcomeTransition` is the pure event the test asserts;
+   the screen differs only by button emphasis. This keeps the first-run deterministic and
+   avoids inventing a multi-step flow.
+- **D44.4 — honest manual-fallback copy, no native-pose promise; all copy in the i18n
+   catalog.** The four-step model and a fallback note are the whole message; the copy
+   concedes automatic placement "may be unavailable on some devices" and names the manual
+   move/scale/rotate path, never promising native pose (M3-1 stays NO-GO). Every visible
+   string (`welcome.*`, 14 keys) lives in `en.ts` and all eight non-English locales — no
+   new locale is added. `tests/onboarding/welcomeGate.test.ts` gates: every route branch,
+   the continue/skip transition, the canonical flag key/value, non-blank coverage of all
+   `welcome.*` keys in every locale, and a forbidden-phrase guard (`native`/`ML`/
+    `automatic pose`/`pose detection`) over the fallback string. `setSeenWelcome` is
+   covered by `tests/store/repo.test.ts`. 165 tests / 16 suites pass; typecheck and lint
+   are clean.

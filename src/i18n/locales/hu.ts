@@ -24,8 +24,28 @@ export const hu: Dict = {
   'onboarding.camera.enable': 'Kamera engedélyezése',
   'onboarding.camera.hint':
     'A kamera segítségével fényképezheti le a ruhákat. A szekrény működik nélküle is.',
-  'onboarding.start': 'Kezdés →',
-  'tabs.wardrobe': 'Szekrény',
+    'onboarding.start': 'Kezdés →',
+     // Welcome (first-run orientation — M3-16).
+    'welcome.title': 'Üdvözöljük a VirtualWardrobe-ben',
+    'welcome.subtitle':
+      'Nézd meg, hogyan néznek ki a ruhák rajtad — a saját felvételeidből és egy válogatott katalógusból, mind az eszközön, semmi sem kerül feltöltésre.',
+    'welcome.steps.heading': 'Így működik',
+    'welcome.step1.title': 'Ruhadarab hozzáadása',
+    'welcome.step1.body':
+      'Fényképezd le a kamerával, vagy válaszd ki a könyvtáradból.',
+    'welcome.step2.title': 'Próbáld fel',
+    'welcome.step2.body':
+      'Válassz egy ruhát és egy testfényképet a stúdióban egy look összeállításához.',
+    'welcome.step3.title': 'Állítsd, ha szükséges',
+    'welcome.step3.body':
+      'Ha az automatikus elhelyezés nem érhető el, kézzel pozicionáld a ruhát.',
+    'welcome.step4.title': 'Mentsd meg vagy oszd meg',
+    'welcome.step4.body': 'Tartsd meg a lookot a galériádban, vagy oszd meg.',
+    'welcome.fallback':
+      'Az automatikus elhelyezés egyes eszközökön nem érhető el. Ekkor bármikor te mozdíthatod, méretezheted és forgathatod a ruhát — a kézi útvonal ugyanazt az eredményt adja.',
+    'welcome.continue': 'Folytatás →',
+    'welcome.skip': 'Kihagyás',
+    'tabs.wardrobe': 'Szekrény',
   'tabs.catalog': 'Katalógus',
   'tabs.looks': 'Lookok',
   'language.title': 'Nyelv',

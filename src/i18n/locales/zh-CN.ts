@@ -24,8 +24,27 @@ export const zhCN: Dict = {
   'onboarding.camera.enable': '启用相机',
   'onboarding.camera.hint':
     '相机可让您拍摄衣服照片。即使没有相机，衣橱也能正常使用。',
-  'onboarding.start': '开始 →',
-  'tabs.wardrobe': '衣橱',
+    'onboarding.start': '开始 →',
+         // Welcome (first-run orientation — M3-16).
+         'welcome.title': '欢迎使用 VirtualWardrobe',
+         'welcome.subtitle':
+           '看看衣服穿在您身上是什么样——从您拍摄的照片和精选目录，一切都在设备上完成，不会上传任何内容。',
+         'welcome.steps.heading': '运作方式',
+         'welcome.step1.title': '添加服装',
+         'welcome.step1.body': '用相机拍照，或从相册中选择一张。',
+         'welcome.step2.title': '试穿',
+         'welcome.step2.body':
+           '在试衣间中选择一件服装和一张身体照片，组合出一个造型。',
+         'welcome.step3.title': '必要时调整',
+         'welcome.step3.body':
+           '如果无法自动放置，就手动摆放服装。',
+         'welcome.step4.title': '保存或分享',
+         'welcome.step4.body': '把造型留在图库中，或分享出去。',
+         'welcome.fallback':
+           '部分设备上可能无法自动放置。此时您也可以自己移动、缩放和旋转服装——手动方式能达到相同效果。',
+         'welcome.continue': '继续 →',
+         'welcome.skip': '跳过',
+     'tabs.wardrobe': '衣橱',
   'tabs.catalog': '目录',
   'tabs.looks': '造型',
   'language.title': '语言',

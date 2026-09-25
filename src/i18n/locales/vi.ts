@@ -24,8 +24,29 @@ export const vi: Dict = {
   'onboarding.camera.enable': 'Bật máy ảnh',
   'onboarding.camera.hint':
     'Máy ảnh giúp bạn chụp ảnh quần áo. Tủ quần áo vẫn hoạt động nếu không có nó.',
-  'onboarding.start': 'Bắt đầu →',
-  'tabs.wardrobe': 'Tủ quần áo',
+    'onboarding.start': 'Bắt đầu →',
+         // Welcome (first-run orientation — M3-16).
+         'welcome.title': 'Chào mừng bạn đến với VirtualWardrobe',
+         'welcome.subtitle':
+           'Xem quần áo mặc lên người bạn thế nào, từ những bức ảnh bạn chụp và danh mục được tuyển chọn — tất cả trên thiết bị của bạn, không có gì tải lên.',
+         'welcome.steps.heading': 'Cách hoạt động',
+         'welcome.step1.title': 'Thêm một món đồ',
+         'welcome.step1.body':
+           'Chụp ảnh bằng máy ảnh hoặc chọn một ảnh từ thư viện của bạn.',
+         'welcome.step2.title': 'Thử',
+         'welcome.step2.body':
+           'Chọn một món đồ và một ảnh cơ thể trong studio để tạo một look.',
+         'welcome.step3.title': 'Điều chỉnh khi cần',
+         'welcome.step3.body':
+           'Nếu không có tự động đặt, hãy tự di chuyển món đồ.',
+         'welcome.step4.title': 'Lưu hoặc chia sẻ',
+         'welcome.step4.body':
+           'Giữ look trong thư viện ảnh của bạn hoặc chia sẻ nó.',
+         'welcome.fallback':
+           'Tự động đặt có thể không khả dụng trên một số thiết bị. Khi đó, bạn vẫn có thể tự di chuyển, thay đổi kích thước và xoay món đồ — cách thủ công cho kết quả như nhau.',
+         'welcome.continue': 'Tiếp tục →',
+         'welcome.skip': 'Bỏ qua',
+         'tabs.wardrobe': 'Tủ quần áo',
   'tabs.catalog': 'Danh mục',
   'tabs.looks': 'Looks',
   'language.title': 'Ngôn ngữ',

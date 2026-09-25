@@ -24,8 +24,29 @@ export const it: Dict = {
   'onboarding.camera.enable': 'Abilita fotocamera',
   'onboarding.camera.hint':
     'La fotocamera ti consente di fotografare gli abiti. L’armadio funziona anche senza.',
-  'onboarding.start': 'Inizia →',
-  'tabs.wardrobe': 'Armadio',
+    'onboarding.start': 'Inizia →',
+        // Welcome (first-run orientation — M3-16).
+     'welcome.title': 'Benvenuto in VirtualWardrobe',
+     'welcome.subtitle':
+       'Scopri come ti stanno i vestiti, con le foto che scatti e un catalogo curato — tutto sul tuo dispositivo, senza upload.',
+     'welcome.steps.heading': 'Come funziona',
+     'welcome.step1.title': 'Aggiungi un capo',
+     'welcome.step1.body':
+       'Fai una foto con la fotocamera o scegline una dalla tua libreria.',
+     'welcome.step2.title': 'Provalo',
+     'welcome.step2.body':
+       'Scegli un capo e una foto del corpo nello studio per comporre un look.',
+     'welcome.step3.title': 'Regola se serve',
+     'welcome.step3.body':
+       'Se il posizionamento automatico non è disponibile, posiziona il capo a mano.',
+     'welcome.step4.title': 'Salva o condividi',
+     'welcome.step4.body':
+       'Conserva il look nella tua galleria o condividilo.',
+     'welcome.fallback':
+       'Il posizionamento automatico potrebbe non essere disponibile su alcuni dispositivi. In tal caso puoi sempre spostare, ridimensionare e ruotare il capo da solo — il percorso manuale dà lo stesso risultato.',
+     'welcome.continue': 'Continua →',
+     'welcome.skip': 'Ignora',
+     'tabs.wardrobe': 'Armadio',
   'tabs.catalog': 'Catalogo',
   'tabs.looks': 'Look',
   'language.title': 'Lingua',

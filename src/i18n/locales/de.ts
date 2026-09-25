@@ -24,8 +24,29 @@ export const de: Dict = {
   'onboarding.camera.enable': 'Kamera aktivieren',
   'onboarding.camera.hint':
     'Mit der Kamera können Sie Kleidung fotografieren. Das Kleiderschrank-Feature funktioniert auch ohne sie.',
-  'onboarding.start': 'Starten →',
-  'tabs.wardrobe': 'Kleiderkammer',
+    'onboarding.start': 'Starten →',
+     // Welcome (first-run orientation — M3-16).
+    'welcome.title': 'Willkommen bei VirtualWardrobe',
+    'welcome.subtitle':
+      'Sieh, wie Kleidung an dir aussieht – von Fotos, die du machst, und einem kuratierten Katalog. Alles auf deinem Gerät, ohne Upload.',
+    'welcome.steps.heading': 'So funktioniert es',
+    'welcome.step1.title': 'Ein Kleidungsstück hinzufügen',
+    'welcome.step1.body':
+      'Nimm ein Foto mit der Kamera auf oder wähle eines aus deiner Mediathek.',
+    'welcome.step2.title': 'Anprobieren',
+    'welcome.step2.body':
+      'Wähle im Studio ein Kleidungsstück und ein Körperfoto, um einen Look zu erstellen.',
+    'welcome.step3.title': 'Bei Bedarf anpassen',
+    'welcome.step3.body':
+      'Wenn das automatische Platzieren nicht verfügbar ist, positioniere das Kleidungsstück von Hand.',
+    'welcome.step4.title': 'Speichern oder teilen',
+    'welcome.step4.body':
+      'Behalte den Look in deiner Galerie oder teile ihn.',
+    'welcome.fallback':
+      'Das automatische Platzieren ist auf manchen Geräten nicht verfügbar. Dann kannst du das Kleidungsstück jederzeit selbst verschieben, skalieren und drehen – der manuelle Weg führt zum gleichen Ergebnis.',
+    'welcome.continue': 'Weiter →',
+    'welcome.skip': 'Überspringen',
+    'tabs.wardrobe': 'Kleiderkammer',
   'tabs.catalog': 'Katalog',
   'tabs.looks': 'Looks',
   'language.title': 'Sprache',

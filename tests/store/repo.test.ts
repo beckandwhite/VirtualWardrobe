@@ -227,15 +227,36 @@ describe('M4-1 · repository / SQLite regressions', () => {
           expect([...db.tables.app_settings.keys()]).toEqual(['theme']);
           });
 
-       it('setOnboarded writes the has_onboarded flag and is idempotent', async () => {
-          expect(await r.getSetting('has_onboarded')).toBeUndefined();
-          await r.setOnboarded();
-          expect(await r.getSetting('has_onboarded')).toBe('1');
-          await r.setOnboarded(); // repeated call must not corrupt / duplicate
-          expect(db.tables.app_settings.get('has_onboarded')).toBe('1');
-          expect([...db.tables.app_settings.keys()]).toEqual(['has_onboarded']);
-          });
-       });
+        it('setOnboarded writes the has_onboarded flag and is idempotent', async () => {
+           expect(await r.getSetting('has_onboarded')).toBeUndefined();
+           await r.setOnboarded();
+           expect(await r.getSetting('has_onboarded')).toBe('1');
+           await r.setOnboarded(); // repeated call must not corrupt / duplicate
+           expect(db.tables.app_settings.get('has_onboarded')).toBe('1');
+           expect([...db.tables.app_settings.keys()]).toEqual(['has_onboarded']);
+            });
+
+        it('setSeenWelcome writes the has_seen_welcome flag and is idempotent', async () => {
+           expect(await r.getSetting('has_seen_welcome')).toBeUndefined();
+           await r.setSeenWelcome();
+           expect(await r.getSetting('has_seen_welcome')).toBe('1');
+           await r.setSeenWelcome(); // repeated call must not corrupt / duplicate
+           expect(db.tables.app_settings.get('has_seen_welcome')).toBe('1');
+           expect([...db.tables.app_settings.keys()]).toEqual(['has_seen_welcome']);
+            });
+
+        it('the welcome flag is independent from the onboarding flag', async () => {
+           await r.setOnboarded();
+           expect(await r.getSetting('has_seen_welcome')).toBeUndefined();
+           await r.setSeenWelcome();
+           expect(await r.getSetting('has_onboarded')).toBe('1');
+           expect(await r.getSetting('has_seen_welcome')).toBe('1');
+           expect([...db.tables.app_settings.keys()].sort()).toEqual([
+              'has_onboarded',
+              'has_seen_welcome',
+              ]);
+            });
+         });
 
     // ── Suite B · item CRUD lifecycle ────────────────────────────────────────
     describe('item CRUD', () => {

@@ -24,8 +24,29 @@ export const es: Dict = {
   'onboarding.camera.enable': 'Activar cámara',
   'onboarding.camera.hint':
     'La cámara te permite fotografiar ropa. El armario funciona sin ella.',
-  'onboarding.start': 'Comenzar →',
-  'tabs.wardrobe': 'Guardarropa',
+    'onboarding.start': 'Comenzar →',
+        // Welcome (first-run orientation — M3-16).
+     'welcome.title': 'Bienvenido a VirtualWardrobe',
+     'welcome.subtitle':
+       'Mira cómo te queda la ropa, con fotos que tomas y de un catálogo curado — todo en tu dispositivo, sin subidas.',
+     'welcome.steps.heading': 'Cómo funciona',
+     'welcome.step1.title': 'Añadir una prenda',
+     'welcome.step1.body':
+       'Toma una foto con la cámara o elige una de tu galería.',
+     'welcome.step2.title': 'Pruébatela',
+     'welcome.step2.body':
+       'Elige una prenda y una foto de tu cuerpo en el estudio para crear un look.',
+     'welcome.step3.title': 'Ajusta si hace falta',
+     'welcome.step3.body':
+       'Si no hay colocación automática, coloca la prenda a mano.',
+     'welcome.step4.title': 'Guarda o comparte',
+     'welcome.step4.body':
+       'Conserva el look en tu galería o compártelo.',
+     'welcome.fallback':
+       'La colocación automática puede no estar disponible en algunos dispositivos. En ese caso puedes mover, escalar y rotar la prenda tú mismo: la vía manual te da el mismo resultado.',
+     'welcome.continue': 'Continuar →',
+     'welcome.skip': 'Saltar',
+     'tabs.wardrobe': 'Guardarropa',
   'tabs.catalog': 'Catálogo',
   'tabs.looks': 'Looks',
   'language.title': 'Idioma',
