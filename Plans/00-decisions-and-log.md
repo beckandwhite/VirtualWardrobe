@@ -747,3 +747,24 @@ and the skippable `e2e:web` all green.
     `automatic pose`/`pose detection`) over the fallback string. `setSeenWelcome` is
    covered by `tests/store/repo.test.ts`. 165 tests / 16 suites pass; typecheck and lint
    are clean.
+
+- **D45.1 — M7 UX Refinement milestone opened for grooming.** Created GitHub milestone
+   [#8 "M7 UX Refinement"](https://github.com/beckandwhite/VirtualWardrobe/milestone/8) and the
+   `M7` label, and dropped in six issues (#53–#58) as a grooming batch — not yet scoped for build;
+   a grill/stress-test pass is planned before acceptance criteria are locked. Items: M7-1 welcome
+   `Continue` → Me tab (#53), M7-2 fold catalog into the Wardrobe tab and drop the catalog tab (#54),
+   M7-3 studio defaults to body photo #1 and signals when >1 exists (#55), M7-4 center the garment
+   overlay on load (#56), M7-5 remove the studio recent-looks strip and hide the skeleton toggle +
+   reset until auto-fit is trustworthy (#57), M7-6 improve the auto-fit/auto-drape experience (#58).
+   Two durable relationships to resolve in grooming: (a) M7-1 + M7-3 both assume multiple body
+   photos, but storage is a single `person_photo_uri` today (`src/store/onboarding.ts`) — decide
+   whether multi-photo body storage is a separate foundational item; (b) M7-5 hides the skeleton/
+   reset controls that M7-6 later reintroduces. Full acceptance criteria and open questions live in
+   each issue body (GitHub is the work-item source of truth per AGENTS.md). Project-board cards were
+   not added — token lacks project scope (cf. D42.5).
+
+- **D45.2 — M7 body photo stays single.** Confirmed the body photo remains a single
+   `person_photo_uri` setting; no multi-photo model. M7-3 (#55) narrowed to "load the saved body
+   photo by default" (dropped the ">1 photo" switcher and the multi-photo storage question); M7-1
+   (#53) dropped its multi-photo dependency note. The D45.1 shared-dependency between M7-1 and M7-3
+   is closed.
