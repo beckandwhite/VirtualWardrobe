@@ -8,12 +8,13 @@ import {
   TextInput,
 } from 'react-native';
 import { useMemo, useState } from 'react';
-import { router } from 'expo-router';
 import { useItems } from '@/store';
 import { applyFilters, type FilterCriteria } from '@/wardrobe';
 import { emptyStateVariant, hasActiveCriteria } from '@/wardrobe/emptyState';
 import { useI18n } from '@/i18n/useI18n';
 import CatalogSection from '@/catalog/CatalogSection';
+import { CAPTURE_HREF, itemHref, studioHref } from '@/navigation/routes';
+import { useGuardedPush } from '@/navigation/useGuardedPush';
 
 // M1-3: the wardrobe browse experience. A virtualized thumbnail grid (reuse the
 // M1-2 `useItems` + `Item` snapshot) with a filter/search bar on top. The visible
@@ -51,6 +52,9 @@ const SWATCH = [
 export default function WardrobeScreen() {
   const { items, loading, reload } = useItems();
   const { t } = useI18n();
+  // Guarded push: a repeated tap on the same destination (open item / try on / add)
+  // within the debounce window is dropped, so no duplicate screen is stacked (#47).
+  const push = useGuardedPush();
 
   const [query, setQuery] = useState('');
   const [criteria, setCriteria] = useState<FilterCriteria>({});
@@ -173,7 +177,9 @@ export default function WardrobeScreen() {
               </TouchableOpacity>
               <TouchableOpacity
                 activeOpacity={0.7}
-                onPress={() => router.push('/capture')}
+                accessibilityRole="button"
+                accessibilityLabel={t('wardrobe.addItem')}
+                onPress={() => push(CAPTURE_HREF)}
               >
                 <Text style={styles.addLink}>{t('wardrobe.addItem')}</Text>
               </TouchableOpacity>
@@ -185,8 +191,10 @@ export default function WardrobeScreen() {
           <TouchableOpacity
             key={String(item.id)}
             activeOpacity={0.85}
+            accessibilityRole="button"
+            accessibilityLabel={item.name}
             style={styles.thumb}
-            onPress={() => router.push(`/item?id=${item.id}`)}
+            onPress={() => push(itemHref(item.id))}
           >
             <Image
               source={{ uri: item.thumbnailPath ?? item.imagePath }}
@@ -201,7 +209,9 @@ export default function WardrobeScreen() {
             <TouchableOpacity
               style={styles.tryOn}
               activeOpacity={0.8}
-              onPress={() => router.push(`/studio?id=${item.id}`)}
+              accessibilityRole="button"
+              accessibilityLabel={`${t('common.tryOn')}: ${item.name}`}
+              onPress={() => push(studioHref(item.id))}
             >
               <Text style={styles.tryOnText}>{t('common.tryOn')}</Text>
             </TouchableOpacity>
@@ -212,7 +222,9 @@ export default function WardrobeScreen() {
       <TouchableOpacity
         style={styles.fab}
         activeOpacity={0.8}
-        onPress={() => router.push('/capture')}
+        accessibilityRole="button"
+        accessibilityLabel={t('wardrobe.addItem')}
+        onPress={() => push(CAPTURE_HREF)}
       >
         <Text style={styles.fabText}>+</Text>
       </TouchableOpacity>

@@ -49,6 +49,7 @@
     "test": "jest",
     "gen-placeholders": "node scripts/gen-placeholders.mjs",
     "fetch:pose": "node scripts/fetch-movenet.mjs",
+    "verify:pose": "node scripts/pose-m37-verify.mjs",
     "e2e:pose": "node scripts/pose-smoke.mjs",
     "e2e:pose:check": "node scripts/pose-smoke-path.mjs --selftest",
     "e2e:web": "node scripts/web-smoke.mjs",

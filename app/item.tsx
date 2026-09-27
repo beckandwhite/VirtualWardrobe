@@ -12,6 +12,7 @@ import { useLocalSearchParams, router } from 'expo-router';
 import { useItem, upsertItem, deleteItem, makeThumbnail } from '@/store';
 import type { ItemCategory } from '@/store';
 import { useI18n } from '@/i18n/useI18n';
+import { parseItemId, exitTo } from '@/navigation/routes';
 
 // M1-2: detail/edit screen. Turns a captured draft (M1-1) into a typed item and
 // owns full CRUD. A thumbnail is generated on save so the gallery (M1-3) decodes
@@ -40,7 +41,8 @@ const COLORS = [
 
 export default function ItemScreen() {
   const { id } = useLocalSearchParams<{ id?: string }>();
-  const { item, loading } = useItem(id ? Number(id) : null);
+  // Canonical id (a single positive integer, else null → the not-found view).
+  const { item, loading } = useItem(parseItemId(id));
   const { t } = useI18n();
 
   const [type, setType] = useState<ItemCategory>('other');
@@ -58,6 +60,15 @@ export default function ItemScreen() {
     setSeededId(item.id);
   }
 
+  // Deterministic exit (#47 D-4): pop back to the originating surface (the wardrobe)
+  // when there is history, else replace to the wardrobe so a deep-linked /item never
+  // dead-ends on a screen with nothing behind it.
+  const leave = () => {
+    const decision = exitTo(router.canGoBack());
+    if (decision.action === 'back') router.back();
+    else router.replace(decision.route);
+  };
+
   if (loading || !item) {
     return (
       <View style={styles.center}>
@@ -65,7 +76,7 @@ export default function ItemScreen() {
           {loading ? t('common.loading') : t('item.notFound')}
         </Text>
         {!loading ? (
-          <TouchableOpacity style={styles.back} onPress={() => router.back()}>
+          <TouchableOpacity style={styles.back} onPress={leave}>
             <Text style={styles.backText}>{t('common.back')}</Text>
           </TouchableOpacity>
         ) : null}
@@ -89,7 +100,7 @@ export default function ItemScreen() {
         tags: tags(),
         thumbnailPath,
       });
-      await router.back();
+      leave();
     } catch (e) {
       console.error('item save failed', e);
       setBusy(false);
@@ -100,7 +111,7 @@ export default function ItemScreen() {
     setBusy(true);
     try {
       await deleteItem(item.id);
-      await router.back();
+      leave();
     } catch (e) {
       console.error('item delete failed', e);
       setBusy(false);

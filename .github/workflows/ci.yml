@@ -39,6 +39,14 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: Native bundle exclusion (M2-1 AC4)
+        run: |
+          npx expo export --platform ios --source-maps external --output-dir dist-ios-check
+          grep -r "@tensorflow" dist-ios-check \
+            && echo "FAIL: @tensorflow found in native bundle" && exit 1 \
+            || echo "ok: no @tensorflow in native bundle"
+          rm -rf dist-ios-check
+
       - name: Audit production and development dependencies
         run: npm audit --audit-level=high
 

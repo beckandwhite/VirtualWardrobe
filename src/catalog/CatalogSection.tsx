@@ -6,11 +6,12 @@ import {
   TouchableOpacity,
   type ImageSourcePropType,
 } from 'react-native';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { router } from 'expo-router';
 import { r, type StoreItem } from '@/store';
 import { PLACEHOLDER_URIS } from '@/catalog/placeholders';
 import { useI18n } from '@/i18n/useI18n';
+import { WARDROBE_HREF, studioHref } from '@/navigation/routes';
 
 function resolveSource(item: StoreItem): ImageSourcePropType {
   return { uri: PLACEHOLDER_URIS[item.category] };
@@ -26,6 +27,11 @@ export default function CatalogSection() {
   const [items, setItems] = useState<StoreItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [copiedId, setCopiedId] = useState<number | null>(null);
+  // A catalog action copies a StoreItem into a real Item before navigating; this
+  // in-flight latch drops a double-tap so we never insert twice / stack two screens
+  // (the guarded-push target is a fresh id each time, so a time latch is what fits
+  // an async copy-then-navigate — #47 double-push).
+  const inFlight = useRef(false);
 
   const load = useCallback(async () => {
     const list = await r.listStoreItems();
@@ -40,28 +46,40 @@ export default function CatalogSection() {
   // "Add to wardrobe" copies the catalog entry into a real user Item (distinct
   // id, source 'user', tags ['catalog']) and bounces to the wardrobe tab.
   const addToWardrobe = useCallback(async (entry: StoreItem) => {
-    const inserted = await r.insertItem({
-      type: entry.category,
-      name: entry.name,
-      color: entry.color,
-      tags: ['catalog'],
-      imagePath: entry.imagePaths[0] ?? '',
-    });
-    setCopiedId(inserted.id);
-    router.replace('/wardrobe');
+    if (inFlight.current) return;
+    inFlight.current = true;
+    try {
+      const inserted = await r.insertItem({
+        type: entry.category,
+        name: entry.name,
+        color: entry.color,
+        tags: ['catalog'],
+        imagePath: entry.imagePaths[0] ?? '',
+      });
+      setCopiedId(inserted.id);
+      router.replace(WARDROBE_HREF);
+    } finally {
+      inFlight.current = false;
+    }
   }, []);
 
   // "Try on" copies to a user Item first, then deep-links the studio with that
   // id — preselecting it exactly like a wardrobe item.
   const tryOn = useCallback(async (entry: StoreItem) => {
-    const inserted = await r.insertItem({
-      type: entry.category,
-      name: entry.name,
-      color: entry.color,
-      tags: ['catalog'],
-      imagePath: entry.imagePaths[0] ?? '',
-    });
-    router.push(`/studio?id=${inserted.id}`);
+    if (inFlight.current) return;
+    inFlight.current = true;
+    try {
+      const inserted = await r.insertItem({
+        type: entry.category,
+        name: entry.name,
+        color: entry.color,
+        tags: ['catalog'],
+        imagePath: entry.imagePaths[0] ?? '',
+      });
+      router.push(studioHref(inserted.id));
+    } finally {
+      inFlight.current = false;
+    }
   }, []);
 
   const renderCard = useCallback(

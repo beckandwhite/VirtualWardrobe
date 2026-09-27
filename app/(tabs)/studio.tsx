@@ -45,6 +45,7 @@ import sampleBody from '../../assets/sample/body.png';
 import sampleGarment from '../../assets/sample/garment.png';
 import { PERSON_PHOTO_KEY } from '@/store/onboarding';
 import { resolveBodySource } from '@/studio/bodySource';
+import { parseItemId } from '@/navigation/routes';
 
 // A garment to overlay: either a wardrobe Item or a catalog StoreItem, normalized
 // to a common shape the studio only ever talks to.
@@ -127,6 +128,9 @@ function toGarmentStore(s: StoreItem): Garment {
 export default function StudioScreen() {
   const { id } = useLocalSearchParams<{ id?: string }>();
   const { t } = useI18n();
+  // Canonical deep-link id: a single positive integer, else null so we fall back to
+  // first-wardrobe / first-catalog instead of querying a junk id (#47 invalid-id).
+  const itemId = parseItemId(id);
 
   const [garment, setGarment] = useState<Garment | null>(null);
   const [bodySource, setBodySource] = useState<ImageSourcePropType>(sampleBody);
@@ -230,7 +234,7 @@ export default function StudioScreen() {
     let alive = true;
     (async () => {
       try {
-        const chosen = id ? await r.getItem(Number(id)) : undefined;
+        const chosen = itemId != null ? await r.getItem(itemId) : undefined;
         if (chosen && alive) {
           setGarment(toGarment(chosen));
           return;
@@ -249,7 +253,7 @@ export default function StudioScreen() {
     return () => {
       alive = false;
     };
-  }, [id]);
+  }, [itemId]);
 
   // 2. Pose → auto box → animated start. Web auto-places via MoveNet; native
   //    ManualPoseProvider returns [] → identity + the "adjusting manually" banner

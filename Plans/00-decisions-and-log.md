@@ -863,3 +863,50 @@ and the skippable `e2e:web` all green.
   the shoulder line y≈0.30 to mid-torso y≈0.425) to match the corrected anchor. All 7 non-degenerate
   M7-6 fixtures now meet the bar (`failingDimensions === []`); no-ankle shoes still degrade to
   null→identity; auto-fit stays web-only. Skeleton toggle + Reset controls reintroduced in the studio.
+
+## 2026-09-27 — M3 Native+Polish batch (docs, nav, pose infra, CI, branding)
+
+- **D49.1 — M3-3 (#16) branding config verified, no change needed.** `app.json` already carries a
+  custom top-level `icon`, a branded `splash` (image + `#E6F4FE` bg, `resizeMode: contain`), and a full
+  `android.adaptiveIcon` set (foreground/background/monochrome); all referenced assets exist under
+  `assets/` at correct dimensions with no default-Expo placeholders. Splash kept as a config-only
+  `app.json` field rather than adopting the `expo-splash-screen` plugin, honoring the zero-extra-dep
+  philosophy (D23.1) — Expo SDK 57 resolves it without warning. Device-build verification remains the
+  only open AC (out of scope in-sandbox). No files changed.
+
+- **D49.2 — M3-8/M3-10/M3-12 (#26/#21/#23) test-environment docs.** Added `docs/dev-setup.md` §8
+  (Playwright web-test env), §9 (Android test env), §10 (iOS test env), each with toolchain / launch
+  (Expo Go baseline + EAS preview referencing M3-1) / perf / test-surface / gotchas, cross-linked from
+  §7.1/§7.2. All state the **manual** native pose path (`src/pose/providers.ts`, the `.native`
+  resolution slot — the repo has no `providers.native.ts`) and put MoveNet/MediaPipe re-scope explicitly
+  out (M3-1 NO-GO). Docs-only; gates green.
+
+- **D49.3 — M3-18 (#49) pose infra reconciled to committed-bytes reality.** After M3-7 (D42) vendored
+  the MoveNet graph into `assets/pose/movenet-singlepose-lite/`: (1) `scripts/fetch-movenet.mjs` is now a
+  pure local copy (`fs.cpSync(assets/pose → public/pose)`), dropping the dead tfhub.dev curl loop,
+  `MOVENET_URL` fallback, and `--emit-url-only` codegen; (2) `src/pose/modelUrl.ts` is a plain committed
+  static constant (no "GENERATED" fiction, value unchanged); (3) added `npm run verify:pose`
+  (`scripts/pose-m37-verify.mjs`), loads the graph network-free and asserts 17 COCO keypoints (exit 0);
+  (4) `docs/dev-setup.md` §2 rewritten to the resolved state. Residual (deferred): §7 still carries a
+  stale tfhub.dev / M3-6-M3-7-in-progress reference — left to avoid colliding with the §8–§10 edits.
+
+- **D49.4 — M3-19 (#50) native-bundle exclusion mechanically proven + CI gate (closes M2-1 AC4).**
+  `expo export --platform ios` succeeds (pure Metro; D10 web-wasm issue does not affect iOS). Grepping
+  the default Hermes `.hbc` is a **false-safe** (packed/minified strings, numeric module IDs), so the
+  proof + CI gate use `--source-maps external`: the `.map` `sources` array lists real module paths.
+  Native iOS graph (1663 modules) contains `src/pose/providers.ts` but NOT `providers.web.ts`,
+  `MoveNetPoseProvider.ts`, `poseLoader.ts`, `modelUrl.ts`, or any `@tensorflow*`/`tfjs` — mechanically
+  confirming the D20.1 platform split. Added CI step "Native bundle exclusion (M2-1 AC4)" to the
+  `quality` job in `.github/workflows/ci.yml` (fails the build on any `@tensorflow` match).
+
+- **D49.5 — M3-17 (#47) navigation & return paths.** Extracted navigation decisions into pure,
+  unit-tested `src/navigation/*` modules (mirrors welcomeGate): `parseItemId` (canonical single-int id,
+  junk → null → store never hit), `studioHref`/`itemHref` builders, `exitTo(canGoBack, fallback)`
+  (modals `router.back()` when history exists else `replace('/wardrobe')` — no cold-start dead-end),
+  `shouldPush`/`useGuardedPush` (700ms same-target double-push debounce) + a CatalogSection in-flight
+  latch, and a single-owner `TABS` descriptor with per-tab accessibility labels. **D-4 resolved:** modal
+  exits use back-or-replace-fallback; studio deep-link relies on the persistent tab bar + reconstructable
+  state (no custom back control). **D-8 resolved:** welcome stays a permanent tab (five icons), encoded
+  with a regression test. Deep links deliberately not gated on onboarding (passive nudge per D-1); id
+  validity is the only enforced state check. +21 nav tests (219 total). Note: M3-14 (#34) storyboard was
+  the page-map input but is **deferred** at the user's request — not committed with this batch.

@@ -18,7 +18,9 @@
         "@/i18n": ["./src/i18n/index.ts"],
         "@/i18n/*": ["./src/i18n/*"],
         "@/onboarding/*": ["./src/onboarding/*"],
-        "@/studio/*": ["./src/studio/*"]
+        "@/studio/*": ["./src/studio/*"],
+        "@/navigation": ["./src/navigation/index.ts"],
+        "@/navigation/*": ["./src/navigation/*"]
     }
   },
    "include": ["**/*.ts", "**/*.tsx", ".expo/types/**/*.ts", "expo-env.d.ts"],

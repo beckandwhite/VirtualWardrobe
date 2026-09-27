@@ -7,14 +7,16 @@ import {
   type ImageSourcePropType,
 } from 'react-native';
 import { useState, useCallback, useEffect } from 'react';
-import { router } from 'expo-router';
 import { r, type TryOn } from '@/store';
 import { deleteLook, shareLook } from '@/composer/share';
 import { useI18n } from '@/i18n/useI18n';
+import { studioHref } from '@/navigation/routes';
+import { useGuardedPush } from '@/navigation/useGuardedPush';
 import sampleBody from '../../assets/sample/body.png';
 
 export default function LooksScreen() {
   const { t } = useI18n();
+  const push = useGuardedPush();
   const [looks, setLooks] = useState<TryOn[]>([]);
   const [loading, setLoading] = useState(true);
   const [notice, setNotice] = useState<string | null>(null);
@@ -50,10 +52,14 @@ export default function LooksScreen() {
 
   // Reopen a look into the studio editor, deep-linking its item so the
   // studio restores the body + garment. The stored transform is re-applied
-  // from the row on studio mount (M2-2 / M3-2 reconstruct).
-  const reopen = useCallback((look: TryOn) => {
-    router.push(`/studio?id=${look.itemId}`);
-  }, []);
+  // from the row on studio mount (M2-2 / M3-2 reconstruct). Guarded so a
+  // double-tap doesn't stack two studio screens (#47).
+  const reopen = useCallback(
+    (look: TryOn) => {
+      push(studioHref(look.itemId));
+    },
+    [push],
+  );
 
   return (
     <View style={styles.screen}>
