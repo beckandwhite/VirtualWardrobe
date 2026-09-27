@@ -133,6 +133,13 @@ issue bodies; implementation notes remain here only when they are useful as dura
 >    test; 165 tests, typecheck, and lint pass. On-device/simulator *rendering* is not exercised
 >    in-sandbox (the known M3-1/D20.5 ceiling); the routing + persistence + copy logic is fully
 >    asserted unit-free of a device.
+>
+> * **#62 — M3-18 deferred residual closed (D51.1).** M3-18 (#49) left `docs/dev-setup.md` §7 carrying
+>    stale post-M3-7 text (dead `tfhub.dev` framing, the false "fetch:pose has a fallback" claim, and
+>    "M3-6/M3-7 in-progress"). This item rewrote §7's third bullet to the committed-bytes reality —
+>    canonical graph committed under `assets/pose/` (M3-7 DONE, M3-6 superseded), `fetch:pose` a pure
+>    local copy, `verify:pose` proves wiring — and kept `MOVENET_MODEL_URL` as the harness's local
+>    auto/manual gate. Docs-only; all internal anchors resolve; typecheck + lint pass.
 
 ## M4 QA · Regression & Coverage
 
