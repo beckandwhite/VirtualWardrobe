@@ -796,3 +796,70 @@ and the skippable `e2e:web` all green.
    found during grooming: `garmentStyle` translates a full-stage-sized layer by `sx*w`/`sy*h`, so the
    `0.5 = center` convention lands garments in the bottom-right quadrant; M7-5 Part B reconciles the
    convention globally (`(sx-0.5)*w`) and verifies the auto-placed path doesn't regress.
+
+## 2026-09-27 — M7-6 auto-fit spike: quality bar + fixtures (gates M7-7)
+
+- **D47.1 — auto-fit is WEB-ONLY; M7-7 targets the MoveNet path, native is unchanged.** MoveNet
+  only runs in `providers.web.ts`; native (`providers.native.ts` → `ManualPoseProvider`) returns
+  `[]`, so `autoTransformFor([])` → `IDENTITY_TRANSFORM` + the M2-4 manual banner (D21.5). M3-1
+  on-device pose stays NO-GO (D21.7). Therefore the M7-7 placement improvements only affect the web
+  auto-place path; native keeps the centered identity start and the manual controls. The fixtures are
+  keypoint inputs (what MoveNet emits), so they exercise the platform-agnostic pure functions
+  (`computeBoxForKeypoints`/`autoTransformFor`) directly, independent of platform wiring.
+
+- **D47.2 — locked, measurable quality bar (tolerance per dimension).** Placement is scored against
+  an aspect-aware expected box (center + separate width/height) per fixture. A placement "meets the
+  bar" when every dimension is within tolerance: horizontal center |Δcx| ≤ 0.03, vertical center
+  |Δcy| ≤ 0.04 (absolute frame fractions); width |Δw|/w_exp ≤ 0.20 and height |Δh|/h_exp ≤ 0.20
+  (relative to the garment's own size); rotation |Δ°| ≤ 5. Numbers + the pure `failingDimensions`
+  scorer live in `tests/fixtures/autofit/fixtures.ts` (`AUTOFIT_TOLERANCE`).
+
+- **D47.3 — committed fixtures + fixture-consuming scaffold.** `tests/fixtures/autofit/fixtures.ts`
+  is the typed, jest-runnable source of truth: 8 cases (5 straight-on garment types top/bottom/dress/
+  outerwear/shoes, plus a horizontally-shifted top, an ~11° leaning top for rotation, and an
+  ankle-less shoes degradation case). `tests/studio/autofit.fixtures.test.ts` runs them: a LIVE suite
+  (green) locks the measured current gap and proves the two properties the current model already meets
+  (horizontal alignment on the strong axis; graceful null degradation), and a `describe.skip('M7-7
+  quality bar')` suite that M7-7 unskips as its red→green target. Full suite stays green (18 suites,
+  191 passed / 7 skipped); `tsc --noEmit` + `eslint --max-warnings 0` clean.
+
+- **D47.4 — measured failures, catalogued by dimension × garment type (against #57's corrected
+  `0.5=center` baseline).** Systemic root cause: `boxToTransform` collapses the box to one square
+  `scale = max(width, height)`, so any non-square garment is over-scaled on its narrow axis (worst for
+  bottoms and dresses — trousers render ~2× too wide). By type: **top** — center anchored at the
+  shoulder line (floats above shoulders) and height collapses to 0 (bottom==top); **bottom** — height
+  derived from hip width ×1.8 not hip→ankle span, so legs stop mid-thigh and render too wide; **dress**
+  — ends at hips, too short/high; **outerwear** — too narrow for an open jacket; **shoes** — box from
+  ankle spread ×0.8, far too small. By dimension: **horizontal** is the strong axis (tracks the
+  shoulder/hip/ankle midpoint, within tolerance under translation); **vertical** fails on most
+  torso/leg garments; **scale (width/height)** fails on every type because of the square collapse and
+  wrong length anchors; **rotation** is always 0, so any lean is uncorrected.
+
+- **D47.5 — recommended M7-7 approach: place against the box, per-type anchors + aspect-aware scale.**
+  (1) Add a per-garment-type anchor spec (torso midpoint for tops, hip→ankle span for bottoms,
+  shoulder→thigh for dresses, feet for shoes) so vertical centers and lengths are correct. (2) Replace
+  the single-square `scale` with aspect-aware sizing — carry separate width/height (or scaleX/scaleY)
+  through the Transform + `compose.ts`/`garmentStyle`, keeping the `0.5=center` convention #57 landed.
+  (3) Derive rotation from the shoulder-line (and hip-line) angle, clamped to ±45°. (4) Keep the
+  null→identity degradation. Reintroduce the Skeleton/Reset controls hidden by M7-5 once placement is
+  trustworthy. This is a self-conflicting change to `boxToTransform`/the Transform shape, so M7-7
+  should touch `src/composer/autoBox.ts` + `transform.ts` + `compose.ts` + `studio.tsx` together.
+
+- **D48.1 — M7-7 aspect-awareness lives in the box geometry, not the `Transform` shape.** Implementing
+  M7-6's recommendation (D47.5), we did **not** add `scaleX`/`scaleY` to `Transform`. Instead
+  `computeBoxForKeypoints` (`src/composer/autoBox.ts`) now returns independent width/height per garment
+  type and the quality bar scores that aspect-aware `Box` directly. Rendering keeps a single
+  `scale = max(width, height)` and contain-fits the garment image into the square layer, so the source
+  image supplies its own aspect ratio inside the box. **Why:** this satisfies the aspect-aware bar at
+  the geometry layer while leaving `compose.ts` and the `0.5=center` export contract (D46 / #57)
+  untouched, so `tests/composer/export.test.ts` stays green with no export-pipeline risk.
+
+- **D48.2 — per-type anchors + body-line rotation carried through `boxToTransform`.**
+  `computeBoxForKeypoints` places per-type vertical anchors (top shoulders→hips/mid-torso; bottom
+  hips→ankles; dress shoulders→knees; outerwear shoulders→below-hips; shoes at/below the ankle line)
+  and derives rotation from the shoulder line (tops/dress/outerwear), hip line (bottoms), or ankle line
+  (shoes), clamped ±45°; `boxToTransform` now carries that rotation through instead of hardcoding 0.
+  The top-placement characterization test (`tests/autoBox.test.ts`) was updated (top center moved from
+  the shoulder line y≈0.30 to mid-torso y≈0.425) to match the corrected anchor. All 7 non-degenerate
+  M7-6 fixtures now meet the bar (`failingDimensions === []`); no-ankle shoes still degrade to
+  null→identity; auto-fit stays web-only. Skeleton toggle + Reset controls reintroduced in the studio.

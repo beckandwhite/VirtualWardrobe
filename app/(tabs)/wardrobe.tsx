@@ -13,12 +13,18 @@ import { useItems } from '@/store';
 import { applyFilters, type FilterCriteria } from '@/wardrobe';
 import { emptyStateVariant, hasActiveCriteria } from '@/wardrobe/emptyState';
 import { useI18n } from '@/i18n/useI18n';
+import CatalogSection from '@/catalog/CatalogSection';
 
 // M1-3: the wardrobe browse experience. A virtualized thumbnail grid (reuse the
 // M1-2 `useItems` + `Item` snapshot) with a filter/search bar on top. The visible
 // list is a pure, memoized function of the snapshot + active facets + query, so
 // re-renders stay cheap. Filters AND together; clearing everything restores the
 // full wardrobe.
+// M7-2b: the catalog was consolidated in here as a second section. The own-clothes
+// grid is the single scroll and renders <CatalogSection/> as its footer, so both
+// sections ("Record your own clothes" / "Catalog") share one scroll. The two data
+// paths stay distinct: this list holds real `Item`s; CatalogSection holds
+// `StoreItem`s with their own add-to-wardrobe / try-on handlers.
 
 const CATEGORIES = [
   'top',
@@ -78,7 +84,7 @@ export default function WardrobeScreen() {
 
   return (
     <View style={styles.screen}>
-      <Text style={styles.header}>{t('wardrobe.header')}</Text>
+      <Text style={styles.header}>{t('wardrobe.ownSection')}</Text>
 
       <TextInput
         style={styles.search}
@@ -174,6 +180,7 @@ export default function WardrobeScreen() {
             </View>
           ) : null
         }
+        ListFooterComponent={<CatalogSection />}
         renderItem={({ item }) => (
           <TouchableOpacity
             key={String(item.id)}

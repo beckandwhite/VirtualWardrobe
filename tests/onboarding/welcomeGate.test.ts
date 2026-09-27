@@ -7,36 +7,38 @@ import {
 } from '../../src/onboarding/welcomeGate';
 import { CATALOG, LOCALES } from '../../src/i18n/strings';
 
-// M3-16 first-run welcome gate. The routing decision (app/index.tsx) lives in
-// src/onboarding/welcomeGate.ts as a pure function of the two persisted flags —
-// `has_onboarded` and `has_seen_welcome` — so every branch is assertable without
-// a router or a store (mirrors entryRedirect.test.ts / D29.2).
+// M3-16 / M7-1 first-run welcome gate. The routing decision (app/index.tsx) lives
+// in src/onboarding/welcomeGate.ts as a pure function of `has_seen_welcome` and
+// `person_photo_uri` presence, so every branch is assertable without a router or a
+// store (mirrors entryRedirect.test.ts / D29.2). M7-1 retired the M0-4
+// `/onboarding` camera flow: a photoless user is routed to the Me tab instead.
 
 describe('welcomeGate', () => {
- it('shows a loading state while either flag is unresolved (null)', () => {
+ it('shows a loading state while either input is unresolved (null)', () => {
    expect(welcomeGate(null, null)).toBe('loading');
    expect(welcomeGate(null, true)).toBe('loading');
-   expect(welcomeGate(true, null)).toBe('loading');
    expect(welcomeGate(null, false)).toBe('loading');
-   expect(welcomeGate(false, null)).toBe('loading');
+   // Welcome seen, but photo-presence still resolving.
+   expect(welcomeGate(true, null)).toBe('loading');
   });
 
- it('shows the welcome only on a truly first launch (both flags false)', () => {
+ it('shows the welcome only on a truly first launch (welcome not seen)', () => {
    expect(welcomeGate(false, false)).toBe('/welcome');
+   expect(welcomeGate(false, true)).toBe('/welcome');
+   // A first launch never depends on photo-presence — the welcome comes first.
+   expect(welcomeGate(false, null)).toBe('/welcome');
   });
 
- it('routes a seen-welcome, not-yet-onboarded user to the M0-4 onboarding', () => {
-   expect(welcomeGate(false, true)).toBe('/onboarding');
+ it('routes a seen-welcome user with no body photo to the Me tab for capture', () => {
+   expect(welcomeGate(true, false)).toBe('/me');
   });
 
- it('routes a fully-settled returning user straight to the wardrobe', () => {
+ it('routes a seen-welcome user with a body photo straight to the wardrobe', () => {
    expect(welcomeGate(true, true)).toBe('/wardrobe');
-   expect(welcomeGate(true, false)).toBe('/wardrobe');
   });
 
- it('never re-shows the welcome to a user who already onboarded', () => {
-     // AC3: a returning user (onboarded) is not interrupted, even if the welcome
-     // flag is somehow still false.
+ it('never re-shows the welcome once it has been seen', () => {
+     // A returning user (welcome seen) is not interrupted, regardless of photo.
    expect(welcomeGate(true, false)).not.toBe('/welcome');
    expect(welcomeGate(true, true)).not.toBe('/welcome');
   });
@@ -45,22 +47,21 @@ describe('welcomeGate', () => {
    const routes: WelcomeRoute[] = [
      welcomeGate(null, null),
      welcomeGate(false, false),
-     welcomeGate(false, true),
+     welcomeGate(true, false),
      welcomeGate(true, true),
     ];
-   expect(routes).toEqual(['loading', '/welcome', '/onboarding', '/wardrobe']);
+   expect(routes).toEqual(['loading', '/welcome', '/me', '/wardrobe']);
   });
 });
 
-describe('continueWelcomeTransition (primary / skip behavior)', () => {
- it('persists has_seen_welcome = "1" and is the same for continue and skip', () => {
-     // Continue and Skip resolve to the same persisted flag and the same next
-     // route for a given onboarding state — both are idempotent one-screen
-     // dismissals (D44.1).
+describe('continueWelcomeTransition (single Continue action)', () => {
+ it('persists has_seen_welcome = "1" and routes on photo-presence', () => {
+     // M7-1: the Skip button is gone; the single Continue action persists the
+     // seen flag and routes by photo-presence — no photo → the Me tab (D44.1).
    expect(continueWelcomeTransition(false)).toEqual({
      key: WELCOME_KEY,
      value: WELCOME_FLAG,
-     route: '/onboarding',
+     route: '/me',
      });
    expect(continueWelcomeTransition(true)).toEqual({
      key: WELCOME_KEY,
@@ -69,8 +70,8 @@ describe('continueWelcomeTransition (primary / skip behavior)', () => {
      });
   });
 
- it('targets the M0-4 onboarding when not yet onboarded, else the wardrobe', () => {
-   expect(continueWelcomeTransition(false).route).toBe('/onboarding');
+ it('targets the Me tab when no photo is set, else the wardrobe', () => {
+   expect(continueWelcomeTransition(false).route).toBe('/me');
    expect(continueWelcomeTransition(true).route).toBe('/wardrobe');
   });
 
@@ -132,7 +133,6 @@ describe('welcome copy (AC4 — honest manual fallback, no native pose promise)'
      expect(CATALOG[locale]['welcome.step3.title']?.length).toBeGreaterThan(0);
      expect(CATALOG[locale]['welcome.step4.title']?.length).toBeGreaterThan(0);
      expect(CATALOG[locale]['welcome.continue']?.length).toBeGreaterThan(0);
-     expect(CATALOG[locale]['welcome.skip']?.length).toBeGreaterThan(0);
      }
    });
 });

@@ -17,9 +17,10 @@ export default function RootLayout() {
 return (
       <I18nProvider>
          <Stack screenOptions={{ headerShown: false }}>
-              <Stack.Screen name="onboarding" />
               <Stack.Screen name="(tabs)" />
-             {/* Flat modals (D19.4): full-screen, reached by push/replace.
+             {/* M7-1 retired the M0-4 `onboarding` camera flow: the Me tab is now
+                 the sole body-capture surface, so that route is gone.
+                 Flat modals (D19.4): full-screen, reached by push/replace.
                  welcome + studio now live inside the (tabs) group as persistent
                  tabs, so they're no longer registered here. */}
              <Stack.Screen name="capture" options={{ presentation: 'modal' }} />

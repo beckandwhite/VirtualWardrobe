@@ -9,7 +9,6 @@ import {
   View,
   StyleSheet,
   TouchableOpacity,
-  ScrollView,
   type ImageSourcePropType,
 } from 'react-native';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -37,7 +36,6 @@ import {
 import {
   shareLook,
   persistLook,
-  reopenTransform,
   type ShareResult,
 } from '@/composer/share';
 import { noticeForShare, EXPORT_ERROR_NOTICE } from '@/composer/notice';
@@ -46,6 +44,7 @@ import type { Keypoint, Transform } from '@/pose';
 import sampleBody from '../../assets/sample/body.png';
 import sampleGarment from '../../assets/sample/garment.png';
 import { PERSON_PHOTO_KEY } from '@/store/onboarding';
+import { resolveBodySource } from '@/studio/bodySource';
 
 // A garment to overlay: either a wardrobe Item or a catalog StoreItem, normalized
 // to a common shape the studio only ever talks to.
@@ -135,7 +134,9 @@ export default function StudioScreen() {
   const [keypoints, setKeypoints] = useState<Keypoint[]>([]);
   const [autoPlaced, setAutoPlaced] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [showSkeleton, setShowSkeleton] = useState(true);
+  // Skeleton-overlay visibility (M7-7): reintroduced now that placement is
+  // trustworthy, so the user can see *why* the auto-box landed where it did.
+  const [showSkeleton, setShowSkeleton] = useState(false);
   const [dims, setDims] = useState({ w: 0, h: 0 });
   // The manual-fallback banner (M2-4): shown when pose auto-drape is unavailable.
   const [manualBanner, setManualBanner] = useState({
@@ -147,14 +148,6 @@ export default function StudioScreen() {
     kind: 'info' | 'error';
     text: string;
   } | null>(null);
-  // The minimal saved-looks strip (M2-3): recent TryOn rows, newest first.
-  const [recent, setRecent] = useState<TryOn[]>([]);
-  const refreshRecent = useCallback(async () => {
-    setRecent((await r.listTryOns()).slice(0, 4));
-  }, []);
-  useEffect(() => {
-    refreshRecent().catch((e) => console.error('studio: recent looks', e));
-  }, [refreshRecent]);
 
   // Seed the try-on body from the user's saved profile photo (the Me tab persists
   // `person_photo_uri`). Runs once on mount; a per-session "Pick photo" override or
@@ -164,10 +157,9 @@ export default function StudioScreen() {
     (async () => {
       try {
         const uri = await r.getSetting(PERSON_PHOTO_KEY);
-        if (uri && alive) {
-          setBodySource({ uri });
-          setBodyPath(uri);
-        }
+        if (!alive) return;
+        setBodySource(resolveBodySource(uri, sampleBody));
+        setBodyPath(uri || null);
       } catch (e) {
         console.error('studio: person photo load', e);
       }
@@ -192,8 +184,6 @@ export default function StudioScreen() {
 
   // Mirror of the five fields for JS-side consumers (serialization + readouts).
   const [mirror, setMirror] = useState<Transform>({ ...IDENTITY_TRANSFORM });
-  // The last auto-derived box, so "Reset" returns to confident auto placement.
-  const autoRef = useRef<Transform>({ ...IDENTITY_TRANSFORM });
 
   // Mirror the shared fields into a single Transform for display + save.
   useAnimatedReaction(
@@ -274,7 +264,6 @@ export default function StudioScreen() {
       setKeypoints(kps);
       const auto = autoTransformFor(kps, garment.type);
       const placed = kps.length > 0;
-      autoRef.current = auto;
       setAutoPlaced(placed);
       applyTransform(auto, true);
       setManualBanner((b) =>
@@ -311,7 +300,11 @@ export default function StudioScreen() {
   /* eslint-enable react-hooks/refs */
 
   // Reanimated UI-thread style for the garment overlay: translate (normalized→px),
-  // scale, rotate, opacity — all from the single shared transform.
+  // scale, rotate, opacity — all from the single shared transform. The layer is
+  // sized to the full stage (its center already sits at the stage center), so a
+  // normalized position of 0.5 must map to a zero translate: offset by (x-0.5)*w
+  // and (y-0.5)*h so x=y=0.5 is truly centered. This matches the export pipeline
+  // (compose.ts / export.ts draw the garment centered at x*w, y*h).
   const garmentStyle = useAnimatedStyle(() => ({
     position: 'absolute',
     left: 0,
@@ -320,8 +313,8 @@ export default function StudioScreen() {
     height: size.value.h,
     opacity: sop.value,
     transform: [
-      { translateX: sx.value * size.value.w },
-      { translateY: sy.value * size.value.h },
+      { translateX: (sx.value - 0.5) * size.value.w },
+      { translateY: (sy.value - 0.5) * size.value.h },
       { scale: ss.value },
       { rotate: `${srot.value}deg` },
     ],
@@ -329,7 +322,7 @@ export default function StudioScreen() {
 
   // Persist the current composite: export + write the TryOn row via the
   // M2-3 composer pipeline (web composite / native garment degrade, D21.3).
-  // Stateful wrapper that keeps the error surface + the recent strip fresh.
+  // Stateful wrapper that keeps the error surface fresh.
   const persist = useCallback(async (): Promise<TryOn | null> => {
     if (!garment) return null;
     setSaving(true);
@@ -340,7 +333,6 @@ export default function StudioScreen() {
         transform: mirror,
         dims: { w: Math.max(dims.w, 720), h: Math.max(dims.h, 960) },
       });
-      await refreshRecent();
       return row;
     } catch (e) {
       // M2-3: a failed export surfaces visibly, never silent.
@@ -350,7 +342,7 @@ export default function StudioScreen() {
     } finally {
       setSaving(false);
     }
-  }, [garment, bodyPath, mirror, dims.w, dims.h, refreshRecent]);
+  }, [garment, bodyPath, mirror, dims.w, dims.h]);
 
   // Share the just-exported look through the M3-2 unified share sheet (the
   // same function the Looks gallery calls — no duplicated share code).
@@ -365,20 +357,14 @@ export default function StudioScreen() {
     if (notice?.kind === 'error') return;
   }, [persist]);
 
-  // Open an existing saved look back into the editor (reconstruct from the
-  // stored transform — M2-3 reopen / M3-2 gallery).
-  const reopen = useCallback(
-    async (look: TryOn) => {
-      const item = await r.getItem(look.itemId);
-      if (!item) return;
-      applyTransform(reopenTransform(look.transform), false);
-      setGarment(toGarment(item));
-      setBodySource({ uri: look.outputPath ?? undefined });
-      setBodyPath(look.outputPath ?? null);
-      setNotice({ kind: 'info', text: t('studio.reopened', { id: look.id }) });
-    },
-    [applyTransform, t],
-  );
+  // Reset the overlay back to the auto-fit start (M7-7): re-derive the per-type
+  // placement from the current pose, or the centered identity when we can't place.
+  const resetTransform = useCallback(() => {
+    const auto = garment
+      ? autoTransformFor(keypoints, garment.type)
+      : { ...IDENTITY_TRANSFORM };
+    applyTransform(auto, true);
+  }, [garment, keypoints, applyTransform]);
 
   // Overlay layer: a faint skeleton the user can toggle so they see *why* the
   // auto-box landed where it did (M2-1). Keypoints drive it; empty on manual.
@@ -522,27 +508,26 @@ export default function StudioScreen() {
           <TouchableOpacity
             style={styles.button}
             activeOpacity={0.8}
-            onPress={() => applyTransform(autoRef.current, true)}
+            onPress={() => setShowSkeleton((s) => !s)}
           >
-            <Text style={styles.buttonText}>{t('studio.reset')}</Text>
+            <Text style={styles.buttonText}>
+              {showSkeleton ? t('studio.skeleton.on') : t('studio.skeleton.off')}
+            </Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.button}
             activeOpacity={0.8}
-            onPress={() => setShowSkeleton((s) => !s)}
+            onPress={resetTransform}
           >
-            <Text style={styles.buttonText}>
-              {showSkeleton
-                ? t('studio.skeleton.on')
-                : t('studio.skeleton.off')}
-            </Text>
+            <Text style={styles.buttonText}>{t('studio.reset')}</Text>
           </TouchableOpacity>
         </View>
+
         <FilePickerButton
           style={styles.button}
           labelStyle={styles.buttonText}
           onPick={(uri) => {
-            setBodySource({ uri });
+            setBodySource(resolveBodySource(uri, sampleBody));
             setBodyPath(uri);
           }}
         >
@@ -559,49 +544,6 @@ export default function StudioScreen() {
           </Text>
         </TouchableOpacity>
       </View>
-
-      <RecentLooks looks={recent} onReopen={reopen} />
-    </View>
-  );
-}
-
-// The minimal saved-looks strip (M2-3): a horizontal row of the most recent
-// TryOn rows; tap to reopen one into the editor. The first-class gallery is M3-2.
-function RecentLooks({
-  looks,
-  onReopen,
-}: {
-  looks: TryOn[];
-  onReopen: (look: TryOn) => void;
-}) {
-  const { t } = useI18n();
-  if (!looks.length) return null;
-  return (
-    <View style={styles.recentRow}>
-      <Text style={styles.recentHeader}>{t('studio.recent')}</Text>
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.recentScroll}
-      >
-        {looks.map((look) => (
-          <TouchableOpacity
-            key={look.id}
-            style={styles.recentCard}
-            activeOpacity={0.8}
-            onPress={() => onReopen(look)}
-          >
-            <Text style={styles.recentTitle}>
-              {t('studio.lookNumber', { id: look.id })}
-            </Text>
-            {look.createdAt ? (
-              <Text style={styles.recentDate}>
-                {look.createdAt.slice(0, 10)}
-              </Text>
-            ) : null}
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
     </View>
   );
 }
@@ -657,16 +599,16 @@ const styles = StyleSheet.create({
     color: '#58a6ff',
     fontWeight: '600',
   },
-  buttonRow: {
-    flexDirection: 'row',
-    gap: 10,
-  },
   button: {
     flex: 1,
     backgroundColor: '#21262d',
     paddingVertical: 12,
     borderRadius: 10,
     alignItems: 'center',
+  },
+  buttonRow: {
+    flexDirection: 'row',
+    gap: 10,
   },
   buttonText: {
     fontSize: 15,
@@ -707,37 +649,5 @@ const styles = StyleSheet.create({
     color: '#c9d1d9',
     fontSize: 18,
     paddingHorizontal: 6,
-  },
-  // Minimal recent-looks strip (M2-3); the full gallery is M3-2.
-  recentRow: {
-    backgroundColor: '#161b22',
-    padding: 16,
-    paddingTop: 0,
-  },
-  recentHeader: {
-    fontSize: 13,
-    color: '#8b949e',
-    marginBottom: 8,
-  },
-  recentScroll: {
-    gap: 10,
-    paddingBottom: 4,
-  },
-  recentCard: {
-    width: 96,
-    height: 64,
-    backgroundColor: '#21262d',
-    borderRadius: 10,
-    padding: 10,
-    justifyContent: 'center',
-  },
-  recentTitle: {
-    fontSize: 13,
-    color: '#c9d1d9',
-    fontWeight: '600',
-  },
-  recentDate: {
-    fontSize: 11,
-    color: '#8b949e',
   },
 });

@@ -69,6 +69,7 @@ export const fr: Dict = {
   'wardrobe.emptyFiltered': 'Aucun résultat ne correspond à vos filtres.',
   'wardrobe.clearFilters': 'Effacer les filtres',
   'wardrobe.addItem': 'Ajouter un article',
+  'wardrobe.ownSection': 'Enregistrez vos propres vêtements',
   'catalog.header': 'Catalogue',
   'catalog.empty': "Le catalogue est vide pour l'instant.",
   'catalog.add': 'Ajouter',

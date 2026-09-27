@@ -29,6 +29,10 @@ function useBoolSetting(key: string, onError: string): boolean | null {
   return value;
 }
 
+// M7-1 retired the M0-4 `/onboarding` camera flow, so nothing in the app routes
+// on `has_onboarded` anymore. The flag is left dormant (still seeded in db.ts,
+// written by repo.setOnboarded, and read by the legacy entryRedirect module +
+// their tests), so this accessor is kept as a thin reader rather than deleted.
 export function useOnboarding(): boolean | null {
   return useBoolSetting('has_onboarded', 'useOnboarding failed');
 }
@@ -68,4 +72,31 @@ export function usePersonPhoto(reloadKey = 0): string | null {
   }, [reloadKey]);
 
   return uri;
+}
+
+// M7-1 entry gate input: whether a body photo is set, as `boolean | null`. `null`
+// while the store resolves (a loading state), then `true`/`false`. Distinct from
+// usePersonPhoto (which conflates loading and unset as `null`) because the gate
+// must tell "still loading" apart from "no photo yet" to avoid a wrong redirect.
+export function usePersonPhotoPresence(): boolean | null {
+  const [present, setPresent] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        await initStore();
+        const raw = await r.getSetting(PERSON_PHOTO_KEY);
+        if (alive) setPresent(!!raw);
+      } catch (e) {
+        console.error('usePersonPhotoPresence failed', e);
+        if (alive) setPresent(false);
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  return present;
 }

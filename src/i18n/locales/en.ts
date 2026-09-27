@@ -90,6 +90,7 @@ export const en: Dict = {
   'wardrobe.emptyFiltered': 'Nothing matches your filters.',
   'wardrobe.clearFilters': 'Clear filters',
   'wardrobe.addItem': 'Add an item',
+  'wardrobe.ownSection': 'Record your own clothes',
 
   // Catalog screen
   'catalog.header': 'Catalog',

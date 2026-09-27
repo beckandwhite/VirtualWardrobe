@@ -68,6 +68,7 @@ export const vi: Dict = {
   'wardrobe.emptyFiltered': 'Không có gì khớp với bộ lọc của bạn.',
   'wardrobe.clearFilters': 'Xóa bộ lọc',
   'wardrobe.addItem': 'Thêm một món',
+  'wardrobe.ownSection': 'Ghi lại quần áo của bạn',
   'catalog.header': 'Danh mục',
   'catalog.empty': 'Danh mục chưa có gì.',
   'catalog.add': 'Thêm',

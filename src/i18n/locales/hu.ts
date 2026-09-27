@@ -68,6 +68,7 @@ export const hu: Dict = {
   'wardrobe.emptyFiltered': 'Semmi sem felel meg a szűrőknek.',
   'wardrobe.clearFilters': 'Szűrők törlése',
   'wardrobe.addItem': 'Darab hozzáadása',
+  'wardrobe.ownSection': 'Rögzítsd a saját ruháidat',
   'catalog.header': 'Katalógus',
   'catalog.empty': 'Még nincs semmi a katalógusban.',
   'catalog.add': 'Hozzáadás',

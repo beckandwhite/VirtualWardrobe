@@ -24,11 +24,12 @@ describe('computeGarmentBox', () => {
     expect(computeGarmentBox([], 'top')).toBeNull();
   });
 
-  it('places a top centered between shoulders at shoulder y', () => {
+  it('places a top centered mid-torso between shoulders and hips', () => {
     const t = computeGarmentBox(Object.values(fig), 'top' as GarmentType);
     expect(t).not.toBeNull();
     expect(t!.x).toBeCloseTo(0.5, 5);
-    expect(t!.y).toBeCloseTo(0.30, 5);
+    // Mid-torso: halfway between the shoulder line (0.30) and the hip line (0.55).
+    expect(t!.y).toBeCloseTo(0.425, 5);
     expect(t!.scale).toBeGreaterThan(0.1);
   });
 

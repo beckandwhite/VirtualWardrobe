@@ -68,6 +68,7 @@ export const es: Dict = {
   'wardrobe.emptyFiltered': 'Nada coincide con tus filtros.',
   'wardrobe.clearFilters': 'Borrar filtros',
   'wardrobe.addItem': 'Añadir una prenda',
+  'wardrobe.ownSection': 'Registra tu propia ropa',
   'catalog.header': 'Catálogo',
   'catalog.empty': 'Aún no hay nada en el catálogo.',
   'catalog.add': 'Añadir',

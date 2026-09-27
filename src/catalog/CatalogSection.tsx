@@ -3,11 +3,10 @@ import {
   Text,
   View,
   StyleSheet,
-  FlatList,
   TouchableOpacity,
   type ImageSourcePropType,
 } from 'react-native';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { router } from 'expo-router';
 import { r, type StoreItem } from '@/store';
 import { PLACEHOLDER_URIS } from '@/catalog/placeholders';
@@ -17,7 +16,12 @@ function resolveSource(item: StoreItem): ImageSourcePropType {
   return { uri: PLACEHOLDER_URIS[item.category] };
 }
 
-export default function CatalogScreen() {
+// Self-contained catalog grid: lists the bundled placeholder store, and lets a
+// StoreItem be copied into a real user Item via "add to wardrobe" / "try on".
+// M7-2b embeds this beneath the own-clothes section in the Wardrobe tab, so it
+// renders as a plain wrap grid — no FlatList / screen wrapper — to compose
+// inside the wardrobe's single scroll without nesting virtualized lists.
+export default function CatalogSection() {
   const { t } = useI18n();
   const [items, setItems] = useState<StoreItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -61,7 +65,7 @@ export default function CatalogScreen() {
   }, []);
 
   const renderCard = useCallback(
-    ({ item }: { item: StoreItem }) => {
+    (item: StoreItem) => {
       const isCopied = item.id === copiedId;
       return (
         <View style={styles.thumb}>
@@ -106,35 +110,37 @@ export default function CatalogScreen() {
     [addToWardrobe, tryOn, copiedId, t],
   );
 
-  const content = useMemo(() => {
-    return (
-      <FlatList
-        data={items}
-        numColumns={2}
-        keyExtractor={(i) => String(i.id)}
-        contentContainerStyle={styles.list}
-        columnWrapperStyle={styles.row}
-        ListHeaderComponent={
-          <Text style={styles.header}>{t('catalog.header')}</Text>
-        }
-        ListEmptyComponent={
-          <Text style={styles.emptyText}>
-            {loading ? t('common.loading') : t('catalog.empty')}
-          </Text>
-        }
-        renderItem={renderCard}
-      />
-    );
-  }, [items, loading, renderCard, t]);
-
-  return <View style={styles.screen}>{content}</View>;
+  return (
+    <View style={styles.section}>
+      <Text style={styles.header}>{t('catalog.header')}</Text>
+      {items.length === 0 ? (
+        <Text style={styles.emptyText}>
+          {loading ? t('common.loading') : t('catalog.empty')}
+        </Text>
+      ) : (
+        <View style={styles.grid}>
+          {items.map((item) => (
+            <View key={String(item.id)} style={styles.cell}>
+              {renderCard(item)}
+            </View>
+          ))}
+        </View>
+      )}
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, padding: 16 },
+  section: { marginTop: 16 },
   header: { fontSize: 24, fontWeight: '800', marginTop: 8, marginBottom: 10 },
-  list: { paddingBottom: 80 },
-  row: { gap: 12 },
+  grid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    columnGap: 12,
+    rowGap: 12,
+    paddingBottom: 8,
+  },
+  cell: { flexBasis: '47%', flexGrow: 1 },
   thumb: {
     height: 210,
     borderRadius: 14,

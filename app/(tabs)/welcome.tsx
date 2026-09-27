@@ -10,7 +10,7 @@ import { router } from 'expo-router';
 import { type Href } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { r } from '@/store';
-import { useOnboarding, useSeenWelcome } from '@/store/onboarding';
+import { useSeenWelcome, usePersonPhotoPresence } from '@/store/onboarding';
 import { continueWelcomeTransition } from '@/onboarding/welcomeGate';
 import { useI18n } from '@/i18n/useI18n';
 import LanguageSwitcher from '@/i18n/LanguageSwitcher';
@@ -18,14 +18,14 @@ import LanguageSwitcher from '@/i18n/LanguageSwitcher';
 // M3-16 first-run orientation. A single, non-blocking screen that tells a new
 // user what the app is, the four-step workflow, and the honest manual fallback.
 // The route decision (whether to show it) lives in src/onboarding/welcomeGate.ts;
-// this screen only renders its body and the continue/skip continuation.
+// this screen only renders its body and the Continue continuation.
 //
 // The continuation persists `has_seen_welcome = '1'` (so the welcome shows at
-// most once, D44.1) then replaces into the next journey step — the M0-4 camera
-// onboarding for a not-yet-onboarded user, else the wardrobe. Continue and Skip
-// resolve to the same next step (the welcome is one screen); they differ only in
-// emphasis. The transition is asserted without a router via
-// continueWelcomeTransition (src/onboarding/welcomeGate.ts).
+// most once, D44.1) then replaces into the next journey step. M7-1 retires the
+// M0-4 camera flow: a user with no body photo yet is routed to the Me tab (the
+// sole body-capture surface), else straight to the wardrobe. There is a single
+// Continue action (the Skip button is gone). The transition is asserted without a
+// router via continueWelcomeTransition (src/onboarding/welcomeGate.ts).
 const STEP_KEYS = [
    'welcome.step1.title',
    'welcome.step2.title',
@@ -35,29 +35,31 @@ const STEP_KEYS = [
 
 export default function WelcomeScreen() {
   const { t } = useI18n();
-  const onboarded = useOnboarding();
+  const hasPhoto = usePersonPhotoPresence();
   const seenWelcome = useSeenWelcome();
   const [busy, setBusy] = useState(false);
 
-  // Welcome is now a permanent tab (not hidden after first use). The Continue/Skip
-  // footer is the first-run continuation into onboarding/wardrobe, so it only makes
-  // sense before the flag is set. A returning user (seenWelcome === true) sees the
-  // same orientation as a footer-less reference page. `null` = still loading; we
-  // don't render the footer until we know, so a first-run user isn't shown a
-  // dead-end page for a frame.
+  // Welcome is now a permanent tab (not hidden after first use). The Continue
+  // footer is the first-run continuation into the Me tab / wardrobe, so it only
+  // makes sense before the flag is set. A returning user (seenWelcome === true)
+  // sees the same orientation as a footer-less reference page. `null` = still
+  // loading; we don't render the footer until we know, so a first-run user isn't
+  // shown a dead-end page for a frame.
   const firstRun = seenWelcome === false;
 
-   // Continue / Skip both persist the seen flag and advance. The destination is a
-   // pure function of the resolved onboarding flag, so the route is deterministic.
+   // Continue persists the seen flag and advances. The destination is a pure
+   // function of photo-presence, so the route is deterministic: no photo yet →
+   // the Me tab for body capture, else the wardrobe. A still-loading presence
+   // (`null`) is treated as "no photo", the safe first-run default.
   const advance = useCallback(async () => {
     setBusy(true);
-    const transition = continueWelcomeTransition(onboarded === true);
+    const transition = continueWelcomeTransition(hasPhoto === true);
     await r.setSeenWelcome();
      // The transition's route is a string from the pure module; the typed router
-     // narrows `Href`. The two destinations are registered flat screens, so this
+     // narrows `Href`. Both destinations are registered flat screens, so this
      // cast is safe and keeps the module router-free.
     router.replace(transition.route as Href);
-   }, [onboarded]);
+   }, [hasPhoto]);
 
   return (
      <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
@@ -105,16 +107,6 @@ export default function WelcomeScreen() {
               onPress={advance}
             >
               <Text style={styles.primaryText}>{t('welcome.continue')}</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.skipButton}
-              accessibilityRole="button"
-              accessibilityState={{ busy }}
-              disabled={busy}
-              activeOpacity={0.8}
-              onPress={advance}
-            >
-              <Text style={styles.skipText}>{t('welcome.skip')}</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -218,14 +210,5 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: '700',
-   },
-  skipButton: {
-    paddingVertical: 10,
-    alignItems: 'center',
-   },
-  skipText: {
-    fontSize: 14,
-    color: '#888',
-    fontWeight: '600',
    },
 });

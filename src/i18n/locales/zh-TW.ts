@@ -66,6 +66,7 @@ export const zhTW: Dict = {
   'wardrobe.emptyFiltered': '沒有符合篩選條件的項目。',
   'wardrobe.clearFilters': '清除篩選條件',
   'wardrobe.addItem': '新增單品',
+  'wardrobe.ownSection': '記錄你自己的衣物',
   'catalog.header': '目錄',
   'catalog.empty': '目錄中尚無內容。',
   'catalog.add': '新增',

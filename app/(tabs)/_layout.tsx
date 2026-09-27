@@ -6,7 +6,9 @@ import { useI18n } from '@/i18n/useI18n';
 // is transparent in URLs, so `router.push('/studio?id=…')` and `redirect('/wardrobe')`
 // from flat screens still resolve — welcome and studio are now tabs in this group.
 // The bar stays visible on every screen: welcome (orientation), me (profile +
-// settings), wardrobe, catalog, studio (try-on), looks.
+// settings), wardrobe, studio (try-on), looks.
+// M7-2b: the catalog was consolidated into the wardrobe tab (two sections in one
+// scroll), so the standalone catalog tab/route was retired — five icons remain.
 // M3-3: tab titles are localized (the (tabs) group lives inside I18nProvider).
 export default function WardrobeGroup() {
   const { t } = useI18n();
@@ -36,15 +38,6 @@ export default function WardrobeGroup() {
           title: t('tabs.wardrobe'),
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="shirt-outline" size={size} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="catalog"
-        options={{
-          title: t('tabs.catalog'),
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="pricetags-outline" size={size} color={color} />
           ),
         }}
       />
