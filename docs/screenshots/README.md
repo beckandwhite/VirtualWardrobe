@@ -82,3 +82,5 @@ Native device screenshots (iOS / Android) are **not** included.
 All four images above are from the **Expo web** build via Playwright/Chromium,
 which is the only runtime currently available here. Native captures should be
 added once a simulator/emulator runtime is provisioned.
+
+<!-- automerge probe 20260927T163546Z -->
