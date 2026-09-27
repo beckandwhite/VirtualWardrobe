@@ -74,8 +74,8 @@ flag (see `src/catalog/ingest.ts`).
 
 ## 7. Dev environment limitations (M3-5)
 
-The current dev setup can't — each now has unblocking work items (autonomous briefs in
-`Plans/issues/`, 2026-09-21, D25):
+Each dev-environment limitation below has unblocking work items (autonomous briefs groomed
+2026-09-21, D25):
 
 - **Render a web UI (no browser in the sandbox).** `@playwright/test` is not installed;
    even then, the harness below is **skippable** when the model bytes are absent, so CI
@@ -86,10 +86,14 @@ The current dev setup can't — each now has unblocking work items (autonomous b
     **M3-10**/**M3-11** (Android emulator + device, see [§9](#9-android-test-environment-m3-10)) and
      **M3-12**/**M3-13** (iOS Simulator, see [§10](#10-ios-test-environment-m3-12)).
      On-device *pose* stays the M3-1 NO-GO spike; these items stand up the env, not the ML.
-- **Talk to the canonical `tfhub.dev` MoveNet URL (302→Kaggle; see §2).** The
-    `fetch:pose` script has a fallback; a model-absent run still produces a PNG of the
-   manual-fallback path. → **M3-6** (synthesize TFJS from the live ONNX, *start first*) /
-    **M3-7** (vendor a known-good TFJS graph, long-term). See §2 options + D24.
+- **Get the MoveNet model bytes.** No network download — the canonical known-good TFJS
+   graph is **committed to the repo** under `assets/pose/movenet-singlepose-lite/`
+   (**M3-7**, DONE; **M3-6** closed as superseded). `npm run fetch:pose` is a pure **local
+   copy** (`assets/pose` → `public/pose`), not a download, so a fresh clone needs no mirror
+   and no external model URL (§2). The e2e harness stays skippable: a model-absent run
+   asserts the **manual-fallback** path and exits 0, so CI is green on a clean checkout.
+    → **M3-7** (the long-term path, DONE) / **M3-6** (the fast ONNX→TFJS path, superseded).
+   Network-free wiring is proved by `npm run verify:pose` (§2 / D42).
 
 ### M3-5 harness (`npm run e2e:pose`)
 - **Script:** `scripts/pose-smoke.mjs` — a thin Playwright runner that drives

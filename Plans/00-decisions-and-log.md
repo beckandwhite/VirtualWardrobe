@@ -882,13 +882,14 @@ and the skippable `e2e:web` all green.
   out (M3-1 NO-GO). Docs-only; gates green.
 
 - **D49.3 — M3-18 (#49) pose infra reconciled to committed-bytes reality.** After M3-7 (D42) vendored
-  the MoveNet graph into `assets/pose/movenet-singlepose-lite/`: (1) `scripts/fetch-movenet.mjs` is now a
-  pure local copy (`fs.cpSync(assets/pose → public/pose)`), dropping the dead tfhub.dev curl loop,
-  `MOVENET_URL` fallback, and `--emit-url-only` codegen; (2) `src/pose/modelUrl.ts` is a plain committed
-  static constant (no "GENERATED" fiction, value unchanged); (3) added `npm run verify:pose`
-  (`scripts/pose-m37-verify.mjs`), loads the graph network-free and asserts 17 COCO keypoints (exit 0);
-  (4) `docs/dev-setup.md` §2 rewritten to the resolved state. Residual (deferred): §7 still carries a
-  stale tfhub.dev / M3-6-M3-7-in-progress reference — left to avoid colliding with the §8–§10 edits.
+   the MoveNet graph into `assets/pose/movenet-singlepose-lite/`: (1) `scripts/fetch-movenet.mjs` is now a
+   pure local copy (`fs.cpSync(assets/pose → public/pose)`), dropping the dead tfhub.dev curl loop,
+   `MOVENET_URL` fallback, and `--emit-url-only` codegen; (2) `src/pose/modelUrl.ts` is a plain committed
+   static constant (no "GENERATED" fiction, value unchanged); (3) added `npm run verify:pose`
+   (`scripts/pose-m37-verify.mjs`), loads the graph network-free and asserts 17 COCO keypoints (exit 0);
+    (4) `docs/dev-setup.md` §2 rewritten to the resolved state. Residual (deferred): §7 still carries a
+    stale tfhub.dev / M3-6-M3-7-in-progress reference — left to avoid colliding with the §8–§10 edits
+   (resolved in D51.1, #62).
 
 - **D49.4 — M3-19 (#50) native-bundle exclusion mechanically proven + CI gate (closes M2-1 AC4).**
   `expo export --platform ios` succeeds (pure Metro; D10 web-wasm issue does not affect iOS). Grepping
@@ -944,7 +945,19 @@ and the skippable `e2e:web` all green.
   (bundle 1819 modules); Welcome→Wardrobe→Studio smoke confirmed the **manual** native pose path
   ("Auto-drape unavailable — adjusting manually", ManualPoseProvider via the generic `src/pose/providers.ts`
   fallback — no `providers.native.ts` file — NOT MoveNet; consistent with M3-1 on-device-ML NO-GO).
-  Evidence: `docs/screenshots/ios-smoke-20260927T073429Z.png`. Gate green (tsc 0 / eslint 0 / 219 tests).
-  `dev-setup.md` §10 device/OS example refreshed (iPhone 17 / iOS 27) + headless-CoreSimulator caveat
-  added. **Follow-up flagged (non-blocking):** cold-install `SQLiteErrorException: no such table:
-  store_items` on first launch that self-recovers — worth a look at store-migration ordering.
+   Evidence: `docs/screenshots/ios-smoke-20260927T073429Z.png`. Gate green (tsc 0 / eslint 0 / 219 tests).
+    `dev-setup.md` §10 device/OS example refreshed (iPhone 17 / iOS 27) + headless-CoreSimulator caveat
+   added. **Follow-up flagged (non-blocking):** cold-install `SQLiteErrorException: no such table:
+   store_items` on first launch that self-recovers — worth a look at store-migration ordering.
+
+- **D51.1 — M3-18 residual closed: `docs/dev-setup.md` §7 reconciled (#62).** Rewrote §7's third
+   bullet to the committed-bytes reality: the canonical known-good TFJS graph is **committed** under
+   `assets/pose/movenet-singlepose-lite/` (**M3-7** DONE, **M3-6** superseded), `npm run fetch:pose`
+   is a pure local `assets/pose → public/pose` copy (no download, no mirror, no external model URL),
+   and the e2e harness stays skippable (model-absent run asserts the manual-fallback path, exit 0).
+    Dropped the dead `tfhub.dev`/302→Kaggle reference, the false "`fetch:pose` has a fallback" claim,
+   and the "M3-6/M3-7 in-progress" framing; kept `MOVENET_MODEL_URL` *as the harness's local
+   auto/manual gate* (D50.1) by wording the removal as "no external model URL", so it stays
+   consistent with the §8 skip-behavior + §2. Also reworded the §7 intro ("can't — each now has…")
+   since the third row is now a *solved* capability, not an open limitation. Docs-only; all internal
+   doc anchors (incl. `#7-dev-environment-limitations-m3-5`) still resolve; typecheck + lint pass.
