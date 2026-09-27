@@ -67,7 +67,7 @@ issue bodies; implementation notes remain here only when they are useful as dura
 | M3-11  | [autonomous] Setup: Android emulator/device on this MacBook        | tooling, qa, M3       | 🚧 BACKLOG          | [#22](https://github.com/beckandwhite/VirtualWardrobe/issues/22)             |
 | M3-12  | [autonomous] Docs: iOS test-environment setup                      | docs, tooling, qa, M3 | ✅ DONE             | [#23](https://github.com/beckandwhite/VirtualWardrobe/issues/23)             |
 | M3-13  | [autonomous] Setup: iOS Simulator on this MacBook                  | tooling, qa, M3       | ✅ DONE             | [#24](https://github.com/beckandwhite/VirtualWardrobe/issues/24)             |
-| M3-14  | Storyboard the core wardrobe-to-try-on user journey                | ux, docs, M3          | 🚧 BACKLOG          | [#34](https://github.com/beckandwhite/VirtualWardrobe/issues/34)             |
+| M3-14  | Storyboard the core wardrobe-to-try-on user journey                | ux, docs, M3          | ✅ DONE             | [#34](https://github.com/beckandwhite/VirtualWardrobe/issues/34)             |
 | M3-15  | [autonomous] Portfolio screenshot kit and demo path                | ux, docs, M3          | ✅ DONE             | [#44](https://github.com/beckandwhite/VirtualWardrobe/issues/44)             |
 | M3-16   | [autonomous] Welcome screen: explain VirtualWardrobe and try-on    | feat, ux, M3           | ✅ DONE*             | [#46](https://github.com/beckandwhite/VirtualWardrobe/issues/46)              |
 | M3-17  | [autonomous] Improve application navigation and return paths       | feat, ux, M3          | ✅ DONE             | [#47](https://github.com/beckandwhite/VirtualWardrobe/issues/47)             |
