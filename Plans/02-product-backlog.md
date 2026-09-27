@@ -226,21 +226,21 @@ issue bodies; implementation notes remain here only when they are useful as dura
   checks/reviews pass; never bypass a gate or change repository settings. If automerge is unavailable,
   leave the PR open and record the blocker.
 
-## M7 · UX Refinement — 🌱 Grooming (created 2026-09-25)
+## M7 · UX Refinement — ✅ Shipped (completed 2026-09-27)
 
 Milestone [#8](https://github.com/beckandwhite/VirtualWardrobe/milestone/8). Groomed to
 agent-ready specs 2026-09-27 (D46.1–D46.3): items reshaped for one-file-per-agent execution on the
-small (~27B) autonomous model. Full acceptance criteria + exact file lists live in each GitHub issue
-body.
+small (~27B) autonomous model. All items delivered to `main` in 55b5ba2 (D47, D48); 18 suites / 198
+tests green. Full acceptance criteria + exact file lists live in each GitHub issue body.
 
 | ID     | Title                                                                     | Labels          | Status      | GH #                                                                 |
 |--------|---------------------------------------------------------------------------|-----------------|-------------|----------------------------------------------------------------------|
-| M7-1   | Route first-run users to Me for body capture; retire /onboarding          | ux, M7          | ✅ READY    | [#53](https://github.com/beckandwhite/VirtualWardrobe/issues/53)     |
-| M7-2a  | Extract a shared CatalogSection component from catalog.tsx                 | ux, feat, M7    | ✅ READY    | [#54](https://github.com/beckandwhite/VirtualWardrobe/issues/54)     |
-| M7-2b  | Consolidate catalog into Wardrobe (two-section) + retire catalog tab/route | ux, feat, M7    | ✅ READY    | [#60](https://github.com/beckandwhite/VirtualWardrobe/issues/60)     |
-| M7-5   | Studio UX pass: cleanup + center-on-load + body-photo verification         | ux, debt, feat, M7 | ✅ READY | [#57](https://github.com/beckandwhite/VirtualWardrobe/issues/57)     |
-| M7-6   | Spike: measure auto-fit quality and define the bar + fixtures              | ux, ml, spike, M7 | ✅ READY  | [#58](https://github.com/beckandwhite/VirtualWardrobe/issues/58)     |
-| M7-7   | Improve auto-fit placement per garment type (implementation)              | ux, ml, M7      | ✅ READY    | [#59](https://github.com/beckandwhite/VirtualWardrobe/issues/59)     |
+| M7-1   | Route first-run users to Me for body capture; retire /onboarding          | ux, M7          | ✅ SHIPPED  | [#53](https://github.com/beckandwhite/VirtualWardrobe/issues/53)     |
+| M7-2a  | Extract a shared CatalogSection component from catalog.tsx                 | ux, feat, M7    | ✅ SHIPPED  | [#54](https://github.com/beckandwhite/VirtualWardrobe/issues/54)     |
+| M7-2b  | Consolidate catalog into Wardrobe (two-section) + retire catalog tab/route | ux, feat, M7    | ✅ SHIPPED  | [#60](https://github.com/beckandwhite/VirtualWardrobe/issues/60)     |
+| M7-5   | Studio UX pass: cleanup + center-on-load + body-photo verification         | ux, debt, feat, M7 | ✅ SHIPPED | [#57](https://github.com/beckandwhite/VirtualWardrobe/issues/57)     |
+| M7-6   | Spike: measure auto-fit quality and define the bar + fixtures              | ux, ml, spike, M7 | ✅ SHIPPED | [#58](https://github.com/beckandwhite/VirtualWardrobe/issues/58)     |
+| M7-7   | Improve auto-fit placement per garment type (implementation)              | ux, ml, M7      | ✅ SHIPPED  | [#59](https://github.com/beckandwhite/VirtualWardrobe/issues/59)     |
 
 Merged/closed in grooming: **M7-3 (#55)** and **M7-4 (#56)** folded into the M7-5 Studio UX pass
 (#57, Parts C and B).
