@@ -29,6 +29,7 @@
     "react-native-worklets": "0.10.1"
   },
   "devDependencies": {
+    "@playwright/test": "^1.63.0",
     "@types/jest": "~29.5.14",
     "@types/react": "~19.2.2",
     "eslint": "^9.39.5",
@@ -53,7 +54,8 @@
     "e2e:pose": "node scripts/pose-smoke.mjs",
     "e2e:pose:check": "node scripts/pose-smoke-path.mjs --selftest",
     "e2e:web": "node scripts/web-smoke.mjs",
-    "e2e:web:check": "node scripts/web-smoke-path.mjs --selftest"
+    "e2e:web:check": "node scripts/web-smoke-path.mjs --selftest",
+    "screenshots": "node scripts/screenshot-kit.mjs"
   },
   "private": true
 }

@@ -146,16 +146,25 @@ One-time OS browser deps, per platform:
 
 ### How the M3-5 harness attaches
 
-The existing harness needs **no rewrite** — it already dynamically imports Playwright:
+The harness dynamically imports Playwright and manages the Expo web server itself:
 
-- `npm run e2e:pose` runs `scripts/pose-smoke.mjs`, which drives `expo start --web` through a
-  fixture body photo + catalog garment (see [§7](#7-dev-environment-limitations-m3-5)'s "M3-5
-  harness"). It does an **optional dynamic `import('@playwright/test')`** so a clean checkout
-  without the dep still lints and runs.
+- `npm run e2e:pose` runs `scripts/pose-smoke.mjs`, which spawns `expo start --web` (non-blocking),
+  polls until the server is ready, then drives it through a fixture body photo + catalog garment
+  (see [§7](#7-dev-environment-limitations-m3-5)'s "M3-5 harness"). It does an **optional dynamic
+  `import('@playwright/test')`** so a clean checkout without the dep still lints and runs (browser
+  pass skips cleanly, exit 0).
 - That dynamic import is why `eslint.config.js` carries an `import/no-unresolved: 'off'`
   carve-out scoped to `scripts/**/*.mjs` (the `vw/node-scripts` block). **Keep that
   carve-out** — removing it re-introduces a false-positive "unresolved" lint error on any
   machine where `@playwright/test` isn't installed.
+- **Note (M3-9, 2026-09-27):** the harness was fixed on its first real run — the Playwright
+  presence check previously imported the package *directory* as a `file://` URL
+  (`ERR_UNSUPPORTED_DIR_IMPORT`, always skipped the browser pass) and the server launch used a
+  blocking `execSync`. Both are corrected (bare-specifier `import('@playwright/test')` +
+  `spawn`/wait/`finally`-teardown). If `npx playwright install chromium` times out on the
+  Playwright CDN, `curl` the Chrome-for-Testing build from the public GCS bucket into the
+  `~/Library/Caches/ms-playwright` cache (the **headless-shell** build is also required for a
+  headless `chromium.launch()`).
 
 ### Run and expected output
 

@@ -13,10 +13,10 @@
 // This sandbox has neither a browser binary nor the model, so a run here exits at
 // skip #1. The browser pass below is written for a machine that has Chromium.
 
-import { fileURLToPath, pathToFileURL } from 'node:url';
+import { fileURLToPath } from 'node:url';
 import { existsSync, mkdirSync, writeFileSync, readdirSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
-import { execSync } from 'node:child_process';
+import { execSync, spawn } from 'node:child_process';
 import { STATUS_AUTO, STATUS_MANUAL, demoNote } from './pose-smoke-path.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -38,9 +38,11 @@ function writeDemoNote(p, screenshot, seconds) {
 }
 
 async function hasPlaywright() {
-    const mod = pathToFileURL(join(root, 'node_modules', '@playwright', 'test')).href;
+    // Resolve via the bare package specifier so Node applies package.json
+    // "exports". Importing the package *directory* as a file:// URL throws
+    // ERR_UNSUPPORTED_DIR_IMPORT even when the dep is installed (M3-9).
     try {
-        await import(mod);
+        await import('@playwright/test');
         return true;
     } catch {
         return false;
@@ -62,38 +64,66 @@ async function main() {
 
     const { chromium } = await import('@playwright/test');
 
-    // Start the Expo web dev server, then drive the studio route.
-    const server = execSync('npx expo start --web --port 8081', {
-       cwd: root,
-      stdio: 'inherit',
-     });
-     const browser = await chromium.launch();
-     const page = await browser.newPage();
-     const consoleErrors = [];
-     page.on('console', (m) => {
-        if (m.type() === 'error') consoleErrors.push(m.text());
-     });
+    const PORT = 8081;
+    const BASE = `http://localhost:${PORT}`;
 
-     // A model-absent run asserts the manual-fallback status text; a model-present
-     // run asserts auto-place. waitFor with a generous timeout; on timeout we
-     // report but do not hard-fail (the model may simply be absent — that's the
-     // skip path, not a regression).
-     await page.goto('http://localhost:8081/studio', { waitUntil: 'domcontentloaded' });
-     await page
-             .getByText(expectedStatus, { exact: false })
-             .waitFor({ timeout: 90000 })
-             .catch((e) => console.log(`[e2e:pose] status wait: ${e.message}`));
+    // Start the Expo web dev server. NOTE: execSync would block forever on a
+    // long-running server (it returns a Buffer, not a child), so spawn it
+    // non-blocking and poll until it answers before driving the studio route.
+    const server = spawn('npx', ['expo', 'start', '--web', '--port', String(PORT)], {
+        cwd: root,
+        stdio: 'inherit',
+        env: { ...process.env, BROWSER: 'none', CI: '1' },
+    });
 
-     if (!existsSync(SHOTS_DIR)) mkdirSync(SHOTS_DIR, { recursive: true });
-     const stamp = new Date().toISOString().replace(/[:.]/g, '-');
-     const out = join(SHOTS_DIR, `studio-${path}-${stamp}.png`);
-     await page.screenshot({ path: out, fullPage: true });
-     console.log(`[e2e:pose] screenshot -> ${out} (via ${path} path: "${expectedStatus}")`);
-     console.log(`[e2e:pose] console errors observed: ${consoleErrors.length}`);
+    async function waitForServer(url, timeoutMs) {
+        const deadline = Date.now() + timeoutMs;
+        while (Date.now() < deadline) {
+            try {
+                const r = await fetch(url);
+                if (r.status < 500) return true;
+            } catch {
+                // server not up yet — keep polling
+            }
+            await new Promise((res) => setTimeout(res, 2000));
+        }
+        return false;
+    }
 
-     writeDemoNote(path, out, Math.round((Date.now() - startMs) / 1000));
-     await browser.close();
-     server.kill('SIGTERM');
+    let browser;
+    try {
+        const ready = await waitForServer(BASE, 180000);
+        if (!ready) throw new Error(`expo web dev server never became ready at ${BASE}`);
+
+        browser = await chromium.launch();
+        const page = await browser.newPage();
+        const consoleErrors = [];
+        page.on('console', (m) => {
+            if (m.type() === 'error') consoleErrors.push(m.text());
+        });
+
+        // A model-absent run asserts the manual-fallback status text; a model-present
+        // run asserts auto-place. waitFor with a generous timeout; on timeout we
+        // report but do not hard-fail (the model may simply be absent — that's the
+        // skip path, not a regression).
+        await page.goto(`${BASE}/studio`, { waitUntil: 'domcontentloaded' });
+        await page
+            .getByText(expectedStatus, { exact: false })
+            .waitFor({ timeout: 90000 })
+            .catch((e) => console.log(`[e2e:pose] status wait: ${e.message}`));
+
+        if (!existsSync(SHOTS_DIR)) mkdirSync(SHOTS_DIR, { recursive: true });
+        const stamp = new Date().toISOString().replace(/[:.]/g, '-');
+        const out = join(SHOTS_DIR, `studio-${path}-${stamp}.png`);
+        await page.screenshot({ path: out, fullPage: true });
+        console.log(`[e2e:pose] screenshot -> ${out} (via ${path} path: "${expectedStatus}")`);
+        console.log(`[e2e:pose] console errors observed: ${consoleErrors.length}`);
+
+        writeDemoNote(path, out, Math.round((Date.now() - startMs) / 1000));
+    } finally {
+        if (browser) await browser.close();
+        server.kill('SIGTERM');
+    }
 }
 
 main().catch((e) => {

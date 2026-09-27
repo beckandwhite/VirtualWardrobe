@@ -62,13 +62,13 @@ issue bodies; implementation notes remain here only when they are useful as dura
 | M3-6   | [autonomous] Vendor TFJS MoveNet via ONNX→TFJS conversion (fast)  | ml, debt, M3, spike   | ⛔ SUPERSEDED*      | [#19](https://github.com/beckandwhite/VirtualWardrobe/issues/19)             |
 | M3-7   | [autonomous] Vendor a known-good TFJS MoveNet graph (long-term)   | ml, debt, M3, spike   | ✅ DONE*            | [#20](https://github.com/beckandwhite/VirtualWardrobe/issues/20)             |
 | M3-8   | [autonomous] Docs: Playwright web-test environment setup           | docs, tooling, qa, M3 | ✅ DONE             | [#26](https://github.com/beckandwhite/VirtualWardrobe/issues/26)             |
-| M3-9   | [autonomous] Setup: install + run Playwright on this MacBook       | tooling, qa, M3       | 🚧 BACKLOG          | [#27](https://github.com/beckandwhite/VirtualWardrobe/issues/27)             |
+| M3-9   | [autonomous] Setup: install + run Playwright on this MacBook       | tooling, qa, M3       | ✅ DONE             | [#27](https://github.com/beckandwhite/VirtualWardrobe/issues/27)             |
 | M3-10  | [autonomous] Docs: Android test-environment setup                  | docs, tooling, qa, M3 | ✅ DONE             | [#21](https://github.com/beckandwhite/VirtualWardrobe/issues/21)             |
 | M3-11  | [autonomous] Setup: Android emulator/device on this MacBook        | tooling, qa, M3       | 🚧 BACKLOG          | [#22](https://github.com/beckandwhite/VirtualWardrobe/issues/22)             |
 | M3-12  | [autonomous] Docs: iOS test-environment setup                      | docs, tooling, qa, M3 | ✅ DONE             | [#23](https://github.com/beckandwhite/VirtualWardrobe/issues/23)             |
 | M3-13  | [autonomous] Setup: iOS Simulator on this MacBook                  | tooling, qa, M3       | 🚧 BACKLOG          | [#24](https://github.com/beckandwhite/VirtualWardrobe/issues/24)             |
 | M3-14  | Storyboard the core wardrobe-to-try-on user journey                | ux, docs, M3          | 🚧 BACKLOG          | [#34](https://github.com/beckandwhite/VirtualWardrobe/issues/34)             |
-| M3-15  | [autonomous] Portfolio screenshot kit and demo path                | ux, docs, M3          | 🚧 BACKLOG          | [#44](https://github.com/beckandwhite/VirtualWardrobe/issues/44)             |
+| M3-15  | [autonomous] Portfolio screenshot kit and demo path                | ux, docs, M3          | ✅ DONE             | [#44](https://github.com/beckandwhite/VirtualWardrobe/issues/44)             |
 | M3-16   | [autonomous] Welcome screen: explain VirtualWardrobe and try-on    | feat, ux, M3           | ✅ DONE*             | [#46](https://github.com/beckandwhite/VirtualWardrobe/issues/46)              |
 | M3-17  | [autonomous] Improve application navigation and return paths       | feat, ux, M3          | ✅ DONE             | [#47](https://github.com/beckandwhite/VirtualWardrobe/issues/47)             |
 | M3-18  | [autonomous] M2-1 post-M3-7 housekeeping                          | debt, tooling, M3     | ✅ DONE             | [#49](https://github.com/beckandwhite/VirtualWardrobe/issues/49)             |

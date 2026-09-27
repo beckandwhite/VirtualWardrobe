@@ -910,3 +910,28 @@ and the skippable `e2e:web` all green.
   with a regression test. Deep links deliberately not gated on onboarding (passive nudge per D-1); id
   validity is the only enforced state check. +21 nav tests (219 total). Note: M3-14 (#34) storyboard was
   the page-map input but is **deferred** at the user's request — not committed with this batch.
+
+- **D50.1 — M3-9 (#27) Playwright web-test env installed + first real run (macOS/arm64, Node 26.10).**
+  Installed `@playwright/test@1.63.0` as a **devDependency** (ADR-004 runtime stance intact) + Chrome for
+  Testing 153.0.8010.12 (chromium v1243, incl. the headless-shell build required for a headless
+  `chromium.launch()`). `npm run e2e:pose` ran end-to-end and captured a real Studio PNG via the
+  **manual** path (model bytes present but `MOVENET_MODEL_URL` unset; auto path needs that env var).
+  **Two harness bugs found + fixed** in `scripts/pose-smoke.mjs` on this first real execution: (1) the
+  Playwright presence check imported the package *directory* as a `file://` URL
+  (`ERR_UNSUPPORTED_DIR_IMPORT`) so the browser pass always skipped even when installed — fixed to a
+  bare-specifier `import('@playwright/test')`; (2) `execSync('expo start --web')` blocked forever —
+  replaced with non-blocking `spawn` + `waitForServer` poll + `finally` teardown. `npx playwright install
+  chromium` timed out on the Playwright CDN (30s socket timeout, no proxy); worked around by curling the
+  build from the Chrome-for-Testing public GCS bucket into the ms-playwright cache. Gate green
+  (tsc 0 / eslint 0 / 219 tests). `docs/dev-setup.md` §8 corrected (the "harness needs no rewrite" claim
+  was false).
+
+- **D50.2 — M3-15 (#44) portfolio screenshot kit.** Added `scripts/screenshot-kit.mjs`
+  (`npm run screenshots`) reusing the pose-smoke launch/teardown pattern (spawn expo web + waitForServer
+  poll + Playwright Chromium + try/finally). Fixed viewport 390x844, `deviceScaleFactor 1`; deterministic
+  via per-route anchor-text waits. Captures the four journey routes /welcome, /wardrobe, /studio, /looks →
+  `docs/screenshots/kit-*.png`, documented in `docs/screenshots/README.md` (wardrobe→saved-look journey,
+  per-image command/viewport/state). Studio captured on the manual-fallback path (web doesn't bundle the
+  pose model; ADR-004). The Expo **web** run does not complete `expo-sqlite` store init, so
+  wardrobe/catalog/looks render empty states — recorded as the honest web state. Native/device evidence
+  PARTIAL: iOS Simulator blocked (no runtime, see D50.3 once resolved), Android not set up.
