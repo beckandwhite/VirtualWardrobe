@@ -961,3 +961,22 @@ and the skippable `e2e:web` all green.
    consistent with the §8 skip-behavior + §2. Also reworded the §7 intro ("can't — each now has…")
    since the third row is now a *solved* capability, not an open limitation. Docs-only; all internal
    doc anchors (incl. `#7-dev-environment-limitations-m3-5`) still resolve; typecheck + lint pass.
+
+- **D52 — Automerge + token reality (corrects D42.5).** Audited the two "automation blockers"
+   flagged after #62; neither was what we thought:
+   1. **Board Status is NOT token-blocked.** The token already carries `project` (+ `repo`,
+      `workflow`, `read:org`, `gist`) — D42.5's "token lacks project scope" is **stale**.
+      `gh project item-edit 1 --owner beckandwhite --field "Board Status" --value "In Progress"`
+      works (#62 moved to In Progress). The earlier "card didn't move" read was a bug in the
+      *verification* — the JSON `status` field is the built-in Status, not the custom
+      `Board Status` single-select; read it back via `--field "Board Status"` or the GraphQL
+      `single_select` field. Owner is the **user** `beckandwhite` (not an org), project id `1`.
+   2. **Automerge needed one repo toggle + correct CLI invocation.** `allow_auto_merge` was
+      `false`; set it `true` via `PATCH repos/... ` (durable). The `gh` CLI `2.101.0` exposes no
+      separate automerge verb — `gh pr merge <n> --auto` is it, and in non-interactive mode it
+      **requires a strategy** (`--merge`/`--rebase`/`--squash`): bare `--auto` prints
+      "`--merge, --rebase, or --squash required when not running interactively`" and no-ops.
+      **Also** it no-ops while `mergeable_state` is `unknown`/`unstable` (CI still settling);
+      request it only once state is `clean`, else it just merges immediately and clears
+      `auto_merge`. Single-dev project, `main` **unprotected**, so the workflow stays
+      "open PR → wait CI green → `gh pr merge --auto --merge` → done".
