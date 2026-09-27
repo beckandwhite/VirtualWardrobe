@@ -935,3 +935,16 @@ and the skippable `e2e:web` all green.
   pose model; ADR-004). The Expo **web** run does not complete `expo-sqlite` store init, so
   wardrobe/catalog/looks render empty states — recorded as the honest web state. Native/device evidence
   PARTIAL: iOS Simulator blocked (no runtime, see D50.3 once resolved), Android not set up.
+
+- **D50.3 — M3-13 (#24) iOS test env stood up end-to-end.** Real macOS (Darwin 27), Xcode 27.0 + iOS
+  27.0 Simulator runtime (found already installed — no `-downloadPlatform` needed). Booted iPhone 17
+  (UDID A6D32BA7-…) **headless via `simctl`** — this Xcode is a headless CoreSimulator install with no
+  GUI `Simulator.app`, so `open -a Simulator` is unavailable and `idb` is absent (navigated via
+  expo-router deep links rather than taps). App launched under Expo Go via `CI=1 npx expo start --ios`
+  (bundle 1819 modules); Welcome→Wardrobe→Studio smoke confirmed the **manual** native pose path
+  ("Auto-drape unavailable — adjusting manually", ManualPoseProvider via the generic `src/pose/providers.ts`
+  fallback — no `providers.native.ts` file — NOT MoveNet; consistent with M3-1 on-device-ML NO-GO).
+  Evidence: `docs/screenshots/ios-smoke-20260927T073429Z.png`. Gate green (tsc 0 / eslint 0 / 219 tests).
+  `dev-setup.md` §10 device/OS example refreshed (iPhone 17 / iOS 27) + headless-CoreSimulator caveat
+  added. **Follow-up flagged (non-blocking):** cold-install `SQLiteErrorException: no such table:
+  store_items` on first launch that self-recovers — worth a look at store-migration ordering.

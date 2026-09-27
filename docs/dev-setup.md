@@ -294,15 +294,19 @@ Simulator run natively; no cross-arch emulation needed).
 
 ```bash
 xcrun simctl list devices           # available devices + runtimes
-xcrun simctl boot "iPhone 16"       # boot a specific model
-open -a Simulator                   # show the Simulator window
+xcrun simctl boot "iPhone 17"       # boot a specific model
+open -a Simulator                   # show the Simulator window (GUI installs only)
 ```
 
-- Pick a concrete **iPhone model + iOS version** (e.g. iPhone 16 / iOS 18) for reproducibility.
+- Pick a concrete **iPhone model + iOS version** (illustrative: iPhone 17 / iOS 27 on Xcode 27 —
+  use whatever runtime `xcrun simctl list runtimes` reports) for reproducibility.
 - **GPU/rendering:** the Simulator uses the host GPU via Metal — rendering is fast, but it is
   **not** a substitute for on-device GPU perf.
 - **Headless vs visible:** `simctl boot` runs headless; `open -a Simulator` attaches the
-  visible window. CI can drive `simctl` headless; local smoke usually wants the window.
+  visible window. CI can drive `simctl` headless; local smoke usually wants the window. Note:
+  a **headless CoreSimulator install** (no GUI `Simulator.app` under Xcode) makes `open -a
+  Simulator` fail — drive everything through `simctl` (boot / install / `io booted screenshot`)
+  in that case.
 
 ### Test surface
 
