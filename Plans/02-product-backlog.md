@@ -228,40 +228,32 @@ issue bodies; implementation notes remain here only when they are useful as dura
 
 ## M7 · UX Refinement — 🌱 Grooming (created 2026-09-25)
 
-Milestone [#8](https://github.com/beckandwhite/VirtualWardrobe/milestone/8). Dropped in for grooming;
-a grill/stress-test pass is planned before scoping is finalized. Acceptance criteria and open
-questions live in each GitHub issue body.
+Milestone [#8](https://github.com/beckandwhite/VirtualWardrobe/milestone/8). Groomed to
+agent-ready specs 2026-09-27 (D46.1–D46.3): items reshaped for one-file-per-agent execution on the
+small (~27B) autonomous model. Full acceptance criteria + exact file lists live in each GitHub issue
+body.
 
-| ID    | Title                                                                | Labels          | Status      | GH #                                                                         |
-|-------|----------------------------------------------------------------------|-----------------|-------------|------------------------------------------------------------------------------|
-| M7-1  | Welcome 'Continue' routes to Me tab to capture first body photo       | ux, M7          | 🌱 GROOMING | [#53](https://github.com/beckandwhite/VirtualWardrobe/issues/53)             |
-| M7-2  | Consolidate catalog into the Wardrobe tab (remove catalog from nav)   | ux, feat, M7    | 🌱 GROOMING | [#54](https://github.com/beckandwhite/VirtualWardrobe/issues/54)             |
-| M7-3  | Studio loads the user's body photo by default                         | ux, feat, M7    | 🌱 GROOMING | [#55](https://github.com/beckandwhite/VirtualWardrobe/issues/55)             |
-| M7-4  | Studio centers the garment overlay immediately on load                | ux, M7          | 🌱 GROOMING | [#56](https://github.com/beckandwhite/VirtualWardrobe/issues/56)             |
-| M7-5  | Studio cleanup: remove recent-looks strip; hide skeleton + reset      | ux, debt, M7    | 🌱 GROOMING | [#57](https://github.com/beckandwhite/VirtualWardrobe/issues/57)             |
-| M7-6  | Improve the auto-fit (auto-drape) experience                          | ux, ml, M7      | 🌱 GROOMING | [#58](https://github.com/beckandwhite/VirtualWardrobe/issues/58)             |
+| ID     | Title                                                                     | Labels          | Status      | GH #                                                                 |
+|--------|---------------------------------------------------------------------------|-----------------|-------------|----------------------------------------------------------------------|
+| M7-1   | Route first-run users to Me for body capture; retire /onboarding          | ux, M7          | ✅ READY    | [#53](https://github.com/beckandwhite/VirtualWardrobe/issues/53)     |
+| M7-2a  | Extract a shared CatalogSection component from catalog.tsx                 | ux, feat, M7    | ✅ READY    | [#54](https://github.com/beckandwhite/VirtualWardrobe/issues/54)     |
+| M7-2b  | Consolidate catalog into Wardrobe (two-section) + retire catalog tab/route | ux, feat, M7    | ✅ READY    | [#60](https://github.com/beckandwhite/VirtualWardrobe/issues/60)     |
+| M7-5   | Studio UX pass: cleanup + center-on-load + body-photo verification         | ux, debt, feat, M7 | ✅ READY | [#57](https://github.com/beckandwhite/VirtualWardrobe/issues/57)     |
+| M7-6   | Spike: measure auto-fit quality and define the bar + fixtures              | ux, ml, spike, M7 | ✅ READY  | [#58](https://github.com/beckandwhite/VirtualWardrobe/issues/58)     |
+| M7-7   | Improve auto-fit placement per garment type (implementation)              | ux, ml, M7      | ✅ READY    | [#59](https://github.com/beckandwhite/VirtualWardrobe/issues/59)     |
 
-> * **Single body photo (decided 2026-09-25):** the body photo stays a single `person_photo_uri`
->   setting (`src/store/onboarding.ts`). No multi-photo model — M7-3 is just "default to the saved
->   photo" and M7-1 nudges the user to set it early.
-> * **M7-5 ↔ M7-6:** M7-5 hides the skeleton toggle + reset controls; M7-6 reintroduces them once
->   auto-fit is trustworthy.
-> * Project-board cards not added automatically — token lacks project scope (cf. D42.5); a
->   project-scoped token should run `gh project item-add` / `gh project item-edit`.
-> * **Grooming input — item shaping for small-model autonomous execution (raised 2026-09-26).**
->   Implementation is planned via autonomous agents on a small model (~27B) with a bounded context
->   window, so items should be shaped for **one-file-per-agent context loading**, not minimal count.
->   - *Consolidation candidate:* M7-3 + M7-4 + M7-5 are all small, mechanical edits to the same
->     ~743-line `app/(tabs)/studio.tsx`. Merging them into one "Studio UX pass" lets an agent load
->     that file once and avoids three items self-conflicting on it. Sequence it before M7-6 (which
->     reintroduces the skeleton/reset the pass hides). Keep M7-6 separate (exploratory/ML).
->   - *Split candidate:* M7-2 spans three files (`_layout.tsx`, `wardrobe.tsx`, `catalog.tsx`) and
->     does removal + shared-component extraction + layout restructure in one go — likely too much
->     context for a small model. Consider splitting into (a) extract shared catalog-section
->     component, (b) restructure Wardrobe into two sections.
->   - Decision deferred to the grill; no restructuring applied yet.
->   - Separately: before any agent implements, each issue body needs tightening into a
->     self-contained spec (hard acceptance criteria, exact file list, no open questions).
+Merged/closed in grooming: **M7-3 (#55)** and **M7-4 (#56)** folded into the M7-5 Studio UX pass
+(#57, Parts C and B).
+
+> * **Single body photo (D45.2):** stays a single `person_photo_uri` setting; no multi-photo model.
+> * **Capture surface (D46.1):** Me is the sole body-capture surface; welcome drops Skip and routes
+>   photoless first-run users to Me; the M0-4 `/onboarding` camera flow is retired.
+> * **Auto-fit (D46.2):** M7-6 is a spike that gates the M7-7 implementation.
+> * **Small-model shaping (D46.3):** studio work merged into one pass (#57); catalog split into
+>   M7-2a (#54) → M7-2b (#60).
+> * **Dependencies / run order:** M7-2b blocked by M7-2a; M7-7 blocked by M7-6; M7-6 spike should
+>   run after M7-5 Part B (centering) lands. M7-1, M7-2a, and M7-5 are independent and parallel-safe.
+> * Project-board cards for #59 and #60 added via `gh project item-add`.
 
 ## Definition of Done (every issue)
 - [ ] Acceptance criteria met and verified (test where applicable).

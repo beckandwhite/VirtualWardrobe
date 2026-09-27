@@ -768,3 +768,31 @@ and the skippable `e2e:web` all green.
    photo by default" (dropped the ">1 photo" switcher and the multi-photo storage question); M7-1
    (#53) dropped its multi-photo dependency note. The D45.1 shared-dependency between M7-1 and M7-3
    is closed.
+
+- **D46.1 — Me tab is the sole body-capture surface; the M0-4 `/onboarding` camera flow is
+   retired.** M7-1 (#53) now drops the welcome **Skip** button (reversing D44.3's Continue/Skip
+   collapse — welcome has a single Continue) and routes first-run users to the **Me** tab
+   **only when `person_photo_uri` is unset** (else Wardrobe), keeping the route a pure function of
+   photo-presence. The two-surface model (M0-4 `/onboarding` camera + Me tab) collapses to one:
+   `/onboarding` is removed from navigation and `has_onboarded` retired if unreferenced. Me is where
+   `person_photo_uri` is written (`app/(tabs)/me.tsx:39`), so it is the natural single capture point.
+
+- **D46.2 — M7-6 auto-fit split into a spike (#58) + implementation (M7-7, #59).** The exploratory
+   auto-fit work is timeboxed as a spike that catalogues failures by garment type, settles
+   web(MoveNet)-vs-native scope (M3-1 native pose stays NO-GO), and locks a measurable quality bar +
+   committed test fixtures. The spike's output gates M7-7, which does the per-type anchor/scaling
+   mapping and reintroduces the Skeleton/Reset controls hidden by the Studio UX pass. Rationale:
+   don't commit to an implementation shape before the failure modes and the "good enough" bar are
+   measured.
+
+- **D46.3 — M7 items reshaped for small-model (~27B) autonomous agents: one-file-per-agent.**
+   Acting on the 2026-09-26 backlog note. (a) The three studio items (former M7-3/M7-4/M7-5, all
+   editing the ~743-line `app/(tabs)/studio.tsx`) are **merged** into one **M7-5 "Studio UX pass"**
+   (#57) with ordered parts A cleanup → B center-on-load → C body-photo verification; #55 and #56 are
+   closed as merged. This lets one agent load the file once and removes the self-conflict risk of
+   three agents editing it serially. (b) **M7-2 is split** into **M7-2a** (#54, extract a shared
+   `src/catalog/CatalogSection.tsx`) and **M7-2b** (#60, restructure Wardrobe into two sections + drop
+   the catalog tab/route), so neither exceeds the small-model context budget. Also fixed a real bug
+   found during grooming: `garmentStyle` translates a full-stage-sized layer by `sx*w`/`sy*h`, so the
+   `0.5 = center` convention lands garments in the bottom-right quadrant; M7-5 Part B reconciles the
+   convention globally (`(sx-0.5)*w`) and verifies the auto-placed path doesn't regress.
