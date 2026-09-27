@@ -1,6 +1,11 @@
 // Repository / CRUD layer over the SQLite store.
 // UI never touches db.ts directly — it only uses the exported `r`.
-import { getDb, type Item, type StoreItem, type NewStoreEntry, type BodyPhoto, type TryOn, type ItemCategory } from './db';
+import { getDb, initStore, type Item, type StoreItem, type NewStoreEntry, type BodyPhoto, type TryOn, type ItemCategory } from './db';
+
+async function readyDb() {
+   await initStore();
+   return getDb();
+}
 
 function nowIso(): string {
    return new Date().toISOString();
@@ -70,13 +75,13 @@ export interface Repo {
 
 function build(): Repo {
    async function getSetting(key: string): Promise<string | undefined> {
-      const db = await getDb();
+      const db = await readyDb();
       const row = await db.getFirstAsync<{ value: string }>('SELECT value FROM app_settings WHERE key = ?', [key]);
       return row?.value;
       }
 
    async function setSetting(key: string, value: string): Promise<void> {
-      const db = await getDb();
+      const db = await readyDb();
       await db.runAsync('INSERT OR REPLACE INTO app_settings (key, value) VALUES (?, ?)', [key, value]);
       }
 
@@ -89,7 +94,7 @@ function build(): Repo {
          }
 
     async function insertItem(input: NewItem): Promise<Item> {
-      const db = await getDb();
+      const db = await readyDb();
       const res = await db.runAsync(
       'INSERT INTO items (type, name, color, tags, image_path, thumbnail_path, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
       [input.type, input.name, input.color, tagsToRow(input.tags ?? []), input.imagePath, input.thumbnailPath ?? null, nowIso()],
@@ -101,7 +106,7 @@ function build(): Repo {
       }
 
    async function updateItem(id: number, patch: Partial<NewItem>): Promise<void> {
-      const db = await getDb();
+      const db = await readyDb();
       await db.withTransactionAsync(async () => {
         if (patch.name !== undefined) await db.runAsync('UPDATE items SET name = ? WHERE id = ?', [patch.name, id]);
         if (patch.color !== undefined) await db.runAsync('UPDATE items SET color = ? WHERE id = ?', [patch.color, id]);
@@ -112,7 +117,7 @@ function build(): Repo {
       }
 
    async function deleteItem(id: number): Promise<void> {
-      const db = await getDb();
+      const db = await readyDb();
       await db.withTransactionAsync(async () => {
         await db.runAsync('DELETE FROM try_ons WHERE item_id = ?', [id]);
         await db.runAsync('DELETE FROM items WHERE id = ?', [id]);
@@ -120,19 +125,19 @@ function build(): Repo {
       }
 
    async function listItems(): Promise<Item[]> {
-      const db = await getDb();
+      const db = await readyDb();
       const rows = await db.getAllAsync<ItemRow>('SELECT * FROM items ORDER BY created_at DESC');
       return rows.map(rowToItem);
       }
 
    async function getItem(id: number): Promise<Item | undefined> {
-      const db = await getDb();
+      const db = await readyDb();
       const row = await db.getFirstAsync<ItemRow>('SELECT * FROM items WHERE id = ?', [id]);
       return row ? rowToItem(row) : undefined;
       }
 
    async function listStoreItems(): Promise<StoreItem[]> {
-      const db = await getDb();
+      const db = await readyDb();
       const rows = await db.getAllAsync<StoreItemRow>('SELECT * FROM store_items ORDER BY name ASC');
       return rows.map((row) => ({
         id: row.id,
@@ -147,7 +152,7 @@ function build(): Repo {
       }
 
    async function insertStoreItem(input: NewStoreEntry): Promise<StoreItem> {
-      const db = await getDb();
+      const db = await readyDb();
       const res = await db.runAsync(
        'INSERT INTO store_items (source, name, category, color, image_paths, specs, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
        ['catalog', input.name, input.category, input.color, pathsToRow(input.imagePaths), input.specs ?? null, nowIso()],
@@ -168,7 +173,7 @@ function build(): Repo {
       }
 
    async function insertBodyPhoto(path: string): Promise<BodyPhoto> {
-      const db = await getDb();
+      const db = await readyDb();
       const res = await db.runAsync('INSERT INTO body_photos (path, created_at) VALUES (?, ?)', [path, nowIso()]);
       return { id: res.lastInsertRowId, path, createdAt: nowIso() };
       }
@@ -179,7 +184,7 @@ function build(): Repo {
         transform: string,
         outputPath?: string | null,
       ): Promise<TryOn> {
-      const db = await getDb();
+         const db = await readyDb();
       const res = await db.runAsync(
       'INSERT INTO try_ons (body_photo_id, item_id, transform, output_path, created_at) VALUES (?, ?, ?, ?, ?)',
       [bodyPhotoId, itemId, transform, outputPath ?? null, nowIso()],
@@ -195,7 +200,7 @@ function build(): Repo {
       }
 
    async function listTryOns(): Promise<TryOn[]> {
-      const db = await getDb();
+      const db = await readyDb();
       const rows = await db.getAllAsync<Row>('SELECT * FROM try_ons ORDER BY created_at DESC');
       return rows.map((row) => ({
         id: row.id,
@@ -208,7 +213,7 @@ function build(): Repo {
       }
 
    async function deleteTryOn(id: number): Promise<void> {
-      const db = await getDb();
+      const db = await readyDb();
       await db.runAsync('DELETE FROM try_ons WHERE id = ?', [id]);
       }
 

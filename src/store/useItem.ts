@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
-import { r, type Item, type NewItem } from './index';
+import { r, type NewItem } from './repo';
+import type { Item } from './db';
 
 // M1-2: hooks over the M0-3 repo so UI stays stateless w.r.t. persistence — await
 // the repo, then refresh local state. The screen never touches the db layer.

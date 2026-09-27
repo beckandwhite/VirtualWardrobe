@@ -186,6 +186,7 @@ let mockDb: ReturnType<typeof makeFakeDb> | null = null;
 
 jest.mock('../../src/store/db', () => ({
     getDb: jest.fn(async () => mockDb!),
+   initStore: jest.fn(async () => undefined),
      }));
 
 // Seed raw rows (as stored) to assert the repo's row→domain conversion on real,

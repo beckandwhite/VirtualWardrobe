@@ -60,6 +60,7 @@ const SCHEMA_VERSION = 1;
 
 let dbPromise: Promise<SQLite.SQLiteDatabase> | null = null;
 let initialized = false;
+let initializationPromise: Promise<void> | null = null;
 
 export function getDb(): Promise<SQLite.SQLiteDatabase> {
    if (!dbPromise) {
@@ -69,9 +70,15 @@ export function getDb(): Promise<SQLite.SQLiteDatabase> {
 }
 
 export async function initStore(): Promise<void> {
+   if (!initializationPromise) {
+      initializationPromise = initializeStore();
+   }
+   return initializationPromise;
+}
+
+async function initializeStore(): Promise<void> {
    const db = await getDb();
    if (initialized) return;
-   initialized = true;
 
     // 1. Always-existing settings table (bootstraps the app state).
    await db.execAsync(`
@@ -128,4 +135,5 @@ export async function initStore(): Promise<void> {
    `);
         await db.runAsync('INSERT OR REPLACE INTO app_settings (key, value) VALUES (?, ?)', ['schema_version', String(SCHEMA_VERSION)]);
      }
+   initialized = true;
 }
