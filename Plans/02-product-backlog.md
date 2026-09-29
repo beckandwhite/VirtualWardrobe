@@ -27,7 +27,7 @@ issue bodies; implementation notes remain here only when they are useful as dura
 
 | ID    | Title                                                           | Labels       | Status     | GH #                                                                         |
 |-------|-----------------------------------------------------------------|--------------|------------|------------------------------------------------------------------------------|
-| M1-1  | Camera + library capture (expo-camera / image-picker)           | feat, M1     | 🚧 PARTIAL | [#6](https://github.com/beckandwhite/VirtualWardrobe/issues/6)               |
+| M1-1  | Camera + library capture (expo-camera / image-picker)           | feat, M1     | 🚧 PARTIAL (D54) — code complete + web evidence; native device-capture deferred | [#6](https://github.com/beckandwhite/VirtualWardrobe/issues/6)               |
 | M1-2  | Item CRUD + thumbnail gen (expo-image-manipulator)              | feat, M1     | ✅ DONE    | [#7](https://github.com/beckandwhite/VirtualWardrobe/issues/7)               |
 | M1-3  | Gallery grid + filter/search (category / color / tag)           | feat, ux, M1 | ✅ DONE    | [#8](https://github.com/beckandwhite/VirtualWardrobe/issues/8)               |
 | M1-4  | Bundled store.json catalog + ingester                           | feat, M1     | ✅ DONE    | [#9](https://github.com/beckandwhite/VirtualWardrobe/issues/9)               |

@@ -1006,3 +1006,15 @@ and the skippable `e2e:web` all green.
      `contents: read`.
    - **Follow-up (out of M4-4 scope):** the `assets/store/placeholder-bottom.png` 404 is a real
      missing catalog placeholder; recorded non-fatally by the smoke, left for a catalog-assets item.
+- **D54 — M1-1 (#6) closed as PARTIAL: code complete + web capture evidence, native deferred.**
+   The capture implementation (`src/capture/useCapture.ts`, `app/capture.tsx`, tab layout, FAB →
+   `/capture`) was already built and green (`tests/capture/draft.test.ts` 8/8). The only open AC is
+   native device-capture evidence (camera permission/capture/persistence + screenshot per target),
+   which is **not producible on this headless host** — no iOS/Android runtime, and simulators lack
+   camera hardware so they could only evidence library import. Added the device-free evidence that
+   *is* achievable: a `capture` route in `scripts/screenshot-kit.mjs` (`kit-capture.png`, anchor
+   "Add a garment") showing the capture modal with hint chips and the **Photo** (library) action
+   only — the Camera action is correctly hidden on web (`cameraAvailable` false), which evidences
+   the "camera unavailable → only Library, no crash" AC. Documented the remaining native gap in
+   `docs/screenshots/README.md`. Terminal state **PARTIAL** — native device-capture evidence stays
+   deferred until a device/emulator runtime lands (consistent with D25.3/D34).
