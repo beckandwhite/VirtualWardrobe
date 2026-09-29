@@ -105,6 +105,43 @@ jobs:
           if-no-files-found: warn
           retention-days: 14
 
+  e2e-web:
+    name: Web smoke (Playwright)
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Web smoke path self-test (browser-free)
+        run: npm run e2e:web:check
+
+      - name: Install Chromium for Playwright
+        run: npx playwright install --with-deps chromium
+
+      - name: Run browser smoke (manual-fallback path, no model)
+        run: npm run e2e:web
+
+      - name: Upload web smoke artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-smoke
+          path: |
+            docs/screenshots/web-last-run.md
+            docs/screenshots/web-last-run.json
+            docs/screenshots/web-*.png
+          if-no-files-found: warn
+          retention-days: 14
+
   codeql:
     name: CodeQL
     runs-on: ubuntu-24.04

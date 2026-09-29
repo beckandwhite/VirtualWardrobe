@@ -18,16 +18,20 @@
 // EXPECTED on the manual path and MUST NOT fail the run — it's asserted to have
 // appeared instead (AC3, via web-smoke-path.classifyConsole).
 //
-// This sandbox has neither a browser binary nor the model, so a run here exits at
-// skip #1. The browser pass below is written for a machine that has Chromium.
+// Per D35, @playwright/test is now a repo devDependency and the browser pass is
+// required in CI; per D50.1, Chromium is installed on the macOS host and the two
+// M3-9 bugs (directory-URL presence check; blocking `execSync` server launch) are
+// fixed here to match pose-smoke.mjs. Skip #1 remains only as a defensive fallback
+// for environments where Chromium genuinely cannot be provisioned.
 
-import { fileURLToPath, pathToFileURL } from 'node:url';
+import { fileURLToPath } from 'node:url';
 import { existsSync, mkdirSync, writeFileSync, readdirSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
-import { execSync } from 'node:child_process';
+import { execSync, spawn } from 'node:child_process';
 import {
     decidePath,
     shouldSkipBrowser,
+    classifyConsole,
     buildReport,
     renderReport,
     reportJson,
@@ -71,22 +75,43 @@ function writeArtifacts(report) {
 }
 
 async function hasPlaywright() {
-    const mod = pathToFileURL(join(root, 'node_modules', '@playwright', 'test')).href;
+    // Resolve via the bare package specifier so Node applies package.json
+    // "exports". Importing the package *directory* as a file:// URL throws
+    // ERR_UNSUPPORTED_DIR_IMPORT even when the dep is installed (M3-9 / D50.1).
     try {
-        await import(mod);
+        await import('@playwright/test');
         return true;
     } catch {
         return false;
     }
 }
 
-// Start the Expo web dev server. Returns the child so the caller can kill it.
+// Start the Expo web dev server. NOTE: execSync would block forever on a
+// long-running server (it returns a Buffer, not a child), so spawn it
+// non-blocking and poll waitForServer() until it answers before driving the
+// routes (M3-9 / D50.1 — back-ported from pose-smoke.mjs).
 function startExpoWeb() {
     const port = process.env.EXPO_WEB_PORT || '8081';
-    return execSync('npx expo start --web --port ' + port, {
+    return spawn('npx', ['expo', 'start', '--web', '--port', String(port)], {
         cwd: root,
         stdio: 'inherit',
+        env: { ...process.env, BROWSER: 'none', CI: '1' },
     });
+}
+
+// Poll the dev server until it answers (< 500) or the deadline passes.
+async function waitForServer(url, timeoutMs) {
+    const deadline = Date.now() + timeoutMs;
+    while (Date.now() < deadline) {
+        try {
+            const r = await fetch(url);
+            if (r.status < 500) return true;
+        } catch {
+            // server not up yet — keep polling
+        }
+        await new Promise((res) => setTimeout(res, 2000));
+    }
+    return false;
 }
 
 function baseUrl() {
@@ -118,22 +143,36 @@ async function main() {
 
     const { chromium } = await import('@playwright/test');
 
-     // Start the Expo web dev server, then drive the happy path.
+     // Start the Expo web dev server, wait until it answers, then drive the path.
     const server = startExpoWeb();
-    const browser = await chromium.launch();
+    let browser;
     try {
+        const ready = await waitForServer(baseUrl(), 180000);
+        if (!ready) throw new Error(`expo web dev server never became ready at ${baseUrl()}`);
+
+        browser = await chromium.launch();
         const page = await browser.newPage();
 
         // Fatal-error gate (AC "no fatal console errors"). A pageerror or any
         // console.error breaks the happy path; the pose-fallback warn is expected
         // on the manual path and is recorded, not fatal (via classifyConsole).
+        // Fatal-error gate (AC "no fatal console errors"), classified via the pure
+        // web-smoke-path.classifyConsole so the rules are unit-tested:
+        //   pageerror / app console.error → fatal (breaks the happy path)
+        //   "falling back to manual" warn  → expected (AC3, must appear on manual)
+        //   "Failed to load resource" 4xx/5xx → resource (non-fatal, recorded for QA;
+        //      incl. the intentionally-absent pose bundle that triggers the fallback)
         const fatalErrors = [];
         const warnings = [];
-        page.on('pageerror', (e) => fatalErrors.push('pageerror: ' + String(e)));
-        page.on('console', (m) => {
-            if (m.type() === 'error') fatalErrors.push('console.error: ' + m.text());
-            if (m.type() === 'warning') warnings.push(m.text());
-         });
+        const resourceErrors = [];
+        const record = (entry) => {
+            const kind = classifyConsole(entry);
+            if (kind === 'fatal') fatalErrors.push(`${entry.kind === 'pageerror' ? 'pageerror' : 'console.error'}: ${entry.text}`);
+            else if (kind === 'expected') warnings.push(entry.text);
+            else if (kind === 'resource') resourceErrors.push(entry.text);
+        };
+        page.on('pageerror', (e) => record({ kind: 'pageerror', text: String(e) }));
+        page.on('console', (m) => record({ kind: 'console', type: m.type(), text: m.text() }));
 
         // 1. Expo web startup: the entry route boots and redirects (index.tsx).
         await page.goto(baseUrl() + '/', { waitUntil: 'domcontentloaded' });
@@ -185,24 +224,23 @@ async function main() {
             browserEnabled: true,
             skipped: false,
             fatalErrors,
+            resourceErrors,
             expectedWarns,
             routes,
          screenshots: out ? [out] : [],
             seconds: now(),
          });
         writeArtifacts(report);
-        console.log(`[e2e:web] console errors observed: ${fatalErrors.length}; expected warns: ${expectedWarns}`);
+        console.log(`[e2e:web] fatal: ${fatalErrors.length}; expected warns: ${expectedWarns}; resource-load failures (non-fatal): ${resourceErrors.length}`);
         console.log(`[e2e:web] ${report.summary}`);
 
         // A fatal error or a failed route / missing fallback warn is a real break.
         if (!report.ok) {
             console.error(`[e2e:web] smoke FAIL: ${report.status}`);
-            await browser.close();
-            server.kill('SIGTERM');
-            process.exit(1);
+            process.exitCode = 1;
         }
-        await browser.close();
      } finally {
+        if (browser) await browser.close();
         server.kill('SIGTERM');
      }
 }

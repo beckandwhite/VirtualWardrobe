@@ -41,17 +41,34 @@ export function isExpectedWarn(text) {
     return EXPECTED_FALLBACK_RE.test(text ?? '');
 }
 
+// Browser-generated sub-resource load failures ("Failed to load resource: the
+// server responded with a status of 404/500"). These are network failures, not
+// app-logic crashes: on the manual path the pose-detection bundle 500s (that's the
+// very trigger for the fallback, AC3) and benign asset 404s (placeholders) also
+// surface this way. They are recorded for QA but MUST NOT fail the run — real
+// breaks arrive as a `pageerror` or an app-emitted console.error, and route-level
+// failures are gated separately by the route goto/networkidle checks.
+export const RESOURCE_LOAD_ERROR_RE = /failed to load resource/i;
+export function isResourceLoadError(text) {
+    return RESOURCE_LOAD_ERROR_RE.test(text ?? '');
+}
+
 /**
  * Classify one console/pageerror entry from the browser pass.
  * @param {{ kind: 'console' | 'pageerror', type?: string, text?: string }} entry
- * @returns {'fatal' | 'expected' | 'info'}
+ * @returns {'fatal' | 'expected' | 'resource' | 'info'}
  */
 export function classifyConsole(entry) {
     const { kind, type, text } = entry ?? {};
-    // An uncaught pageerror, or any console.error, breaks the happy path → fatal.
-    if (kind === 'pageerror' || type === 'error') return 'fatal';
+    // An uncaught pageerror always breaks the happy path → fatal.
+    if (kind === 'pageerror') return 'fatal';
     // The pose-fallback warn is the one thing we WANT on the manual path (AC3).
     if (isExpectedWarn(text)) return 'expected';
+    // A console.error that is a browser resource-load failure (404/500 on a
+    // sub-resource, incl. the intentionally-absent model bundle) is non-fatal.
+    if (type === 'error' && isResourceLoadError(text)) return 'resource';
+    // Any other console.error is a genuine app-level error → fatal.
+    if (type === 'error') return 'fatal';
     return 'info';
 }
 
@@ -78,13 +95,15 @@ export function shouldSkipBrowser(input) {
  */
 export function buildReport(run) {
     const fatalErrors = run.fatalErrors ?? [];
+    const resourceErrors = run.resourceErrors ?? [];
     const expectedWarns = run.expectedWarns ?? 0;
     const routes = run.routes ?? [];
     const path = run.path ?? 'manual';
     const skipped = Boolean(run.skipped);
     const failedRoutes = routes.filter((r) => !r.ok);
     // A run is PASS only when not skipped, no fatal errors, and no failed routes;
-    // on the manual path the fallback warn must have appeared (AC3).
+    // on the manual path the fallback warn must have appeared (AC3). Resource-load
+    // failures are recorded but never gate (see classifyConsole).
     let status = 'PASS';
     if (skipped) status = 'SKIP';
     else if (fatalErrors.length) status = 'FAIL';
@@ -94,19 +113,21 @@ export function buildReport(run) {
         ...run,
         path,
         skipped,
+        resourceErrors,
         status,
         ok: status === 'PASS',
-        summary: reportSummary({ path, skipped, status, fatalErrors, failedRoutes, expectedWarns, routes }),
+        summary: reportSummary({ path, skipped, status, fatalErrors, failedRoutes, expectedWarns, routes, resourceErrors }),
     };
 }
 
-function reportSummary({ path, skipped, status, fatalErrors, failedRoutes, expectedWarns, routes }) {
+function reportSummary({ path, skipped, status, fatalErrors, failedRoutes, expectedWarns, routes, resourceErrors }) {
     const parts = [`M4-4 e2e:web smoke (asserts the ${path} path)`];
     if (skipped) parts.push('browser pass skipped — no Chromium/Playwright (in-sandbox ceiling)');
     parts.push(`status: ${status}`);
     parts.push(`routes: ${routes.filter((r) => r.ok).length}/${routes.length} ok`);
     parts.push(`fatal console/pageerror: ${fatalErrors.length}`);
     parts.push(`expected fallback warns: ${expectedWarns}`);
+    parts.push(`resource-load failures (non-fatal): ${(resourceErrors ?? []).length}`);
     if (failedRoutes.length) parts.push(`failed routes: ${failedRoutes.map((r) => r.route).join(', ')}`);
     return parts.join('\n');
 }
@@ -141,6 +162,18 @@ if (import.meta.url === `file://${process.argv[1]}` || process.argv.includes('--
     // console classification — fatal vs the expected manual-fallback warn (AC3).
     check('classify pageerror', classifyConsole({ kind: 'pageerror', text: 'boom' }), 'fatal');
     check('classify console-error', classifyConsole({ kind: 'console', type: 'error', text: 'TypeError' }), 'fatal');
+    check(
+        'classify resource 404 non-fatal',
+        classifyConsole({ kind: 'console', type: 'error', text: 'Failed to load resource: the server responded with a status of 404 (Not Found)' }),
+        'resource',
+    );
+    check(
+        'classify resource 500 (absent model) non-fatal',
+        classifyConsole({ kind: 'console', type: 'error', text: 'Failed to load resource: the server responded with a status of 500 (Internal Server Error)' }),
+        'resource',
+    );
+    check('isResourceLoadError hit', isResourceLoadError('Failed to load resource: status of 404'), true);
+    check('isResourceLoadError miss', isResourceLoadError('TypeError: x is not a function'), false);
     check(
         'classify expected warn',
         classifyConsole({ kind: 'console', type: 'warning', text: 'PoseProvider "movenet-web" failed, falling back to manual:' }),
