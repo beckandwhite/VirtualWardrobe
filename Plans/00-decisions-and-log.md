@@ -1018,3 +1018,21 @@ and the skippable `e2e:web` all green.
    the "camera unavailable → only Library, no crash" AC. Documented the remaining native gap in
    `docs/screenshots/README.md`. Terminal state **PARTIAL** — native device-capture evidence stays
    deferred until a device/emulator runtime lands (consistent with D25.3/D34).
+- **D55 — M5-1 (#25) CI/security workflow verified green; closed PARTIAL by owner choice on push
+   protection.** Audited `.github/workflows/ci.yml` against #25's ACs: all nine are satisfied — push
+   + PR triggers on `main`, `concurrency` cancel-in-progress, top-level least-privilege
+   `contents: read` (per-job elevation only for CodeQL/dependency-review), Node 22.x on ubuntu-24.04
+   with npm cache, `npm ci` → `typecheck`/`lint`/`npm test`, `npm audit --audit-level=high` (gating),
+   CodeQL (javascript-typescript), and dependency-review (`fail-on-severity: high`, PR-only). The
+   latest `main` run (36621660009) is **green across all jobs** including CodeQL, so the earlier
+   "CodeQL failed" PARTIAL note (M5-1 footnote) was **stale** and is corrected.
+   - **Push protection: deliberately NOT enabled.** Secret scanning is `enabled`; push protection is
+     `disabled`. Owner opted to leave it off (personal project; occasional direct commits to `main`
+     are acceptable). This is a deliberate decision, not a blocker — hence terminal state **PARTIAL**
+     per AC#6's literal wording, with no further action planned. Re-enable any time via
+     Settings → Code security, or `PATCH /repos/beckandwhite/VirtualWardrobe` with
+     `security_and_analysis.secret_scanning_push_protection.status=enabled`.
+   - **Environment note:** GitHub Advanced Security is unavailable on this public repo plan, but
+     CodeQL and dependency-review run free for public repos, so those ACs hold. Action versions are
+     pinned to major tags (`@v4`/`@v3`), which satisfies AC#7's "explicit" wording; SHA-pinning is a
+     future hardening option, not required here.
