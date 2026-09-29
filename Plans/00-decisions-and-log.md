@@ -980,3 +980,29 @@ and the skippable `e2e:web` all green.
       request it only once state is `clean`, else it just merges immediately and clears
       `auto_merge`. Single-dev project, `main` **unprotected**, so the workflow stays
       "open PR → wait CI green → `gh pr merge --auto --merge` → done".
+- **D53 — M4-4 (#31) web smoke browser pass fixed + wired to CI.** The `e2e:web` browser pass
+   had never actually run: it predated M3-9/D50.1 and still carried the two bugs those fixed in
+   `pose-smoke.mjs` only. Back-ported both to `scripts/web-smoke.mjs` — the presence check now
+   uses the bare `import('@playwright/test')` specifier (the `pathToFileURL(node_modules/...)`
+   directory import threw `ERR_UNSUPPORTED_DIR_IMPORT` even when installed, so the run always
+   took the SKIP branch), and the dev server is launched with non-blocking `spawn` + a
+   `waitForServer` poll (the old `execSync('expo start --web')` blocked forever and returned a
+   Buffer, so `server.kill()` would also throw). Teardown moved to `finally` with
+   `process.exitCode` instead of an in-try `process.exit`. First real green run on macOS/arm64,
+   Node 26.10: manual path, 2/2 routes (`/wardrobe`, `/studio`), fallback warn asserted, PNG +
+   JSON artifact written.
+   - **Console classification (AC3): browser resource-load failures are non-fatal.** A model-absent
+     run 500s the `@tensorflow-models/pose-detection` web bundle — that 500 is the *trigger* for
+     the manual fallback, so failing on it contradicts AC3 ("model-absent runs assert the manual
+     fallback cleanly"). Likewise a benign `assets/store/placeholder-bottom.png` 404 is not an app
+     crash. Moved the rule into the unit-tested `classifyConsole`: `pageerror` and app
+     `console.error` stay **fatal**; `Failed to load resource` 4xx/5xx classify as **resource**
+     (recorded in the report for QA, non-gating); route-level failures remain gated separately by
+     the per-route goto/networkidle checks.
+   - **CI wiring (per D35).** Added an `e2e-web` job to `.github/workflows/ci.yml`: browser-free
+     `e2e:web:check` self-test always, then `npx playwright install --with-deps chromium` +
+     `npm run e2e:web`, then `upload-artifact` of `docs/screenshots/web-last-run.{md,json}` + PNGs.
+     Node 22.x / ubuntu-24.04 / npm cache, consistent with the other jobs; inherits top-level
+     `contents: read`.
+   - **Follow-up (out of M4-4 scope):** the `assets/store/placeholder-bottom.png` 404 is a real
+     missing catalog placeholder; recorded non-fatally by the smoke, left for a catalog-assets item.

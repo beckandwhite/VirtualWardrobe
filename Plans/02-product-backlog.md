@@ -148,7 +148,7 @@ issue bodies; implementation notes remain here only when they are useful as dura
 | M4-1  | Repository / SQLite regression tests                       | qa, coverage, M4          | ✅ BUILT (D26)      | [#28](https://github.com/beckandwhite/VirtualWardrobe/issues/28)             |
 | M4-2  | Screen-level flow tests (onboarding, capture, studio)      | qa, coverage, ux, M4      | ✅ BUILT (D29)      | [#29](https://github.com/beckandwhite/VirtualWardrobe/issues/29)             |
 | M4-3  | Pose-provider failure & fallback regression tests          | qa, coverage, ml, M4      | ✅ BUILT (D30)      | [#30](https://github.com/beckandwhite/VirtualWardrobe/issues/30)             |
-| M4-4  | Browser-level smoke tests for the Expo web app             | qa, coverage, tooling, M4 | 🟡 BUILT-waived (D31) | [#31](https://github.com/beckandwhite/VirtualWardrobe/issues/31)           |
+| M4-4  | Browser-level smoke tests for the Expo web app             | qa, coverage, tooling, M4 | 🟢 BUILT (D53) — browser pass runs + wired to CI | [#31](https://github.com/beckandwhite/VirtualWardrobe/issues/31)           |
 
 ## M5 · Devops (CI/CD and delivery confidence)
 
