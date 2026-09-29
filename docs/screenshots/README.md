@@ -49,8 +49,9 @@ skips cleanly with exit 0.
 |---|--------|------|-------|------------------|----------------|
 | 1 | Onboarding / welcome | [`kit-onboarding-welcome.png`](./kit-onboarding-welcome.png) | `/welcome` | `Welcome to VirtualWardrobe` | First-run orientation (a dev-only store-init error toast is visible — web-only, see notes) |
 | 2 | Gallery / wardrobe | [`kit-gallery-wardrobe.png`](./kit-gallery-wardrobe.png) | `/wardrobe` | `Record your own clothes` | Own-clothes + Catalog sections, empty on web |
-| 3 | Studio (try-on) | [`kit-studio.png`](./kit-studio.png) | `/studio` | `Save & share` | Manual-fallback path (banner + status + sliders) |
-| 4 | Saved / shared look | [`kit-looks-saved.png`](./kit-looks-saved.png) | `/looks` | `Your looks` | Saved-looks gallery, empty on a fresh web profile |
+| 3 | Capture (add garment) | [`kit-capture.png`](./kit-capture.png) | `/capture` | `Add a garment` | M1-1 capture modal — hint chips + **Photo** (library) only; no Camera action on web (`cameraAvailable` false) |
+| 4 | Studio (try-on) | [`kit-studio.png`](./kit-studio.png) | `/studio` | `Save & share` | Manual-fallback path (banner + status + sliders) |
+| 5 | Saved / shared look | [`kit-looks-saved.png`](./kit-looks-saved.png) | `/looks` | `Your looks` | Saved-looks gallery, empty on a fresh web profile |
 
 Every image is produced by the single `npm run screenshots` command above at the
 390 x 844 viewport; the per-image "anchor" column is the exact string the script
@@ -79,6 +80,21 @@ Native device screenshots (iOS / Android) are **not** included.
   simulator cannot boot the app.
 - **Android: not set up** — no Android SDK / emulator is configured on this host.
 
-All four images above are from the **Expo web** build via Playwright/Chromium,
-which is the only runtime currently available here. Native captures should be
-added once a simulator/emulator runtime is provisioned.
+All images above are from the **Expo web** build via Playwright/Chromium, which is
+the only runtime currently available here. Native captures should be added once a
+simulator/emulator runtime is provisioned.
+
+### M1-1 (capture) evidence status
+
+- **Web (available now):** `kit-capture.png` shows the capture screen with the
+  hint chips and the **Photo** (library) action only — the Camera action is hidden
+  because `cameraAvailable` is false on web (no `expo-camera`). This exercises the
+  "camera unavailable → only Library is shown, nothing crashes" acceptance
+  criterion on web, and the library-import → `Item` draft path is covered by the
+  passing `tests/capture/draft.test.ts` unit suite.
+- **Native camera capture / permission / on-device persistence (still open):**
+  producing this requires a booted iOS/Android runtime with camera access, which
+  is not provisionable on this headless host (and simulators lack camera hardware,
+  so even a booted simulator can only evidence library import). This is the sole
+  remaining M1-1 gap and is tracked as **PARTIAL** — code complete, native
+  device-capture evidence deferred until a device/emulator runtime lands.

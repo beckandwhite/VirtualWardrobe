@@ -37,6 +37,7 @@ const VIEWPORT = { width: 390, height: 844 };
 const ROUTES = [
     { name: 'welcome', file: 'kit-onboarding-welcome.png', anchor: 'Welcome to VirtualWardrobe' },
     { name: 'wardrobe', file: 'kit-gallery-wardrobe.png', anchor: 'Record your own clothes' },
+    { name: 'capture', file: 'kit-capture.png', anchor: 'Add a garment' },
     { name: 'studio', file: 'kit-studio.png', anchor: 'Save & share' },
     { name: 'looks', file: 'kit-looks-saved.png', anchor: 'Your looks' },
 ];
