@@ -35,7 +35,8 @@
       },
     "plugins": [
       "expo-router",
-      "expo-sqlite"
+      "expo-sqlite",
+      "./modules/vw-background-removal/app.plugin.js"
     ]
   }
 }

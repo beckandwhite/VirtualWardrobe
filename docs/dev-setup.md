@@ -335,19 +335,28 @@ dev build** via `expo-dev-client` + EAS. Expo Go stays valid for pure-JS/web wor
 
 ### What M5-4 added
 
-- `expo-dev-client` + `expo-modules-core` as direct dependencies.
+- `expo-dev-client` + `expo-modules-core` as direct dependencies (pinned `~57.0.19`
+  to match Expo SDK 57).
 - `eas.json` with `development` / `preview` / `production` profiles.
 - `app.json` native identifiers: `ios.bundleIdentifier` and `android.package`
   (`com.beckandwhite.virtualwardrobe`).
-- A trivial local module `modules/hello-native/` proving the native-module path
-  (Swift + Kotlin + a TS wrapper with a web/Expo-Go fallback), linked via
-  `"hello-native": "file:./modules/hello-native"` in root `package.json`.
+- Registered the `vw-background-removal` config plugin
+  (`./modules/vw-background-removal/app.plugin.js`) in `app.json` `plugins` so
+  `expo prebuild` applies its iOS Info.plist usage strings and the Android
+  `minSdkVersion` 24 floor.
 
-### Prebuild strategy (ADR D55)
+The native-module path itself is proved by the real `modules/vw-background-removal/`
+module (shipped by #64) — Expo autolinking auto-discovers modules under `modules/`
+via their `expo-module.config.json`, so no root `package.json` `file:` entry is
+needed. That module's `index.ts` uses `requireOptionalNativeModule(...)`, which
+returns `null` in Expo Go and resolves to the native implementation in a dev build.
 
-**EAS-managed** — `ios/` and `android/` are **not committed**; EAS runs
-`expo prebuild` at build time. See **D55** in `Plans/00-decisions-and-log.md`
-for the rationale and the committed-native-dirs alternative.
+### Prebuild strategy (ADR D58)
+
+**EAS-managed** — `ios/` and `android/` are **not committed** (gitignored) and
+`expo prebuild` regenerates them at build time. See **D58** in
+`Plans/00-decisions-and-log.md` for the rationale and the committed-native-dirs
+alternative.
 
 ### Build and run a dev client
 
@@ -377,9 +386,11 @@ macOS/self-hosted runner lands.
 - `eas build` requires **`eas login`** and an Expo account.
 - After changing native config (`app.json` plugins, a new native module), a new
   `eas build` is required — a JS-only Fast Refresh won't pick it up.
-- The `hello-native` module's TS wrapper falls back to a JS stub on web/Expo Go
-  (`requireNativeModule` throws there) — that fallback is dev-only and must never
-  ship as the production path.
+- `vw-background-removal` degrades gracefully off the dev build: its
+  `requireOptionalNativeModule` returns `null` in Expo Go / web, so
+  `removeBackgroundAsync` returns the original image (`removed: false`) rather
+  than throwing. Background removal only actually runs in a custom dev build.
+
 
 
 

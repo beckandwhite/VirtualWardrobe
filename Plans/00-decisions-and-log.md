@@ -1018,58 +1018,119 @@ and the skippable `e2e:web` all green.
    the "camera unavailable → only Library, no crash" AC. Documented the remaining native gap in
    `docs/screenshots/README.md`. Terminal state **PARTIAL** — native device-capture evidence stays
    deferred until a device/emulator runtime lands (consistent with D25.3/D34).
+- **D55 — M5-1 (#25) CI/security workflow verified green; closed PARTIAL by owner choice on push
+   protection.** Audited `.github/workflows/ci.yml` against #25's ACs: all nine are satisfied — push
+   + PR triggers on `main`, `concurrency` cancel-in-progress, top-level least-privilege
+   `contents: read` (per-job elevation only for CodeQL/dependency-review), Node 22.x on ubuntu-24.04
+   with npm cache, `npm ci` → `typecheck`/`lint`/`npm test`, `npm audit --audit-level=high` (gating),
+   CodeQL (javascript-typescript), and dependency-review (`fail-on-severity: high`, PR-only). The
+   latest `main` run (36621660009) is **green across all jobs** including CodeQL, so the earlier
+   "CodeQL failed" PARTIAL note (M5-1 footnote) was **stale** and is corrected.
+   - **Push protection: deliberately NOT enabled.** Secret scanning is `enabled`; push protection is
+     `disabled`. Owner opted to leave it off (personal project; occasional direct commits to `main`
+     are acceptable). This is a deliberate decision, not a blocker — hence terminal state **PARTIAL**
+     per AC#6's literal wording, with no further action planned. Re-enable any time via
+     Settings → Code security, or `PATCH /repos/beckandwhite/VirtualWardrobe` with
+     `security_and_analysis.secret_scanning_push_protection.status=enabled`.
+   - **Environment note:** GitHub Advanced Security is unavailable on this public repo plan, but
+     CodeQL and dependency-review run free for public repos, so those ACs hold. Action versions are
+     pinned to major tags (`@v4`/`@v3`), which satisfies AC#7's "explicit" wording; SHA-pinning is a
+     future hardening option, not required here.
+- **D56 — M1-1 (#6) closed as DONE: native runtime evidence captured on the iOS Simulator (supersedes
+   D54's PARTIAL).** With an iOS 27 Simulator now available, the app was booted in Expo Go (SDK 57) and
+   three native captures were added under `docs/screenshots/` (`ios-welcome-*`, `ios-capture-modal-*`,
+   `ios-wardrobe-catalog-*`). These evidence the native-only behavior the web build can't: the capture
+   modal renders **both Photo and Camera** actions (`cameraAvailable` true on native), and the SQLite
+   store initializes on-device (the seeded Catalog populates where web shows empty states; the
+   `virtual_wardrobe.db` `items` schema matches the M1-1 draft shape). Navigation was driven by Expo
+   Router deep links; screenshots via `simctl io screenshot`.
+   - **Caveats (accepted, DONE with a note):** (1) the iOS Simulator has no camera hardware, so a real
+     camera-sensor photo needs a physical device; the permission/availability path is covered in code
+     and the Camera action is shown natively. (2) This headless host has no Simulator GUI and no working
+     `idb`/`appium`, so tap-driven flows (library-picker selection, permission dialog, restart-survival)
+     could not be script-driven here — they remain covered by `tests/capture/draft.test.ts` (green) and
+     the web capture e2e. Owner chose "screenshots only, close DONE with caveat" rather than a temporary
+     dev-harness to synthesize a draft row.
 
-- **D55 — M5-4 (#75) custom dev-build enablement: prebuild strategy + EAS + trivial module.**
-   The app previously ran exclusively in **Expo Go** (no committed `ios/`/`android/`, no
-   `expo-dev-client`, no `eas.json`). Any feature requiring a custom native module (first instance:
-   background-removal #64) requires leaving Expo Go. This entry records all cross-cutting decisions.
+## 2026-09-30 — #64 Autoremove background on clothes (planning)
+
+- **D57 — Background removal is on-device on both platforms; no cloud.** Grilled #64. Segmentation
+   runs client-side to preserve the offline / client-only architecture (ADR-004): **web** uses
+   `@imgly/background-removal` (in-browser WASM); **native** uses a **custom Expo module** wrapping
+   **iOS Vision `VNGenerateForegroundInstanceMaskRequest`** (iOS 17+) + **Android ML Kit Subject
+   Segmentation** (API 24+). Rejected: cloud APIs (remove.bg) — break offline stance, add cost +
+   privacy exposure; TF.js-on-native — contradicts the deliberate web-only TF.js split (poseLoader)
+   and still needs a dev build; community packages (`nitro-vision-kit` too immature/pluginless,
+   `background-remover` uses the wrong iOS-15 person path).
+   - **Consequence:** the custom native module forces the app off **Expo Go** onto a first-ever
+     custom dev build. That build-system enablement is split into **#75 (M5-4)**, which #64 depends on.
+- **D57.1 — Cutout replaces the original (destructive).** Output is a **transparent PNG**; whichever
+   image the user keeps at capture (cutout or raw) becomes `Item.imagePath`, the other is discarded.
+   Non-destructive reprocessing is explicitly not a goal; reprocessing existing items is a follow-up.
+- **D57.2 — Auto-run with a light adjust, graceful degradation.** Runs automatically at capture with
+   accept / re-run / revert-to-original (no manual mask brush). On iOS <17 / Simulator / no subject /
+   low confidence / ML Kit model not yet downloaded → keep the raw capture, show a subtle note, never
+   block the save. **No app-wide min-iOS bump** — the feature degrades, the app does not.
+   - **Caveats (accepted):** not verifiable on the iOS Simulator (Vision subject-lift needs a physical
+     device); Android ML Kit model is a one-time ~200KB Play-services download, offline thereafter.
+- **D57.3 — Web engine (@imgly) deferred; web ships as a passthrough for now.** #64 merged with the
+   native path (custom Expo module) and the review UI live, but `src/capture/removeBackground.web.ts`
+   returns the original image unchanged. Reason: `@imgly/background-removal` imports `onnxruntime-web`
+   via package-`exports` subpaths (`onnxruntime-web/webgpu`) that Metro's default resolver cannot
+   bundle; a static import pulled that unresolvable graph into the whole web bundle through `@/capture`
+   and broke every route (#76 Web-smoke failure, hotfixed by #77). Wiring the real web engine —
+   install `onnxruntime-web`, enable Metro package exports (or a targeted resolver shim), restore the
+   `@imgly` impl behind a lazy import, verify in a browser — is tracked as **#78**. Until then web
+   captures succeed and the review step falls back to "keep original".
+
+- **D58 — M5-4 (#75) custom dev-build enablement: prebuild strategy + EAS + native-module wiring.**
+   Completes the build-system enablement D57 split out of #64. The app previously ran only in
+   **Expo Go**; #64 shipped the real custom native module `modules/vw-background-removal/` but its
+   `requireOptionalNativeModule('VwBackgroundRemoval')` returns `null` until a custom dev build
+   links it. This entry records the cross-cutting build decisions that make that dev build possible.
 
    1. **Prebuild strategy: EAS-managed (native dirs not committed).**
-      `ios/` and `android/` stay in `.gitignore`; EAS runs `expo prebuild` at cloud-build time.
-      Rationale: single-dev project, EAS is Expo's first-class build service, and avoiding
-      committed native dirs keeps the repo diff tractable when Expo or a native module version
-      changes. The alternative (committed native dirs + bare workflow) would be preferred in a
-      team setting where direct Xcode/Android Studio editing is needed.
+      `ios/` and `android/` are gitignored (`/ios/`, `/android/` added); `expo prebuild` regenerates
+      them at build time. Rationale: single-dev project, EAS is Expo's first-class build service, and
+      not committing native dirs keeps the repo diff tractable across Expo/native-module version
+      bumps. The alternative (committed native dirs + bare workflow) would suit a team that edits
+      native projects directly in Xcode/Android Studio.
 
-   2. **Build service: EAS cloud.**
-      `eas.json` added with three profiles — `development` (`developmentClient: true`,
-      `distribution: internal`, `ios.simulator: true`), `preview` (internal distribution),
-      `production` (auto-increment). Self-hosted runner (M5-3, Docker) is not deployed; native
-      CI build artifacts are therefore **deferred** — no macOS GitHub Actions runner exists, and
-      Linux runners cannot produce iOS binaries. The CI jobs that remain (quality, tests, e2e-web,
-      CodeQL, dependency-review) are JS/TS-only and continue unchanged.
+   2. **Build service: EAS cloud; native CI deferred.**
+      `eas.json` with three profiles — `development` (`developmentClient: true`,
+      `distribution: internal`, `ios.simulator: true`), `preview` (internal), `production`
+      (auto-increment). Native CI build artifacts are **deferred**: no macOS GitHub Actions runner
+      exists (Linux runners cannot build iOS), and the self-hosted Docker runner (M5-3) is not
+      deployed. The existing CI jobs (quality, tests, e2e-web, CodeQL, dependency-review) are
+      JS/TS-only and are unaffected.
 
-   3. **expo-dev-client + expo-modules-core added as direct dependencies.**
-      `expo-dev-client@~57.0.19` (enables custom-runtime dev builds), `expo-modules-core@~57.0.19`
-      (explicit direct dep for local module auto-linking, pinned to match Expo SDK 57 — an
-      unpinned install pulled 58.x and produced a duplicate nested copy under `expo/`; pinning to
-      `~57.0.19` dedupes to the single version the SDK expects). The `hello-native` local module
-      (see point 4) sets `"expo-modules-core": "*"` as a peer dep; npm resolves that to the
-      already-installed version.
+   3. **expo-dev-client + expo-modules-core as direct deps.**
+      `expo-dev-client@~57.0.19` (custom-runtime dev builds) and `expo-modules-core@~57.0.19`
+      (already used by `vw-background-removal`'s `index.ts`; now an explicit direct dep). Pinned to
+      `~57.0.19` to match Expo SDK 57 — an unpinned install pulled 58.x and produced a duplicate
+      nested copy under `expo/`; the pin dedupes to the single version the SDK expects.
 
-   4. **Trivial local Expo module `modules/hello-native/`.**
-      Proves the native-module resolution path required by #64. Structure:
-      `ios/HelloNativeModule.swift` (Swift `Module` subclass, `Function("greeting")`),
-      `android/.../HelloNativeModule.kt` (Kotlin `ModuleDefinition`, `Function("greeting")`),
-      `src/index.ts` (TypeScript wrapper with a JS fallback for web/Expo Go),
-      `expo-module.config.json` (declares iOS + Android module class names for auto-linking),
-      `package.json` (name `hello-native`, `main: src/index.ts`).
-      Registered in root `package.json` as `"hello-native": "file:./modules/hello-native"` so
-      `expo prebuild` auto-links it via the `expo-modules-core` linking protocol. The native
-      `greeting()` function returns a platform string; the TS fallback returns a "not a dev build"
-      message — this is a proof-of-concept only and is not imported by the app today.
+   4. **The native-module proof is the real `vw-background-removal` module (not a throwaway).**
+      #75's AC "a trivial custom Expo module resolves in the dev build" is satisfied by the real
+      module #64 already committed — a dedicated toy module would be pure noise beside it. Expo
+      autolinking auto-discovers modules under `modules/` via their `expo-module.config.json`
+      (no root `package.json` `file:` entry needed), so `vw-background-removal` links on prebuild.
 
-   5. **app.json identifiers added.**
-      `ios.bundleIdentifier: "com.beckandwhite.virtualwardrobe"` and
-      `android.package: "com.beckandwhite.virtualwardrobe"` — required by both EAS and `expo
-      prebuild`; these were previously absent.
+   5. **Config plugin registered.** `modules/vw-background-removal/app.plugin.js` (iOS Info.plist
+      usage strings + Android `minSdkVersion` 24 floor for ML Kit Subject Segmentation) was shipped
+      by #64 but not referenced anywhere, so it never ran. Added
+      `"./modules/vw-background-removal/app.plugin.js"` to `app.json` `plugins` so `expo prebuild`
+      applies it.
+
+   6. **app.json identifiers added.** `ios.bundleIdentifier` and `android.package` =
+      `com.beckandwhite.virtualwardrobe` — required by EAS and `expo prebuild`; previously absent.
 
    **AC status:**
    - `eas.json` present, dev profile configured: ✅
-   - Prebuild strategy decision recorded (this entry): ✅
-   - Native CI build artifacts: **deferred** (no macOS runner; self-hosted Docker runner blocked, M5-3)
-   - Dev client builds and launches on a physical device / emulator: **deferred** (requires hardware
-     + EAS account login + `eas build --profile development`; not automatable on this headless host)
-   - Trivial module resolves in the dev build: **pending device run** (module structure and
-     auto-link config are complete; actual native resolution can only be verified when a dev build
-     installs on a device)
+   - Prebuild / native-dir strategy recorded as an ADR (this entry): ✅
+   - Custom native module wired to resolve in a dev build (autolink + plugin registered): ✅ (config
+     complete; the real `vw-background-removal` module is the proof)
+   - Native CI build artifact: **deferred** (no macOS/self-hosted runner; documented, not blocking)
+   - Dev client builds and launches on a physical iOS device + Android emulator, module resolves
+     on-device: **deferred** — requires an Expo account, `eas login`, and hardware; not automatable
+     on this headless host. Verification steps recorded in `docs/dev-setup.md` §11.

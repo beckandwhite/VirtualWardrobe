@@ -79,6 +79,14 @@ export const hu: Dict = {
   'capture.hint': 'Tipp (nem kötelező)',
   'capture.photo': 'Fénykép',
   'capture.camera': 'Kamera',
+
+  // #64 background-removal review step
+  'capture.bg.processing': 'Háttér eltávolítása…',
+  'capture.bg.removed': 'Háttér eltávolítva',
+  'capture.bg.failed': 'Nem sikerült eltávolítani a hátteret',
+  'capture.bg.useCutout': 'Kivágás használata',
+  'capture.bg.keepOriginal': 'Eredeti megtartása',
+  'capture.bg.retry': 'Újra',
   'item.notFound': 'A darab nem található.',
   'item.label.type': 'Típus',
   'item.label.color': 'Szín',

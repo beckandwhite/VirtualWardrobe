@@ -106,6 +106,14 @@ export const en: Dict = {
   'capture.photo': 'Photo',
   'capture.camera': 'Camera',
 
+  // #64 background-removal review step
+  'capture.bg.processing': 'Removing background…',
+  'capture.bg.removed': 'Background removed',
+  'capture.bg.failed': "Couldn't remove the background",
+  'capture.bg.useCutout': 'Use cutout',
+  'capture.bg.keepOriginal': 'Keep original',
+  'capture.bg.retry': 'Try again',
+
   // Item detail / edit screen
   'item.notFound': 'Item not found.',
   'item.label.type': 'Type',

@@ -76,6 +76,14 @@ export const zhTW: Dict = {
   'capture.hint': '提示（選填）',
   'capture.photo': '照片',
   'capture.camera': '相機',
+
+  // #64 background-removal review step
+  'capture.bg.processing': '正在移除背景…',
+  'capture.bg.removed': '背景已移除',
+  'capture.bg.failed': '無法移除背景',
+  'capture.bg.useCutout': '使用去背圖',
+  'capture.bg.keepOriginal': '保留原圖',
+  'capture.bg.retry': '重試',
   'item.notFound': '找不到單品。',
   'item.label.type': '類型',
   'item.label.color': '顏色',

@@ -72,29 +72,31 @@ waits for before shooting, which is what makes each capture deterministic.
   it does not appear once the store is available (native) or in a production web
   build.
 
-## Native / device evidence — PARTIAL
+## Native / device evidence — iOS Simulator (M1-1)
 
-Native device screenshots (iOS / Android) are **not** included.
+The app now boots and runs on the **iOS 27 Simulator** (Expo Go, SDK 57). The three
+`ios-*.png` captures below are from that real native runtime — not the web build —
+and evidence the native-specific capture behavior that the web images can't:
 
-- **iOS Simulator: blocked** — no iOS runtime is installed on this host, so the
-  simulator cannot boot the app.
-- **Android: not set up** — no Android SDK / emulator is configured on this host.
+| File | Screen | Native-only signal |
+|------|--------|--------------------|
+| [`ios-welcome-20260930T102220Z.png`](./ios-welcome-20260930T102220Z.png) | Welcome | App builds + runs on the iOS Simulator with the native tab bar. |
+| [`ios-capture-modal-20260930T102220Z.png`](./ios-capture-modal-20260930T102220Z.png) | Capture (add garment) | Modal shows **both Photo and Camera** actions — on native `cameraAvailable` is `true`, so the Camera action renders (contrast `kit-capture.png`, where web hides it). |
+| [`ios-wardrobe-catalog-20260930T102220Z.png`](./ios-wardrobe-catalog-20260930T102220Z.png) | Wardrobe | The **SQLite store initializes on-device**: the seeded Catalog populates (Black Chinos, Black Crew Tee, …) where the web run renders empty states. The own-clothes `items` table is empty ("No items yet") — a captured draft lands here. |
 
-All images above are from the **Expo web** build via Playwright/Chromium, which is
-the only runtime currently available here. Native captures should be added once a
-simulator/emulator runtime is provisioned.
+The `items`/`store_items` schema in the on-device `virtual_wardrobe.db` matches the
+M1-1 draft shape (`type`, `name`, `color`, `tags`, `image_path`, `thumbnail_path`,
+`created_at`), confirming the store layer the draft insert targets is live on native.
 
-### M1-1 (capture) evidence status
+### Caveats (why M1-1 lands DONE with a note)
 
-- **Web (available now):** `kit-capture.png` shows the capture screen with the
-  hint chips and the **Photo** (library) action only — the Camera action is hidden
-  because `cameraAvailable` is false on web (no `expo-camera`). This exercises the
-  "camera unavailable → only Library is shown, nothing crashes" acceptance
-  criterion on web, and the library-import → `Item` draft path is covered by the
-  passing `tests/capture/draft.test.ts` unit suite.
-- **Native camera capture / permission / on-device persistence (still open):**
-  producing this requires a booted iOS/Android runtime with camera access, which
-  is not provisionable on this headless host (and simulators lack camera hardware,
-  so even a booted simulator can only evidence library import). This is the sole
-  remaining M1-1 gap and is tracked as **PARTIAL** — code complete, native
-  device-capture evidence deferred until a device/emulator runtime lands.
+- **No camera-sensor capture on the Simulator** — the iOS Simulator has no camera
+  hardware, so a real camera *photo* can only come from a physical device. The
+  camera *permission*/availability path is exercised in code (`cameraAvailable`)
+  and the Camera action is shown natively as above.
+- **Interactive tap flows not automatable on this host** — this environment has no
+  Simulator GUI and no working `idb`/`appium`, so the tap-driven library-picker
+  selection, the permission dialog, and restart-survival could not be script-driven
+  here. Those paths remain covered by the passing `tests/capture/draft.test.ts`
+  unit suite and the web capture e2e. Navigation to each screen above was driven by
+  Expo Router deep links; screenshots via `simctl io screenshot`.

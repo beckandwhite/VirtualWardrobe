@@ -80,6 +80,14 @@ export const fr: Dict = {
   'capture.hint': 'Indication (facultatif)',
   'capture.photo': 'Photo',
   'capture.camera': 'Caméra',
+
+  // #64 background-removal review step
+  'capture.bg.processing': "Suppression de l'arrière-plan…",
+  'capture.bg.removed': 'Arrière-plan supprimé',
+  'capture.bg.failed': "Impossible de supprimer l'arrière-plan",
+  'capture.bg.useCutout': 'Utiliser le détourage',
+  'capture.bg.keepOriginal': "Conserver l'original",
+  'capture.bg.retry': 'Réessayer',
   'item.notFound': 'Article introuvable.',
   'item.label.type': 'Type',
   'item.label.color': 'Couleur',

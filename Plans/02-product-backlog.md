@@ -27,7 +27,7 @@ issue bodies; implementation notes remain here only when they are useful as dura
 
 | ID    | Title                                                           | Labels       | Status     | GH #                                                                         |
 |-------|-----------------------------------------------------------------|--------------|------------|------------------------------------------------------------------------------|
-| M1-1  | Camera + library capture (expo-camera / image-picker)           | feat, M1     | 🚧 PARTIAL (D54) — code complete + web evidence; native device-capture deferred | [#6](https://github.com/beckandwhite/VirtualWardrobe/issues/6)               |
+| M1-1  | Camera + library capture (expo-camera / image-picker)           | feat, M1     | ✅ DONE (D56) — code complete + web + iOS-Simulator native runtime evidence; caveats: no sim camera sensor, interactive taps not automatable on host (unit + web e2e cover them) | [#6](https://github.com/beckandwhite/VirtualWardrobe/issues/6)               |
 | M1-2  | Item CRUD + thumbnail gen (expo-image-manipulator)              | feat, M1     | ✅ DONE    | [#7](https://github.com/beckandwhite/VirtualWardrobe/issues/7)               |
 | M1-3  | Gallery grid + filter/search (category / color / tag)           | feat, ux, M1 | ✅ DONE    | [#8](https://github.com/beckandwhite/VirtualWardrobe/issues/8)               |
 | M1-4  | Bundled store.json catalog + ingester                           | feat, M1     | ✅ DONE    | [#9](https://github.com/beckandwhite/VirtualWardrobe/issues/9)               |
@@ -154,10 +154,10 @@ issue bodies; implementation notes remain here only when they are useful as dura
 
 | ID    | Title                                                   | Labels          | Status       | GH #                                                                         |
 |-------|---------------------------------------------------------|-----------------|--------------|------------------------------------------------------------------------------|
-| M5-1  | [autonomous] GitHub Actions build and security workflow | tooling, qa, M5 | 🚧 PARTIAL*  | [#25](https://github.com/beckandwhite/VirtualWardrobe/issues/25)             |
+| M5-1  | [autonomous] GitHub Actions build and security workflow | tooling, qa, M5 | 🟢 PARTIAL* (D55) — CI green on main; push protection off by choice | [#25](https://github.com/beckandwhite/VirtualWardrobe/issues/25)             |
 | M5-2  | CI/CD test execution and reporting                      | tooling, qa, M5 | ✅ DONE*     | [#32](https://github.com/beckandwhite/VirtualWardrobe/issues/32)             |
 | M5-3  | [autonomous] Private GitHub Actions runner from Docker  | tooling, qa, M5 | ✅ CLOSED*   | [#33](https://github.com/beckandwhite/VirtualWardrobe/issues/33)             |
-| M5-4  | Enable custom dev build + native CI (leave Expo Go)     | tooling, M5     | 🚧 IN PROGRESS (D55) | [#75](https://github.com/beckandwhite/VirtualWardrobe/issues/75) |
+| M5-4  | Enable custom dev build + native CI (leave Expo Go)     | tooling, M5     | 🚧 IN PROGRESS (D58) — EAS + plugin wired; device build/native CI deferred | [#75](https://github.com/beckandwhite/VirtualWardrobe/issues/75) |
 
 > * **M5-1 - establish a small, trustworthy CI/security baseline.** The workflow should run on
 >   pushes and pull requests, install from the lockfile with `npm ci`, and enforce the repository's
@@ -165,9 +165,12 @@ issue bodies; implementation notes remain here only when they are useful as dura
 >   deliberate severity threshold, CodeQL for JavaScript/TypeScript, and dependency review on pull
 >   requests. GitHub secret scanning/push protection is a repository setting to enable and verify,
 >   not a substitute for the workflow itself.
->   **Current status:** `Quality` and `Jest` jobs passed in the first GH run, but the overall run
->   still fails because the `CodeQL` analysis step failed. The work item remains **PARTIAL** until the
->   security analysis job is fixed or the workflow is narrowed to a verified default configuration.
+>   **Current status:** CI on `main` is **green across all jobs** — `Quality` (typecheck, lint,
+>   `npm audit --audit-level=high`, native-bundle exclusion), `Jest`, `CodeQL`, and the `Web smoke`
+>   job (added for M4-4/#31); `Dependency review` runs on PRs only. The earlier CodeQL failure is
+>   resolved. Remains **PARTIAL** only because secret-scanning **push protection** is deliberately
+>   left disabled (owner decision — personal project; secret scanning itself is enabled). No further
+>   workflow work is planned. See D55.
 
 > * **M5-2 - make CI test results actionable.** Add the clean-install test sequence, coverage and
 >   machine-readable artifacts, clear failure output, required-check guidance, and rerun/download
