@@ -327,4 +327,70 @@ open -a Simulator                   # show the Simulator window (GUI installs on
 - **First build is slow** (native compile / Simulator cold boot); later runs are cached.
 - Scope stays the **manual** native path; MoveNet/MediaPipe on-device is **M3-1 NO-GO**.
 
+## 11. Custom dev build (M5-4)
+
+Until M5-4 the app ran **only** in Expo Go. The first custom **native module**
+(background removal, #64) can't run in Expo Go, so the app now supports a **custom
+dev build** via `expo-dev-client` + EAS. Expo Go stays valid for pure-JS/web work.
+
+### What M5-4 added
+
+- `expo-dev-client` + `expo-modules-core` as direct dependencies (pinned `~57.0.19`
+  to match Expo SDK 57).
+- `eas.json` with `development` / `preview` / `production` profiles.
+- `app.json` native identifiers: `ios.bundleIdentifier` and `android.package`
+  (`com.beckandwhite.virtualwardrobe`).
+- Registered the `vw-background-removal` config plugin
+  (`./modules/vw-background-removal/app.plugin.js`) in `app.json` `plugins` so
+  `expo prebuild` applies its iOS Info.plist usage strings and the Android
+  `minSdkVersion` 24 floor.
+
+The native-module path itself is proved by the real `modules/vw-background-removal/`
+module (shipped by #64) — Expo autolinking auto-discovers modules under `modules/`
+via their `expo-module.config.json`, so no root `package.json` `file:` entry is
+needed. That module's `index.ts` uses `requireOptionalNativeModule(...)`, which
+returns `null` in Expo Go and resolves to the native implementation in a dev build.
+
+### Prebuild strategy (ADR D58)
+
+**EAS-managed** — `ios/` and `android/` are **not committed** (gitignored) and
+`expo prebuild` regenerates them at build time. See **D58** in
+`Plans/00-decisions-and-log.md` for the rationale and the committed-native-dirs
+alternative.
+
+### Build and run a dev client
+
+```bash
+eas login                                          # requires an Expo account
+eas build --profile development --platform ios     # or --platform android
+# install the resulting build on a device/simulator, then:
+npx expo start --dev-client                        # dev server for the custom client
+```
+
+- **iOS Simulator dev build:** the `development` profile sets `ios.simulator: true`,
+  so the build installs directly on a booted Simulator.
+- **Physical device:** needs a signing team (EAS manages credentials).
+- **Expo Go still works** for JS/web-only changes — `npx expo start` (no `--dev-client`).
+
+### Native CI status
+
+Native build artifacts in CI are **deferred**: there is no macOS GitHub Actions
+runner, and Linux runners can't produce iOS binaries. The self-hosted Docker
+runner (M5-3) is not deployed. The existing CI jobs (quality, tests, e2e-web,
+CodeQL, dependency-review) stay JS/TS-only and are unaffected. Native builds run
+via `eas build` from a developer machine or an EAS-hosted worker until a
+macOS/self-hosted runner lands.
+
+### Gotchas
+
+- `eas build` requires **`eas login`** and an Expo account.
+- After changing native config (`app.json` plugins, a new native module), a new
+  `eas build` is required — a JS-only Fast Refresh won't pick it up.
+- `vw-background-removal` degrades gracefully off the dev build: its
+  `requireOptionalNativeModule` returns `null` in Expo Go / web, so
+  `removeBackgroundAsync` returns the original image (`removed: false`) rather
+  than throwing. Background removal only actually runs in a custom dev build.
+
+
+
 

@@ -16,9 +16,11 @@
        "typedRoutes": true
      },
     "ios": {
+      "bundleIdentifier": "com.beckandwhite.virtualwardrobe",
       "supportsTablet": true
     },
     "android": {
+      "package": "com.beckandwhite.virtualwardrobe",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/android-icon-foreground.png",
@@ -33,7 +35,8 @@
       },
     "plugins": [
       "expo-router",
-      "expo-sqlite"
+      "expo-sqlite",
+      "./modules/vw-background-removal/app.plugin.js"
     ]
   }
 }

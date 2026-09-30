@@ -1082,3 +1082,55 @@ and the skippable `e2e:web` all green.
    install `onnxruntime-web`, enable Metro package exports (or a targeted resolver shim), restore the
    `@imgly` impl behind a lazy import, verify in a browser — is tracked as **#78**. Until then web
    captures succeed and the review step falls back to "keep original".
+
+- **D58 — M5-4 (#75) custom dev-build enablement: prebuild strategy + EAS + native-module wiring.**
+   Completes the build-system enablement D57 split out of #64. The app previously ran only in
+   **Expo Go**; #64 shipped the real custom native module `modules/vw-background-removal/` but its
+   `requireOptionalNativeModule('VwBackgroundRemoval')` returns `null` until a custom dev build
+   links it. This entry records the cross-cutting build decisions that make that dev build possible.
+
+   1. **Prebuild strategy: EAS-managed (native dirs not committed).**
+      `ios/` and `android/` are gitignored (`/ios/`, `/android/` added); `expo prebuild` regenerates
+      them at build time. Rationale: single-dev project, EAS is Expo's first-class build service, and
+      not committing native dirs keeps the repo diff tractable across Expo/native-module version
+      bumps. The alternative (committed native dirs + bare workflow) would suit a team that edits
+      native projects directly in Xcode/Android Studio.
+
+   2. **Build service: EAS cloud; native CI deferred.**
+      `eas.json` with three profiles — `development` (`developmentClient: true`,
+      `distribution: internal`, `ios.simulator: true`), `preview` (internal), `production`
+      (auto-increment). Native CI build artifacts are **deferred**: no macOS GitHub Actions runner
+      exists (Linux runners cannot build iOS), and the self-hosted Docker runner (M5-3) is not
+      deployed. The existing CI jobs (quality, tests, e2e-web, CodeQL, dependency-review) are
+      JS/TS-only and are unaffected.
+
+   3. **expo-dev-client + expo-modules-core as direct deps.**
+      `expo-dev-client@~57.0.19` (custom-runtime dev builds) and `expo-modules-core@~57.0.19`
+      (already used by `vw-background-removal`'s `index.ts`; now an explicit direct dep). Pinned to
+      `~57.0.19` to match Expo SDK 57 — an unpinned install pulled 58.x and produced a duplicate
+      nested copy under `expo/`; the pin dedupes to the single version the SDK expects.
+
+   4. **The native-module proof is the real `vw-background-removal` module (not a throwaway).**
+      #75's AC "a trivial custom Expo module resolves in the dev build" is satisfied by the real
+      module #64 already committed — a dedicated toy module would be pure noise beside it. Expo
+      autolinking auto-discovers modules under `modules/` via their `expo-module.config.json`
+      (no root `package.json` `file:` entry needed), so `vw-background-removal` links on prebuild.
+
+   5. **Config plugin registered.** `modules/vw-background-removal/app.plugin.js` (iOS Info.plist
+      usage strings + Android `minSdkVersion` 24 floor for ML Kit Subject Segmentation) was shipped
+      by #64 but not referenced anywhere, so it never ran. Added
+      `"./modules/vw-background-removal/app.plugin.js"` to `app.json` `plugins` so `expo prebuild`
+      applies it.
+
+   6. **app.json identifiers added.** `ios.bundleIdentifier` and `android.package` =
+      `com.beckandwhite.virtualwardrobe` — required by EAS and `expo prebuild`; previously absent.
+
+   **AC status:**
+   - `eas.json` present, dev profile configured: ✅
+   - Prebuild / native-dir strategy recorded as an ADR (this entry): ✅
+   - Custom native module wired to resolve in a dev build (autolink + plugin registered): ✅ (config
+     complete; the real `vw-background-removal` module is the proof)
+   - Native CI build artifact: **deferred** (no macOS/self-hosted runner; documented, not blocking)
+   - Dev client builds and launches on a physical iOS device + Android emulator, module resolves
+     on-device: **deferred** — requires an Expo account, `eas login`, and hardware; not automatable
+     on this headless host. Verification steps recorded in `docs/dev-setup.md` §11.

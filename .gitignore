@@ -22,6 +22,11 @@ coverage/
 artifacts-ci/
 
 # native builds
+# ios/ and android/ are EAS-managed (D55 / M5-4): not committed; `expo prebuild`
+# regenerates them at build time. Ignore the whole trees so a local prebuild
+# doesn't accidentally commit generated native projects.
+/ios/
+/android/
 ios/Pods/
 android/build/
 android/app/build/
