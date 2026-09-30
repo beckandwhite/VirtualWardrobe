@@ -1036,3 +1036,18 @@ and the skippable `e2e:web` all green.
      CodeQL and dependency-review run free for public repos, so those ACs hold. Action versions are
      pinned to major tags (`@v4`/`@v3`), which satisfies AC#7's "explicit" wording; SHA-pinning is a
      future hardening option, not required here.
+- **D56 — M1-1 (#6) closed as DONE: native runtime evidence captured on the iOS Simulator (supersedes
+   D54's PARTIAL).** With an iOS 27 Simulator now available, the app was booted in Expo Go (SDK 57) and
+   three native captures were added under `docs/screenshots/` (`ios-welcome-*`, `ios-capture-modal-*`,
+   `ios-wardrobe-catalog-*`). These evidence the native-only behavior the web build can't: the capture
+   modal renders **both Photo and Camera** actions (`cameraAvailable` true on native), and the SQLite
+   store initializes on-device (the seeded Catalog populates where web shows empty states; the
+   `virtual_wardrobe.db` `items` schema matches the M1-1 draft shape). Navigation was driven by Expo
+   Router deep links; screenshots via `simctl io screenshot`.
+   - **Caveats (accepted, DONE with a note):** (1) the iOS Simulator has no camera hardware, so a real
+     camera-sensor photo needs a physical device; the permission/availability path is covered in code
+     and the Camera action is shown natively. (2) This headless host has no Simulator GUI and no working
+     `idb`/`appium`, so tap-driven flows (library-picker selection, permission dialog, restart-survival)
+     could not be script-driven here — they remain covered by `tests/capture/draft.test.ts` (green) and
+     the web capture e2e. Owner chose "screenshots only, close DONE with caveat" rather than a temporary
+     dev-harness to synthesize a draft row.
