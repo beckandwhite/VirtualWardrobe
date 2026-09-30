@@ -1,0 +1,21 @@
+plugins {
+  id 'com.android.library'
+  id 'org.jetbrains.kotlin.android'
+  id 'expo-module-gradle-plugin'
+}
+
+group = 'expo.modules.vwbackgroundremoval'
+version = '0.1.0'
+
+android {
+  namespace "expo.modules.vwbackgroundremoval"
+  defaultConfig {
+    // ML Kit Subject Segmentation requires API 24+.
+    minSdkVersion 24
+  }
+}
+
+dependencies {
+  // ML Kit Subject Segmentation (on-device foreground/subject cut-out).
+  implementation "com.google.mlkit:segmentation-subject:16.0.0-beta1"
+}

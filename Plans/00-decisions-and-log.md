@@ -1051,3 +1051,25 @@ and the skippable `e2e:web` all green.
      could not be script-driven here — they remain covered by `tests/capture/draft.test.ts` (green) and
      the web capture e2e. Owner chose "screenshots only, close DONE with caveat" rather than a temporary
      dev-harness to synthesize a draft row.
+
+## 2026-09-30 — #64 Autoremove background on clothes (planning)
+
+- **D57 — Background removal is on-device on both platforms; no cloud.** Grilled #64. Segmentation
+   runs client-side to preserve the offline / client-only architecture (ADR-004): **web** uses
+   `@imgly/background-removal` (in-browser WASM); **native** uses a **custom Expo module** wrapping
+   **iOS Vision `VNGenerateForegroundInstanceMaskRequest`** (iOS 17+) + **Android ML Kit Subject
+   Segmentation** (API 24+). Rejected: cloud APIs (remove.bg) — break offline stance, add cost +
+   privacy exposure; TF.js-on-native — contradicts the deliberate web-only TF.js split (poseLoader)
+   and still needs a dev build; community packages (`nitro-vision-kit` too immature/pluginless,
+   `background-remover` uses the wrong iOS-15 person path).
+   - **Consequence:** the custom native module forces the app off **Expo Go** onto a first-ever
+     custom dev build. That build-system enablement is split into **#75 (M5-4)**, which #64 depends on.
+- **D57.1 — Cutout replaces the original (destructive).** Output is a **transparent PNG**; whichever
+   image the user keeps at capture (cutout or raw) becomes `Item.imagePath`, the other is discarded.
+   Non-destructive reprocessing is explicitly not a goal; reprocessing existing items is a follow-up.
+- **D57.2 — Auto-run with a light adjust, graceful degradation.** Runs automatically at capture with
+   accept / re-run / revert-to-original (no manual mask brush). On iOS <17 / Simulator / no subject /
+   low confidence / ML Kit model not yet downloaded → keep the raw capture, show a subtle note, never
+   block the save. **No app-wide min-iOS bump** — the feature degrades, the app does not.
+   - **Caveats (accepted):** not verifiable on the iOS Simulator (Vision subject-lift needs a physical
+     device); Android ML Kit model is a one-time ~200KB Play-services download, offline thereafter.

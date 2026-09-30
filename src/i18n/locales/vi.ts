@@ -79,6 +79,14 @@ export const vi: Dict = {
   'capture.hint': 'Gợi ý (tùy chọn)',
   'capture.photo': 'Ảnh',
   'capture.camera': 'Máy ảnh',
+
+  // #64 background-removal review step
+  'capture.bg.processing': 'Đang xóa nền…',
+  'capture.bg.removed': 'Đã xóa nền',
+  'capture.bg.failed': 'Không thể xóa nền',
+  'capture.bg.useCutout': 'Dùng ảnh đã tách nền',
+  'capture.bg.keepOriginal': 'Giữ ảnh gốc',
+  'capture.bg.retry': 'Thử lại',
   'item.notFound': 'Không tìm thấy món đồ.',
   'item.label.type': 'Loại',
   'item.label.color': 'Màu',

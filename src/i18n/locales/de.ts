@@ -80,6 +80,14 @@ export const de: Dict = {
   'capture.hint': 'Hinweis (optional)',
   'capture.photo': 'Foto',
   'capture.camera': 'Kamera',
+
+  // #64 background-removal review step
+  'capture.bg.processing': 'Hintergrund wird entfernt…',
+  'capture.bg.removed': 'Hintergrund entfernt',
+  'capture.bg.failed': 'Hintergrund konnte nicht entfernt werden',
+  'capture.bg.useCutout': 'Freisteller verwenden',
+  'capture.bg.keepOriginal': 'Original behalten',
+  'capture.bg.retry': 'Erneut versuchen',
   'item.notFound': 'Teil nicht gefunden.',
   'item.label.type': 'Typ',
   'item.label.color': 'Farbe',

@@ -79,6 +79,14 @@ export const it: Dict = {
   'capture.hint': 'Suggerimento (facoltativo)',
   'capture.photo': 'Foto',
   'capture.camera': 'Fotocamera',
+
+  // #64 background-removal review step
+  'capture.bg.processing': 'Rimozione dello sfondo…',
+  'capture.bg.removed': 'Sfondo rimosso',
+  'capture.bg.failed': 'Impossibile rimuovere lo sfondo',
+  'capture.bg.useCutout': 'Usa ritaglio',
+  'capture.bg.keepOriginal': 'Mantieni originale',
+  'capture.bg.retry': 'Riprova',
   'item.notFound': 'Capo non trovato.',
   'item.label.type': 'Tipo',
   'item.label.color': 'Colore',

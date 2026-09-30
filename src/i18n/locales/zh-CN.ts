@@ -76,6 +76,14 @@ export const zhCN: Dict = {
   'capture.hint': '提示（可选）',
   'capture.photo': '照片',
   'capture.camera': '相机',
+
+  // #64 background-removal review step
+  'capture.bg.processing': '正在移除背景…',
+  'capture.bg.removed': '背景已移除',
+  'capture.bg.failed': '无法移除背景',
+  'capture.bg.useCutout': '使用抠图',
+  'capture.bg.keepOriginal': '保留原图',
+  'capture.bg.retry': '重试',
   'item.notFound': '未找到该单品。',
   'item.label.type': '类型',
   'item.label.color': '颜色',

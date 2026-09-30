@@ -79,6 +79,14 @@ export const es: Dict = {
   'capture.hint': 'Pista (opcional)',
   'capture.photo': 'Foto',
   'capture.camera': 'Cámara',
+
+  // #64 background-removal review step
+  'capture.bg.processing': 'Eliminando el fondo…',
+  'capture.bg.removed': 'Fondo eliminado',
+  'capture.bg.failed': 'No se pudo eliminar el fondo',
+  'capture.bg.useCutout': 'Usar recorte',
+  'capture.bg.keepOriginal': 'Conservar original',
+  'capture.bg.retry': 'Reintentar',
   'item.notFound': 'Prenda no encontrada.',
   'item.label.type': 'Tipo',
   'item.label.color': 'Color',
