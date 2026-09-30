@@ -157,6 +157,7 @@ issue bodies; implementation notes remain here only when they are useful as dura
 | M5-1  | [autonomous] GitHub Actions build and security workflow | tooling, qa, M5 | 🚧 PARTIAL*  | [#25](https://github.com/beckandwhite/VirtualWardrobe/issues/25)             |
 | M5-2  | CI/CD test execution and reporting                      | tooling, qa, M5 | ✅ DONE*     | [#32](https://github.com/beckandwhite/VirtualWardrobe/issues/32)             |
 | M5-3  | [autonomous] Private GitHub Actions runner from Docker  | tooling, qa, M5 | ✅ CLOSED*   | [#33](https://github.com/beckandwhite/VirtualWardrobe/issues/33)             |
+| M5-4  | Enable custom dev build + native CI (leave Expo Go)     | tooling, M5     | 🚧 IN PROGRESS (D55) | [#75](https://github.com/beckandwhite/VirtualWardrobe/issues/75) |
 
 > * **M5-1 - establish a small, trustworthy CI/security baseline.** The workflow should run on
 >   pushes and pull requests, install from the lockfile with `npm ci`, and enforce the repository's

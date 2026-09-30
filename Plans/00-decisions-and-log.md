@@ -1018,3 +1018,58 @@ and the skippable `e2e:web` all green.
    the "camera unavailable → only Library, no crash" AC. Documented the remaining native gap in
    `docs/screenshots/README.md`. Terminal state **PARTIAL** — native device-capture evidence stays
    deferred until a device/emulator runtime lands (consistent with D25.3/D34).
+
+- **D55 — M5-4 (#75) custom dev-build enablement: prebuild strategy + EAS + trivial module.**
+   The app previously ran exclusively in **Expo Go** (no committed `ios/`/`android/`, no
+   `expo-dev-client`, no `eas.json`). Any feature requiring a custom native module (first instance:
+   background-removal #64) requires leaving Expo Go. This entry records all cross-cutting decisions.
+
+   1. **Prebuild strategy: EAS-managed (native dirs not committed).**
+      `ios/` and `android/` stay in `.gitignore`; EAS runs `expo prebuild` at cloud-build time.
+      Rationale: single-dev project, EAS is Expo's first-class build service, and avoiding
+      committed native dirs keeps the repo diff tractable when Expo or a native module version
+      changes. The alternative (committed native dirs + bare workflow) would be preferred in a
+      team setting where direct Xcode/Android Studio editing is needed.
+
+   2. **Build service: EAS cloud.**
+      `eas.json` added with three profiles — `development` (`developmentClient: true`,
+      `distribution: internal`, `ios.simulator: true`), `preview` (internal distribution),
+      `production` (auto-increment). Self-hosted runner (M5-3, Docker) is not deployed; native
+      CI build artifacts are therefore **deferred** — no macOS GitHub Actions runner exists, and
+      Linux runners cannot produce iOS binaries. The CI jobs that remain (quality, tests, e2e-web,
+      CodeQL, dependency-review) are JS/TS-only and continue unchanged.
+
+   3. **expo-dev-client + expo-modules-core added as direct dependencies.**
+      `expo-dev-client@~57.0.19` (enables custom-runtime dev builds), `expo-modules-core@~57.0.19`
+      (explicit direct dep for local module auto-linking, pinned to match Expo SDK 57 — an
+      unpinned install pulled 58.x and produced a duplicate nested copy under `expo/`; pinning to
+      `~57.0.19` dedupes to the single version the SDK expects). The `hello-native` local module
+      (see point 4) sets `"expo-modules-core": "*"` as a peer dep; npm resolves that to the
+      already-installed version.
+
+   4. **Trivial local Expo module `modules/hello-native/`.**
+      Proves the native-module resolution path required by #64. Structure:
+      `ios/HelloNativeModule.swift` (Swift `Module` subclass, `Function("greeting")`),
+      `android/.../HelloNativeModule.kt` (Kotlin `ModuleDefinition`, `Function("greeting")`),
+      `src/index.ts` (TypeScript wrapper with a JS fallback for web/Expo Go),
+      `expo-module.config.json` (declares iOS + Android module class names for auto-linking),
+      `package.json` (name `hello-native`, `main: src/index.ts`).
+      Registered in root `package.json` as `"hello-native": "file:./modules/hello-native"` so
+      `expo prebuild` auto-links it via the `expo-modules-core` linking protocol. The native
+      `greeting()` function returns a platform string; the TS fallback returns a "not a dev build"
+      message — this is a proof-of-concept only and is not imported by the app today.
+
+   5. **app.json identifiers added.**
+      `ios.bundleIdentifier: "com.beckandwhite.virtualwardrobe"` and
+      `android.package: "com.beckandwhite.virtualwardrobe"` — required by both EAS and `expo
+      prebuild`; these were previously absent.
+
+   **AC status:**
+   - `eas.json` present, dev profile configured: ✅
+   - Prebuild strategy decision recorded (this entry): ✅
+   - Native CI build artifacts: **deferred** (no macOS runner; self-hosted Docker runner blocked, M5-3)
+   - Dev client builds and launches on a physical device / emulator: **deferred** (requires hardware
+     + EAS account login + `eas build --profile development`; not automatable on this headless host)
+   - Trivial module resolves in the dev build: **pending device run** (module structure and
+     auto-link config are complete; actual native resolution can only be verified when a dev build
+     installs on a device)
