@@ -4,9 +4,13 @@ import { manipulateAsync, SaveFormat } from 'expo-image-manipulator';
 // (M1-3) never has to decode megabytes on scroll. The full-res image stays in
 // `Item.imagePath`; only the thumbnail is what a list decodes.
 //
+// #64: thumbnails are PNG so a transparent-PNG cutout keeps its alpha in the
+// wardrobe grid (a JPEG thumb would flatten the cutout onto a black matte). A
+// passthrough JPEG source is simply re-wrapped as PNG — larger, but correct.
+//
 // Best-effort: on any failure we fall back to the original path so a thumb never
-// blocks the user (ADR-001 keeps the garment a 2D overlay, not a perfect cutout).
-// RN-only module: imported by the item screen, never by the node test suite.
+// blocks the user. RN-only module: imported by the item screen, never by the node
+// test suite.
 export const THUMB_SIZE = 400;
 
 export async function makeThumbnail(fullPath: string, size = THUMB_SIZE): Promise<string> {
@@ -14,7 +18,7 @@ export async function makeThumbnail(fullPath: string, size = THUMB_SIZE): Promis
       const res = await manipulateAsync(
          fullPath,
          [{ resize: { width: size, height: size } }],
-         { format: SaveFormat.JPEG, compress: 0.7 },
+         { format: SaveFormat.PNG },
       );
       return res.uri;
       } catch (e) {

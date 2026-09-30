@@ -8,7 +8,12 @@ import {
 } from 'react-native';
 import { useState } from 'react';
 import { router } from 'expo-router';
-import { useCapture, type CaptureSource, type CaptureResult } from '@/capture';
+import {
+  useCapture,
+  processCaptureImage,
+  type CaptureSource,
+  type CaptureResult,
+} from '@/capture';
 import { FilePickerButton } from '@/capture/FilePickerButton';
 import { r } from '@/store';
 import { useI18n } from '@/i18n/useI18n';
@@ -37,7 +42,12 @@ export default function CaptureScreen() {
     setBusy(true);
     try {
       const result = await takePhoto(source);
-      const draft = buildDraftFromCapture(result, hint);
+      // #64: auto-remove the background on-device; the cutout becomes the item
+      // image (passthrough keeps the original when unsupported / no subject).
+      const captured = result
+        ? { ...result, uri: (await processCaptureImage(result.uri)).uri }
+        : null;
+      const draft = buildDraftFromCapture(captured, hint);
       if (!draft) {
         // Nothing captured (cancel / denial / error): reset busy, no insert, no nav.
         setBusy(false);
@@ -58,7 +68,9 @@ export default function CaptureScreen() {
   const captureFromUri = async (uri: string) => {
     setBusy(true);
     try {
-      const result: CaptureResult = { uri, source: 'library' };
+      // #64: web runs @imgly background removal in-browser before the draft.
+      const processed = await processCaptureImage(uri);
+      const result: CaptureResult = { uri: processed.uri, source: 'library' };
       const draft = buildDraftFromCapture(result, hint);
       if (!draft) {
         setBusy(false);
