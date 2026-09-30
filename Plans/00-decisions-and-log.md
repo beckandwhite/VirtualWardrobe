@@ -1073,3 +1073,12 @@ and the skippable `e2e:web` all green.
    block the save. **No app-wide min-iOS bump** — the feature degrades, the app does not.
    - **Caveats (accepted):** not verifiable on the iOS Simulator (Vision subject-lift needs a physical
      device); Android ML Kit model is a one-time ~200KB Play-services download, offline thereafter.
+- **D57.3 — Web engine (@imgly) deferred; web ships as a passthrough for now.** #64 merged with the
+   native path (custom Expo module) and the review UI live, but `src/capture/removeBackground.web.ts`
+   returns the original image unchanged. Reason: `@imgly/background-removal` imports `onnxruntime-web`
+   via package-`exports` subpaths (`onnxruntime-web/webgpu`) that Metro's default resolver cannot
+   bundle; a static import pulled that unresolvable graph into the whole web bundle through `@/capture`
+   and broke every route (#76 Web-smoke failure, hotfixed by #77). Wiring the real web engine —
+   install `onnxruntime-web`, enable Metro package exports (or a targeted resolver shim), restore the
+   `@imgly` impl behind a lazy import, verify in a browser — is tracked as **#78**. Until then web
+   captures succeed and the review step falls back to "keep original".
