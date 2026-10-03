@@ -64,7 +64,7 @@ issue bodies; implementation notes remain here only when they are useful as dura
 | M3-8   | [autonomous] Docs: Playwright web-test environment setup           | docs, tooling, qa, M3 | ✅ DONE             | [#26](https://github.com/beckandwhite/VirtualWardrobe/issues/26)             |
 | M3-9   | [autonomous] Setup: install + run Playwright on this MacBook       | tooling, qa, M3       | ✅ DONE             | [#27](https://github.com/beckandwhite/VirtualWardrobe/issues/27)             |
 | M3-10  | [autonomous] Docs: Android test-environment setup                  | docs, tooling, qa, M3 | ✅ DONE             | [#21](https://github.com/beckandwhite/VirtualWardrobe/issues/21)             |
-| M3-11  | [autonomous] Setup: Android emulator/device on this MacBook        | tooling, qa, M3       | 🚧 BACKLOG          | [#22](https://github.com/beckandwhite/VirtualWardrobe/issues/22)             |
+| M3-11  | [autonomous] Setup: Android emulator/device on this MacBook        | tooling, qa, M3, size:M | ✅ READY TO PICK UP | [#22](https://github.com/beckandwhite/VirtualWardrobe/issues/22)             |
 | M3-12  | [autonomous] Docs: iOS test-environment setup                      | docs, tooling, qa, M3 | ✅ DONE             | [#23](https://github.com/beckandwhite/VirtualWardrobe/issues/23)             |
 | M3-13  | [autonomous] Setup: iOS Simulator on this MacBook                  | tooling, qa, M3       | ✅ DONE             | [#24](https://github.com/beckandwhite/VirtualWardrobe/issues/24)             |
 | M3-14  | Storyboard the core wardrobe-to-try-on user journey                | ux, docs, M3          | ✅ DONE             | [#34](https://github.com/beckandwhite/VirtualWardrobe/issues/34)             |
@@ -149,6 +149,29 @@ issue bodies; implementation notes remain here only when they are useful as dura
 | M4-2  | Screen-level flow tests (onboarding, capture, studio)      | qa, coverage, ux, M4      | ✅ BUILT (D29)      | [#29](https://github.com/beckandwhite/VirtualWardrobe/issues/29)             |
 | M4-3  | Pose-provider failure & fallback regression tests          | qa, coverage, ml, M4      | ✅ BUILT (D30)      | [#30](https://github.com/beckandwhite/VirtualWardrobe/issues/30)             |
 | M4-4  | Browser-level smoke tests for the Expo web app             | qa, coverage, tooling, M4 | 🟢 BUILT (D53) — browser pass runs + wired to CI | [#31](https://github.com/beckandwhite/VirtualWardrobe/issues/31)           |
+| M4-5  | Diagnose and fix expo-router InvalidStateError | qa, coverage, M4, size:M | ✅ READY TO PICK UP | [#48](https://github.com/beckandwhite/VirtualWardrobe/issues/48) |
+
+## QA follow-ups · Coverage validity & runtime confidence (M4 QA)
+
+The M4 issues are closed against their original scope. These follow-ups address gaps found in a
+fresh coverage run: the reported percentage omits unimported screens, screen behavior is not
+asserted at the UI boundary, and native/browser integration confidence is still limited.
+
+| ID    | Title                                                        | Labels                         | Status              | GH # |
+|-------|--------------------------------------------------------------|--------------------------------|---------------------|------|
+| QA-F1 | Measure the full Jest coverage surface and enforce thresholds | qa, coverage, tooling, M4, size:M | ✅ READY TO PICK UP | [#81](https://github.com/beckandwhite/VirtualWardrobe/issues/81) |
+| QA-F2 | Add user-visible tests for onboarding, capture, wardrobe, and studio | qa, coverage, ux, M4, size:L | ✅ READY TO PICK UP | [#82](https://github.com/beckandwhite/VirtualWardrobe/issues/82) |
+| QA-F3 | Make Expo web smoke tests assert real screen and flow success | qa, coverage, tooling, M4, size:M | ✅ READY TO PICK UP | [#83](https://github.com/beckandwhite/VirtualWardrobe/issues/83) |
+| QA-F4 | Verify native background-removal bridge and fallback behavior | qa, coverage, tooling, M4, size:L | ✅ READY TO PICK UP | [#84](https://github.com/beckandwhite/VirtualWardrobe/issues/84) |
+| QA-F5 | Cover MoveNet image decoding and provider lifecycle paths | qa, coverage, ml, M4, size:S | ✅ READY TO PICK UP | [#85](https://github.com/beckandwhite/VirtualWardrobe/issues/85) |
+
+Sizing follows [`autonomous-sizing.md`](autonomous-sizing.md). Planning assumptions are now
+recorded in each GitHub issue; the open-ended grooming prompts have been removed. Suggested order:
+QA-F1 first to establish a trustworthy coverage denominator; QA-F2 and QA-F3 next, coordinated
+around one user journey; QA-F5 can proceed independently; start QA-F4 with its native
+host/device-availability check because that may constrain verification. These are recommendations,
+not hard dependencies. The project **Status** is `Ready to pickup`; its separate **Board Status**
+is `To Do`.
 
 ## M5 · Devops (CI/CD and delivery confidence)
 
@@ -265,6 +288,23 @@ Merged/closed in grooming: **M7-3 (#55)** and **M7-4 (#56)** folded into the M7-
 > * **Dependencies / run order:** M7-2b blocked by M7-2a; M7-7 blocked by M7-6; M7-6 spike should
 >   run after M7-5 Part B (centering) lands. M7-1, M7-2a, and M7-5 are independent and parallel-safe.
 > * Project-board cards for #59 and #60 added via `gh project item-add`.
+
+## UX follow-ups
+
+| ID    | Title                                      | Labels       | Status                  | GH # |
+|-------|--------------------------------------------|--------------|-------------------------|------|
+| UX-F1 | Make all welcome-screen language options visible | ux, M7, size:M | ✅ READY TO PICK UP | [#65](https://github.com/beckandwhite/VirtualWardrobe/issues/65) |
+| UX-F2 | Add in-app feedback links and GitHub issue templates | ux, docs, feat, M7, size:M | ✅ READY TO PICK UP | [#63](https://github.com/beckandwhite/VirtualWardrobe/issues/63) |
+
+> **UX-F1 (#65):** Follow-up to the shipped M7 welcome work. The language switcher currently puts
+> eight non-active locale buttons in one non-wrapping row. The accepted direction is a responsive
+> grid of readable native-language labels, with no hidden horizontal scrolling; the issue contains
+> the full implementation scope and verification criteria. The Playwright web smoke is extended to
+> assert both visible options and no clipping at desktop and narrow browser widths.
+>
+> **UX-F2 (#63):** Add a localized About & feedback section to Me with links to GitHub, prefilled bug
+> and feature templates, and the user guide. Avoid a sixth tab; warn against sharing private photos.
+> The issue contains the full scope and verification criteria.
 
 ## Definition of Done (every issue)
 - [ ] Acceptance criteria met and verified (test where applicable).

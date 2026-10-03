@@ -155,6 +155,17 @@ Status of this document: locked as of planning phase (2026-09-18).
  is a known false positive. Disabling in `eslint.config.js` with a comment;
   revisit when a proper async-loading hook lands.
 
+## 2026-10-03 — Issue triage: #48 navigation regression
+
+- **D59: Treat #48 as a router-state regression, not a data-layer bug.**
+  The report contains only an unsymbolicated `InvalidStateError` from `expo-router` and no
+  reproduction steps, so duplicate or overlapping route transitions remain a hypothesis, not a
+  confirmed cause. The issue is ready for a bounded reproduction/diagnosis followed by a narrow fix.
+- **Why:** The app has an existing `src/navigation` layer and focused test coverage opportunities;
+  inspect these as starting points, but change only the confirmed failure path.
+- **Consequences:** Do not add a same-target debounce/dedupe guard unless reproduction supports it.
+  Preserve deterministic deep-link exits and record the evidence and checks in the PR.
+
 ## 2026-09-18 — M0-5 grilling + design lock
 
 - **D16: M0-5 design locked via the `grilling` workflow** (7 Q&A, all settled):
@@ -1134,3 +1145,31 @@ and the skippable `e2e:web` all green.
    - Dev client builds and launches on a physical iOS device + Android emulator, module resolves
      on-device: **deferred** — requires an Expo account, `eas login`, and hardware; not automatable
      on this headless host. Verification steps recorded in `docs/dev-setup.md` §11.
+
+## 2026-10-03 — Issue grooming: #65 visible welcome language selector
+
+- **D60: Use a wrapping grid of language names, not flags, a dropdown, or horizontal scrolling.**
+  The existing shared `LanguageSwitcher` renders eight non-active locale options in one
+  non-wrapping row, clipping later choices on browser widths. The issue now calls for a compact
+  multi-row layout at desktop width and additional wrapped rows on narrow screens. Its existing
+  Playwright web-smoke harness will verify option selection and no clipping at desktop and narrow
+  viewport sizes.
+- **Why:** Keep every alternative directly discoverable, preserve recognizable native-language
+  labels (including the distinct Chinese variants), and avoid relying on an invisible scroll gesture.
+- **Consequences:** Preserve the active-locale exclusion and existing `setLocale` behavior. Keep the
+  shared component usable on native; this requires a small web-smoke extension, so the item is sized M.
+  The user was unavailable to choose among the offered layout approaches, so the explicit preference
+  against invisible scrolling and the visible-options requirement determined this default.
+
+## 2026-10-03 — Issue grooming: #63 in-app feedback links
+
+- **D61: Put About & feedback links at the bottom of the existing Me tab, not in a new tab or route.**
+  Provide links to the GitHub repository, dedicated bug and feature-request templates, and the app
+  usage guide. Keep feedback submission external; do not add telemetry, uploads, or an in-app form.
+- **Why:** Me already owns profile/settings, so it is a discoverable place for help without changing
+  primary navigation. Separate templates route reports to the right format; the photo warning
+  reinforces the app's local-first privacy model.
+- **Consequences:** Add complete copy for all nine locales, update feedback documentation, extend the
+  web smoke, and create two Markdown issue templates. Sized M for this bounded UI/docs/templates/test
+  change. The user was unavailable to choose page placement, so the existing navigation and settings
+  ownership determined the default; the selected scope is recorded in #63.
