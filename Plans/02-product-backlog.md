@@ -149,7 +149,7 @@ issue bodies; implementation notes remain here only when they are useful as dura
 | M4-2  | Screen-level flow tests (onboarding, capture, studio)      | qa, coverage, ux, M4      | ✅ BUILT (D29)      | [#29](https://github.com/beckandwhite/VirtualWardrobe/issues/29)             |
 | M4-3  | Pose-provider failure & fallback regression tests          | qa, coverage, ml, M4      | ✅ BUILT (D30)      | [#30](https://github.com/beckandwhite/VirtualWardrobe/issues/30)             |
 | M4-4  | Browser-level smoke tests for the Expo web app             | qa, coverage, tooling, M4 | 🟢 BUILT (D53) — browser pass runs + wired to CI | [#31](https://github.com/beckandwhite/VirtualWardrobe/issues/31)           |
-| M4-5  | Diagnose and fix expo-router InvalidStateError | qa, coverage, M4, size:M | ✅ READY TO PICK UP | [#48](https://github.com/beckandwhite/VirtualWardrobe/issues/48) |
+| M4-5   | Diagnose and fix expo-router InvalidStateError | qa, coverage, M4, size:M | 🟢 PR OPEN (D60) — unmount-guard decision + regression; original crash not repro in CI | [#48](https://github.com/beckandwhite/VirtualWardrobe/issues/48) |
 
 ## QA follow-ups · Coverage validity & runtime confidence (M4 QA)
 

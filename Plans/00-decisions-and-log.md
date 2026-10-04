@@ -1173,3 +1173,32 @@ and the skippable `e2e:web` all green.
   web smoke, and create two Markdown issue templates. Sized M for this bounded UI/docs/templates/test
   change. The user was unavailable to choose page placement, so the existing navigation and settings
   ownership determined the default; the selected scope is recorded in #63.
+## 2026-10-04 — #48 expo-router InvalidStateError (M4-5)
+
+- **D62: Fix the reproduced invalid-state condition with an unmount guard in the navigation-decision
+  layer, not a new debounce and not scattered route guards.** The reported crash is an
+  unsymbolicated `InvalidStateError` from the router bundle with no repro steps; it is NOT
+  reproducible in the node jest env (no router/worklets bridge) and the web smoke (`npm run e2e:web`)
+  is a happy path that stays green. The deterministic invalid-state condition we *can* model is a
+  navigation issued after the originating screen unmounted: every async call site
+  (`welcome.advance`, `capture.finalize`, `item.leave`, `catalog.addToWardrobe/tryOn`) issues
+  `router.replace`/`router.back` *after an `await`* with no unmount guard, so a slow completion (or a
+  transition overlapping another) lands on a dead screen — the classic InvalidStateError trigger.
+- **Implementation:** added the pure decision `shouldNavigate(state, target, now, windowMs)` to
+  `src/navigation/pushGuard.ts` (drops any navigation when `state.mounted === false`, else defers to
+  the #47 `shouldPush` same-target dedup) and wired a live mount flag into the router-bound
+  `useGuardedPush` hook (`useEffect` sets it on mount, flips it off on unmount; the NavState object is
+  captured once for the cleanup). No new debounce; the deep-link `back()`/`replace()` exit (`exitTo`)
+  is untouched and still allowed while mounted.
+- **Why unmount, not duplicate:** #48 keeps duplicate/overlapping navigation a *hypothesis*; the
+  same-target time-dedup (`shouldPush`, #47) already covers a repeated target, so the only unguarded
+  condition left that matches the report is post-unmount navigation.
+- **Evidence / regression:** `tests/navigation/guardedNavigation.test.ts` asserts the guard drops a
+  post-unmount navigation for any target, preserves the same-target dedup while mounted, and keeps a
+  mounted deep-link exit allowed — it FAILS before (missing `shouldNavigate`/`NavState`) and PASSES
+  after; full suite 233/233, `tsc --noEmit` clean, `eslint --max-warnings 0` clean.
+- **Consequences / remaining uncertainty:** the fix hardens the async-navigation call sites against the
+  deterministic dead-screen transition but cannot be shown to clear the *original* symbolicated crash
+  from the node env; that confirmation is left to a real device/browser run (on-device work deferred,
+  headless host). The issue/PR record the attempted flow and the residual uncertainty rather than
+  claiming the original crash is cleared.
