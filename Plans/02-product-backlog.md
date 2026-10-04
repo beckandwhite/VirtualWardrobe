@@ -293,7 +293,7 @@ Merged/closed in grooming: **M7-3 (#55)** and **M7-4 (#56)** folded into the M7-
 
 | ID    | Title                                      | Labels       | Status                  | GH # |
 |-------|--------------------------------------------|--------------|-------------------------|------|
-| UX-F1 | Make all welcome-screen language options visible | ux, M7, size:M | ✅ READY TO PICK UP | [#65](https://github.com/beckandwhite/VirtualWardrobe/issues/65) |
+| UX-F1 | Make all welcome-screen language options visible | ux, M7, size:M | 🚧 WIP — PR open | [#65](https://github.com/beckandwhite/VirtualWardrobe/issues/65) |
 | UX-F2 | Add in-app feedback links and GitHub issue templates | ux, docs, feat, M7, size:M | ✅ READY TO PICK UP | [#63](https://github.com/beckandwhite/VirtualWardrobe/issues/63) |
 
 > **UX-F1 (#65):** Follow-up to the shipped M7 welcome work. The language switcher currently puts
@@ -301,6 +301,11 @@ Merged/closed in grooming: **M7-3 (#55)** and **M7-4 (#56)** folded into the M7-
 > grid of readable native-language labels, with no hidden horizontal scrolling; the issue contains
 > the full implementation scope and verification criteria. The Playwright web smoke is extended to
 > assert both visible options and no clipping at desktop and narrow browser widths.
+> * **Status (branch `work/65-visible-language-grid`):** `LanguageSwitcher` now wraps (flexWrap grid,
+>   4 compact columns on a desktop card, fewer on narrow) with per-chip a11y role/label; `web-smoke`
+>   adds `checkWelcomeLanguages` at `1024x768` + `375x812` (bounded-box + no-h-overflow + selection
+>   flips the active locale). typecheck/lint/227 tests pass; `e2e:web` browser pass ran and PASSED
+>   at both widths.
 >
 > **UX-F2 (#63):** Add a localized About & feedback section to Me with links to GitHub, prefilled bug
 > and feature templates, and the user guide. Avoid a sixth tab; warn against sharing private photos.
