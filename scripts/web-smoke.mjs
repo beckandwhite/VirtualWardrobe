@@ -53,6 +53,35 @@ const path = decidePath({ modelUrl, modelDir: modelDirPresent ? MODEL_DIR : null
 // redirects to /onboarding or /wardrobe); these are the screens we assert on.
 const ROUTES = ['wardrobe', 'studio'];
 
+// #65 welcome language-selector coverage. On a fresh web context the active locale
+// is the default 'en' (no persisted setting, no system-locale global on web), so
+// the switcher offers the eight *non-English* native-language labels. We assert all
+// eight render fully (no chip clipped past the viewport, no horizontal document
+// scroll) at a desktop width and a narrow phone width, then that selecting one swaps
+// the welcome copy (the clicked label drops to zero as it becomes the active,
+// excluded locale). Each label's box is measured against the viewport — an
+// equivalent robust check to "within the selector/card bounds" — not a DOM presence
+// check. Labels mirror src/i18n/strings.ts LOCALE_LABELS minus the active 'en'.
+const WELCOME_LANG_LABELS = [
+    'Magyar',
+    'Deutsch',
+    'Español',
+    'Italiano',
+    'Français',
+    'Tiếng Việt',
+    '简体中文',
+    '繁體中文',
+];
+const WELCOME_LANG_VIEWPORTS = [
+    { name: 'desktop', width: 1024, height: 768 },
+    { name: 'narrow', width: 375, height: 812 },
+];
+// Horizontal tolerance (px) so a 1px sub-pixel rounding at the card edge isn't a
+// false clip. A chip is "visible" when its left edge is at/after 0 and its right
+// edge never passes the viewport (the card is max-width 480, full-width only on a
+// narrow screen, so the viewport bound is the binding edge either way).
+const CLIP_TOLERANCE = 2;
+
 // The expected console.warn the manual path surfaces (AC3).
 const EXPECTED_WARN_RE = /falling back to manual/i;
 
@@ -97,6 +126,84 @@ function startExpoWeb() {
         stdio: 'inherit',
         env: { ...process.env, BROWSER: 'none', CI: '1' },
     });
+}
+
+// #65 welcome language-selector coverage. Visits /welcome at a desktop and a
+// narrow viewport and asserts all eight non-active native-language labels render
+// unclipped and that selecting one swaps the welcome copy. The active locale on a
+// fresh web context is the default 'en' (no persisted setting / system-locale
+// global on web), so the eight visible labels are the non-English LOCALE_LABELS.
+//
+// Clipping is measured, not text-presence: each label's bounding box must sit
+// inside the viewport (left edge >= 0, right edge <= viewport width) — the card is
+// max-width 480, so the viewport bound is the binding edge — and the document must
+// have no horizontal overflow (no hidden horizontal scroll). Selection is verified
+// behaviorally: after clicking 'Deutsch' the active locale flips to 'de', so that
+// label leaves the selector (the active locale is excluded) and 'English' (the
+// now-inactive locale) appears — i.e. the welcome copy/selector changed.
+async function checkWelcomeLanguages(browser, baseUrl, fatalErrors) {
+     for (const vp of WELCOME_LANG_VIEWPORTS) {
+         const context = await browser.newContext({ viewport: { width: vp.width, height: vp.height } });
+         try {
+             const page = await context.newPage();
+
+             await page.goto(baseUrl() + '/welcome', { waitUntil: 'domcontentloaded' });
+             // The selector only renders once the i18n provider resolves; wait on the
+             // first known label so the check runs against a settled selector.
+             await page.getByText(WELCOME_LANG_LABELS[0], { exact: true }).waitFor({ timeout: 60000 });
+
+             const clipped = [];
+             for (const label of WELCOME_LANG_LABELS) {
+                 const loc = page.getByText(label, { exact: true });
+                 const count = await loc.count();
+                 if (count === 0) {
+                     clipped.push(`${label} (not rendered)`);
+                     continue;
+                 }
+                 const box = await loc.first().boundingBox();
+                 if (!box) {
+                     clipped.push(`${label} (no bounds)`);
+                     continue;
+                 }
+                 const offLeft = box.x < -CLIP_TOLERANCE;
+                 const offRight = box.x + box.width > vp.width + CLIP_TOLERANCE;
+                 if (offLeft || offRight) clipped.push(`${label} (x=${Math.round(box.x)} w=${Math.round(box.width)})`);
+             }
+
+             // The document must not overflow horizontally (no hidden scroll area).
+             const hOverflow = await page.evaluate(
+                 () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+             );
+
+             // Selection: click a known alternative and assert the active locale flipped.
+             let selectionErr = null;
+             try {
+                 await page.getByText('Deutsch', { exact: true }).click();
+                 const stillThere = await page.getByText('Deutsch', { exact: true }).count();
+                 const englishNow = await page.getByText('English', { exact: true }).count();
+                 if (stillThere > 0 || englishNow === 0) {
+                     selectionErr =
+                         `selection did not flip active locale (Deutsch still=${stillThere}, English now=${englishNow})`;
+                 }
+             } catch (e) {
+                 selectionErr = e.message;
+             }
+
+             const problems = [];
+             if (clipped.length) problems.push(`clipped/off-viewport: ${clipped.join(', ')}`);
+             if (hOverflow > CLIP_TOLERANCE) problems.push(`horizontal overflow ${Math.round(hOverflow)}px`);
+             if (selectionErr) problems.push(`selection: ${selectionErr}`);
+
+             if (problems.length) {
+                 fatalErrors.push(`[welcome ${vp.name} ${vp.width}x${vp.height}] ${problems.join('; ')}`);
+                 console.log(`[e2e:web] welcome ${vp.name} (${vp.width}x${vp.height}): FAIL — ${problems.join('; ')}`);
+             } else {
+                 console.log(`[e2e:web] welcome ${vp.name} (${vp.width}x${vp.height}): 8 options visible + selectable, no clip/overflow`);
+             }
+         } finally {
+             await context.close();
+         }
+     }
 }
 
 // Poll the dev server until it answers (< 500) or the deadline passes.
@@ -204,10 +311,15 @@ async function main() {
             console.log(`[e2e:web] status wait: ${e.message}`);
          }
 
-        // Assert the expected fallback warn appeared on the manual path (AC3).
+// Assert the expected fallback warn appeared on the manual path (AC3).
         const expectedWarns = warnings.filter((w) => EXPECTED_WARN_RE.test(w)).length;
 
-        // Capture the screenshot artifact.
+          // #65 welcome language-selector coverage: all eight non-active native-language
+          // options render unclipped and are selectable at desktop + narrow viewports.
+          // Failures are folded into fatalErrors so they gate the run like a route break.
+        await checkWelcomeLanguages(browser, baseUrl, fatalErrors);
+
+          // Capture the screenshot artifact.
         ensureShotsDir();
         const out = join(SHOTS_DIR, `web-${path}-${stamp()}.png`);
         try {
