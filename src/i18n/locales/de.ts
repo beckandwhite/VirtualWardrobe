@@ -61,6 +61,15 @@ export const de: Dict = {
   'me.photo.set': 'Foto festlegen',
   'me.photo.change': 'Foto ändern',
   'me.photo.empty': 'Noch kein Foto festgelegt.',
+  'me.feedback.title': 'Info & Feedback',
+  'me.feedback.hint':
+      'Öffne das Projekt, melde einen Fehler oder fordere eine Funktion auf GitHub an. Zur Eingabe ist ein GitHub-Konto nötig. Nimm nie Fotos von dir oder deiner Garderobe auf — alles bleibt auf deinem Gerät.',
+  'me.feedback.about': 'Info · GitHub-Repository',
+  'me.feedback.bug': 'Fehler melden',
+  'me.feedback.feature': 'Funktion anfragen',
+  'me.feedback.guide': 'So verwendest du die App',
+  'me.feedback.openFailed':
+      'Der Link ließ sich nicht öffnen. Öffne ihn auf GitHub von deinem Gerät aus.',
   'wardrobe.header': 'Deine Garderobe',
   'wardrobe.search': 'Name oder Tags suchen',
   'wardrobe.count': '{visible} von {total}',

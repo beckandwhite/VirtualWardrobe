@@ -60,6 +60,15 @@ export const hu: Dict = {
   'me.photo.set': 'Fotó beállítása',
   'me.photo.change': 'Fotó módosítása',
   'me.photo.empty': 'Még nincs fotó beállítva.',
+  'me.feedback.title': 'Névjegy és visszajelzés',
+  'me.feedback.hint':
+     'Nyissa meg a projektet, jelezzen hibát, vagy kérjen funkciót a GitHubon. Beküldéshez GitHub-fiók szükséges. Soha ne tartalmazzon a jelentés a testéről vagy szekrényéről készült fotókat — minden az eszközön marad.',
+  'me.feedback.about': 'Névjegy · GitHub-tár',
+  'me.feedback.bug': 'Hiba jelentése',
+  'me.feedback.feature': 'Funkciókérés',
+  'me.feedback.guide': 'Az alkalmazás használata',
+  'me.feedback.openFailed':
+     'Nem sikerült megnyitni a hivatkozást. Nyissa meg a GitHubon az eszközéről.',
   'wardrobe.header': 'A szekrénye',
   'wardrobe.search': 'Keresés név vagy címke szerint',
   'wardrobe.count': '{visible} / {total}',

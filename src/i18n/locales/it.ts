@@ -61,6 +61,15 @@ export const it: Dict = {
   'me.photo.set': 'Imposta foto',
   'me.photo.change': 'Cambia foto',
   'me.photo.empty': 'Nessuna foto impostata.',
+  'me.feedback.title': 'Info e feedback',
+  'me.feedback.hint':
+      'Apri il progetto, segnala un bug o richiedi una funzione su GitHub. Per inviare serve un account GitHub. Non includere mai foto del tuo corpo o del tuo archivio: tutto resta sul tuo dispositivo.',
+  'me.feedback.about': 'Info · Repository GitHub',
+  'me.feedback.bug': 'Segnala un bug',
+  'me.feedback.feature': 'Richiedi una funzione',
+  'me.feedback.guide': 'Come usare l’app',
+  'me.feedback.openFailed':
+      'Non è riuscito ad aprire quel link. Aprilo su GitHub dal tuo dispositivo.',
   'wardrobe.header': 'Il tuo armadio',
   'wardrobe.search': 'Cerca per nome o tag',
   'wardrobe.count': '{visible} di {total}',

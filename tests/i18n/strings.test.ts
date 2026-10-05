@@ -107,8 +107,38 @@ describe('catalogs', () => {
 
   it('detects a dropped placeholder token', () => {
     expect(tokensIn('Look #{id} · {date}')).toEqual(['date', 'id']);
-    // A hand-built broken dict is flagged (guards the placeholder gate itself).
+     // A hand-built broken dict is flagged (guards the placeholder gate itself).
     const good = tokensIn(CATALOG.en['wardrobe.count']).join(',');
     expect(good).toBe('total,visible');
-  });
-});
+    });
+
+   // #63 About & feedback: the new me.feedback.* keys are plain (no {token}), so
+   // they must ship non-blank in every locale AND carry no interpolation — a
+   // regression that added a token to one locale would silently swallow a value,
+   // so both invariants are locked here without weakening the coverage gates.
+  const FEEDBACK_KEYS = [
+     'me.feedback.title',
+     'me.feedback.hint',
+     'me.feedback.about',
+     'me.feedback.bug',
+     'me.feedback.feature',
+     'me.feedback.guide',
+     'me.feedback.openFailed',
+    ];
+
+   it.each(NON_DEFAULT)('ships non-blank About & feedback text for %s', (locale) => {
+     for (const key of FEEDBACK_KEYS) {
+       const value = CATALOG[locale][key];
+       expect(typeof value).toBe('string');
+       expect(value.length).toBeGreaterThan(0);
+      }
+     });
+
+   it('every locale keeps the About & feedback text token-free', () => {
+     expect(placeholderMismatches('en')).toEqual([]);
+     for (const key of FEEDBACK_KEYS) {
+       expect(tokensIn(CATALOG.en[key])).toEqual([]);
+      }
+     });
+ });
+

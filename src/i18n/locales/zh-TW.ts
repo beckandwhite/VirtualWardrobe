@@ -59,6 +59,15 @@ export const zhTW: Dict = {
   'me.photo.set': '設定照片',
   'me.photo.change': '更換照片',
   'me.photo.empty': '尚未設定照片。',
+  'me.feedback.title': '關於與回饋',
+  'me.feedback.hint':
+      '在 GitHub 上開啟專案、回報問題或申請功能。提交需要 GitHub 帳戶。切勿附上您的身體或衣櫥照片——所有內容都保留在您的裝置上。',
+  'me.feedback.about': '關於 · GitHub 儲存庫',
+  'me.feedback.bug': '回報問題',
+  'me.feedback.feature': '申請功能',
+  'me.feedback.guide': '如何使用應用程式',
+  'me.feedback.openFailed':
+        '無法開啟該連結。請在您的裝置上從 GitHub 開啟。',
   'wardrobe.header': '您的衣櫥',
   'wardrobe.search': '搜尋名稱或標籤',
   'wardrobe.count': '{total} 件中的 {visible} 件',

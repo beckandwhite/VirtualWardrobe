@@ -85,6 +85,19 @@ const CLIP_TOLERANCE = 2;
 // The expected console.warn the manual path surfaces (AC3).
 const EXPECTED_WARN_RE = /falling back to manual/i;
 
+// #63 — the Me tab's About & feedback section. On web, each action renders as an
+// `<a data-testid="…">` (the inner View's `href` + `testID`), so the harness can
+// read each action's destination `href` WITHOUT clicking it — a click would make
+// expo-linking's web openURL set window.location and navigate the page away to the
+// target. The four canonical URLs mirror app/(tabs)/me.tsx FEEDBACK_ACTIONS.
+const REPO = 'https://github.com/beckandwhite/VirtualWardrobe';
+const ME_FEEDBACK_ACTIONS = [
+   { testId: 'me.link.about', href: REPO },
+   { testId: 'me.link.bug', href: `${REPO}/issues/new?template=bug_report.md` },
+   { testId: 'me.link.feature', href: `${REPO}/issues/new?template=feature_request.md` },
+   { testId: 'me.link.guide', href: `${REPO}/blob/main/docs/usage.md` },
+];
+
 function ensureShotsDir() {
     if (!existsSync(SHOTS_DIR)) mkdirSync(SHOTS_DIR, { recursive: true });
 }
@@ -200,11 +213,48 @@ async function checkWelcomeLanguages(browser, baseUrl, fatalErrors) {
              } else {
                  console.log(`[e2e:web] welcome ${vp.name} (${vp.width}x${vp.height}): 8 options visible + selectable, no clip/overflow`);
              }
-         } finally {
-             await context.close();
-         }
-     }
+        } finally {
+            await context.close();
+        }
+    }
 }
+
+// #63 — assert the Me tab's About & feedback section renders all four actions and
+// each targets its canonical GitHub/usage URL. The harness *reads* each action's
+// `href` (the inner View renders an <a data-testid="…"> on web) instead of clicking
+// it: tapping runs expo-linking's openURL, which on web sets window.location and
+// navigates the page away from /me (the AC "without opening/submitting an issue").
+// A missing action or a wrong target is a real break, folded into fatalErrors like
+// a route failure; the check itself never navigates.
+async function checkMeFeedbackLinks(page, fatalErrors) {
+    const problems = [];
+    for (const action of ME_FEEDBACK_ACTIONS) {
+        const locator = page.getByTestId(action.testId);
+        const count = await locator.count();
+        if (count === 0) {
+            problems.push(`${action.testId} not rendered`);
+            continue;
+        }
+        const first = locator.first();
+        // Read the destination from the DOM attribute, not a navigation.
+        const href = await first.getAttribute('href').catch(() => null);
+        const visible = await first.isVisible().catch(() => false);
+        if (!visible) {
+            problems.push(`${action.testId} not visible`);
+            continue;
+        }
+        if (href !== action.href) {
+            problems.push(`${action.testId} href=${JSON.stringify(href)} want ${JSON.stringify(action.href)}`);
+        }
+    }
+    if (problems.length) {
+        fatalErrors.push(`[me feedback] ${problems.join('; ')}`);
+        console.log(`[e2e:web] me feedback: FAIL — ${problems.join('; ')}`);
+    } else {
+        console.log(`[e2e:web] me feedback: 4 actions render with canonical targets (no navigation)`);
+    }
+}
+
 
 // Poll the dev server until it answers (< 500) or the deadline passes.
 async function waitForServer(url, timeoutMs) {
@@ -317,9 +367,21 @@ async function main() {
           // #65 welcome language-selector coverage: all eight non-active native-language
           // options render unclipped and are selectable at desktop + narrow viewports.
           // Failures are folded into fatalErrors so they gate the run like a route break.
-        await checkWelcomeLanguages(browser, baseUrl, fatalErrors);
+         await checkWelcomeLanguages(browser, baseUrl, fatalErrors);
 
-          // Capture the screenshot artifact.
+            // #63 Me About & feedback section: load /me and assert all four actions
+            // render and target the canonical URLs — without clicking (reading the
+            // href keeps the smoke on /me). Folded into fatalErrors like a route.
+         try {
+             await page.goto(baseUrl() + '/me', { waitUntil: 'domcontentloaded' });
+             await checkMeFeedbackLinks(page, fatalErrors);
+         } catch (e) {
+             fatalErrors.push(`[me feedback] ${e.message}`);
+             console.log(`[e2e:web] me feedback: ${e.message}`);
+          }
+
+            // Capture the screenshot artifact.
+
         ensureShotsDir();
         const out = join(SHOTS_DIR, `web-${path}-${stamp()}.png`);
         try {
