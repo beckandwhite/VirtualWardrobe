@@ -61,6 +61,15 @@ export const vi: Dict = {
   'me.photo.set': 'Đặt ảnh',
   'me.photo.change': 'Đổi ảnh',
   'me.photo.empty': 'Chưa đặt ảnh.',
+  'me.feedback.title': 'Giới thiệu và góp ý',
+  'me.feedback.hint':
+      'Mở dự án, báo lỗi hoặc yêu cầu tính năng trên GitHub. Cần tài khoản GitHub để gửi. Đừng bao giờ đính kèm ảnh cơ thể hay tủ quần áo của bạn — mọi thứ đều ở trên thiết bị của bạn.',
+  'me.feedback.about': 'Giới thiệu · kho Github',
+  'me.feedback.bug': 'Báo lỗi',
+  'me.feedback.feature': 'Yêu cầu tính năng',
+  'me.feedback.guide': 'Cách sử dụng ứng dụng',
+  'me.feedback.openFailed':
+      'Không mở được liên kết đó. Hãy mở nó trên GitHub từ thiết bị của bạn.',
   'wardrobe.header': 'Tủ quần áo của bạn',
   'wardrobe.search': 'Tìm theo tên hoặc thẻ',
   'wardrobe.count': '{visible} trên {total}',

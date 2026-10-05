@@ -1201,4 +1201,31 @@ and the skippable `e2e:web` all green.
   deterministic dead-screen transition but cannot be shown to clear the *original* symbolicated crash
   from the node env; that confirmation is left to a real device/browser run (on-device work deferred,
   headless host). The issue/PR record the attempted flow and the residual uncertainty rather than
-  claiming the original crash is cleared.
+   claiming the original crash is cleared.
+
+## 2026-10-04 — #63 in-app feedback links + issue templates (M7)
+
+- **D63: Render the four feedback actions as `TouchableOpacity` rows, each wrapping an inner
+  `View` that carries `testID` + `href`; open via `expo-linking` only on press.** `testID` becomes a
+  web `data-testid` and `href` a web `<a href>` so the e2e harness can read each destination URL
+  *without clicking* (a click runs expo-linking's web `openURL`, which sets `window.location` and
+  navigates the smoke away from `/me`). On native `testID`/`href` are inert and `onPress` opens the
+  system browser. The `href` is spread via a `Record<string, string>` cast because it is not a typed
+  RN prop; `testID` is, so no cast is needed there.
+- **Why no in-app form / no upload:** preserves the D61 / local-first model. A failed open is a
+  visible, localized `me.feedback.openFailed` string (not swallowed) and a `console.error`; success is
+  silent. Submission stays 100% external — the action only deep-links GitHub's prefilled "new issue"
+  screen, which requires a GitHub account (documented, not gated in-app).
+- **Templates:** `.github/ISSUE_TEMPLATE/bug_report.md` (front-matter `labels: [bug]`, fields
+  summary / steps / expected / actual / environment / redacted logs) and `feature_request.md`
+  (`labels: [enhancement]`, problem / outcome / optional alternatives). Both warn users not to attach
+  body/wardrobe photos.
+- **Evidence / regression:** 7 new `me.feedback.*` keys land non-blank in all nine locales with no
+  `{token}` (locked by a new token-free invariant in `tests/i18n/strings.test.ts`); `web-smoke.mjs`
+  asserts all four `data-testid` links render and target the canonical URLs (`REPO`, two
+  `issues/new?template=…`, and `blob/main/docs/usage.md`) with zero navigation. Full suite 242/242,
+  `tsc --noEmit` clean, `eslint --max-warnings 0` clean, `e2e:web` PASS.
+- **Consequences:** `docs/feedback.md` is rewritten to describe the shipped actions, template URLs,
+  GitHub sign-in requirement, and redacted-photo guidance; the stale "nonexistent template" section is
+  removed. No web-hosted service, telemetry, or route was added.
+

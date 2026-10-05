@@ -82,6 +82,18 @@ export const en: Dict = {
   'me.photo.change': 'Change photo',
   'me.photo.empty': 'No photo set yet.',
 
+  // About & feedback (D61): external links to the GitHub project and its issue
+  // templates plus the usage guide. Submission is external (a GitHub account is
+  // required); nothing is collected in-app, so no tokens to preserve here.
+  'me.feedback.title': 'About & feedback',
+  'me.feedback.hint':
+    'Open the project, report a bug, or request a feature on GitHub. A GitHub account is needed to submit. Never include photos of your body or wardrobe — everything stays on your device.',
+  'me.feedback.about': 'About · GitHub repository',
+  'me.feedback.bug': 'Report a bug',
+  'me.feedback.feature': 'Request a feature',
+  'me.feedback.guide': 'How to use the app',
+  "me.feedback.openFailed": "Couldn't open that link. Open it on GitHub from your device.",
+
   // Wardrobe screen
   'wardrobe.header': 'Your wardrobe',
   'wardrobe.search': 'Search name or tags',

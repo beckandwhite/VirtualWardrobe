@@ -59,6 +59,15 @@ export const zhCN: Dict = {
   'me.photo.set': '设置照片',
   'me.photo.change': '更换照片',
   'me.photo.empty': '尚未设置照片。',
+  'me.feedback.title': '关于与反馈',
+  'me.feedback.hint':
+      '在 GitHub 上打开项目、报告问题或申请功能。提交需要 GitHub 账户。切勿附上您的身体或衣橱照片——所有内容都保留在您的设备上。',
+  'me.feedback.about': '关于 · GitHub 仓库',
+  'me.feedback.bug': '报告问题',
+  'me.feedback.feature': '申请功能',
+  'me.feedback.guide': '如何使用应用',
+  'me.feedback.openFailed':
+       '无法打开该链接。请在您的设备上从 GitHub 打开。',
   'wardrobe.header': '我的衣橱',
   'wardrobe.search': '搜索名称或标签',
   'wardrobe.count': '{total} 件中的 {visible} 件',
