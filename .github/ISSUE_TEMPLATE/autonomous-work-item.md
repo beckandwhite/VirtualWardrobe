@@ -12,6 +12,9 @@ labels: []
      See Plans/autonomous-sizing.md for the routing guidance. -->
 
 > **Autonomous-run spec.** Follow the steps and scope below. Do only what is listed.
+> Run the full [AGENTS.md autonomous run lifecycle](../../AGENTS.md#autonomous-run-lifecycle):
+> on pickup move this card to **In Progress** and add your `<run-id>-<model-id>` run label;
+> commit, push, and open a PR with `Closes #<this issue>`.
 > If an acceptance criterion or step is materially ambiguous, stop and leave the
 > issue in **Planning/Grilling** while requesting clarification rather than guessing.
 
@@ -38,6 +41,14 @@ Do **NOT** touch <files/areas that are out of bounds for this item>.
 ## Verify
 
 - <Exact command(s) and the observable result that means success>.
+
+## Close-out (autonomous)
+
+When Verify passes and the PR's CI + required checks are **all green**, the work is ready —
+**merge the PR and close this item** (squash-merge, confirm it closed, move the card to **Done**,
+drop the run label). If any check is **failing**, do not merge: add the `HUMAN!!!` label, leave the
+card in **In Progress**, and stop. See
+[AGENTS.md § Autonomous run lifecycle](../../AGENTS.md#autonomous-run-lifecycle) for the exact commands.
 
 ## Decision logging (autonomous runs)
 
