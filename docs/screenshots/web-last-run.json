@@ -40,7 +40,7 @@
     {
       "name": "screenshot",
       "ok": true,
-      "detail": "/Users/I778444/VirtualWardrobe/docs/screenshots/web-manual-2026-10-06T15-33-01-861Z.png"
+      "detail": "/Users/I778444/VirtualWardrobe/docs/screenshots/web-manual-2026-10-06T17-16-23-732Z.png"
     }
   ],
   "interaction": {
@@ -54,11 +54,11 @@
     "narrow 375x812"
   ],
   "screenshots": [
-    "/Users/I778444/VirtualWardrobe/docs/screenshots/web-manual-2026-10-06T15-33-01-861Z.png"
+    "/Users/I778444/VirtualWardrobe/docs/screenshots/web-manual-2026-10-06T17-16-23-732Z.png"
   ],
-  "seconds": 5,
+  "seconds": 20,
   "status": "PASS",
   "ok": true,
   "summary": "M4-4 e2e:web smoke (asserts the manual path)\nstatus: PASS\nentry destination: /welcome\nroutes: 2/2 ok\nfatal console/pageerror: 0\nexpected fallback warns: 1\nresource-load failures (non-fatal): 3\nwelcome language selector: proofed at desktop 1024x768, narrow 375x812\ninteraction: proven — save-share",
-  "generatedAt": "2026-10-06T15:33:02.720Z"
+  "generatedAt": "2026-10-06T17:16:24.642Z"
 }

@@ -234,6 +234,18 @@ async function checkWelcomeLanguages(browser, baseUrl, fatalErrors) {
 // a route failure; the check itself never navigates.
 async function checkMeFeedbackLinks(page, fatalErrors) {
     const problems = [];
+    // The About & feedback section mounts after the Me screen hydrates, which on a
+    // slower CI runner lands well after `domcontentloaded`. Wait for the first
+    // action to attach before reading counts, so a not-yet-rendered section is not
+    // mistaken for a missing one (the race that reddened CI). A genuine absence
+    // still surfaces: the waitFor times out and every action is reported missing.
+    try {
+        await page.getByTestId(ME_FEEDBACK_ACTIONS[0].testId).first().waitFor({ timeout: 60000 });
+    } catch (e) {
+        fatalErrors.push(`[me feedback] section never rendered (${e.message})`);
+        console.log(`[e2e:web] me feedback: FAIL — section never rendered (${e.message})`);
+        return;
+    }
     for (const action of ME_FEEDBACK_ACTIONS) {
         const locator = page.getByTestId(action.testId);
         const count = await locator.count();
