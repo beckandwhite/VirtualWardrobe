@@ -79,6 +79,26 @@ export function shouldSkipBrowser(input) {
     return !(input && input.playwright);
 }
 
+// A recorded assertion: a named check that the browser pass proved (or failed to
+// prove). Required UI checks contribute a `{ ok: false }` here, which gates the
+// run (see buildReport). This is the hard-assertion contract #83 demanded: any
+// missing screen/fallback/interaction surfaces as a failed assertion, never a
+// logged-and-ignored warning.
+export function makeAssertion(name, ok, detail = '') {
+    return { name, ok: Boolean(ok), detail };
+}
+
+// The entry route's valid destinations per src/onboarding/welcomeGate.ts. A
+// fresh context (no persisted state) resolves to /welcome; a returning photoless
+// user to /me; a photo-set user to /wardrobe. The harness asserts the landing is
+// one of these.
+export const ENTRY_DESTINATIONS = Object.freeze(['/welcome', '/me', '/wardrobe']);
+
+// A fresh-context (empty persisted state) entry lands on /welcome: has_seen_welcome
+// is bootstrapped '0', so welcomeGate(false, …) → '/welcome'. This is the
+// deterministic expected screen the harness proves for a clean run.
+export const EXPECTED_ENTRY_DESTINATION = '/welcome';
+
 /**
  * @param {{
  *   path?: 'auto' | 'manual';
@@ -87,9 +107,13 @@ export function shouldSkipBrowser(input) {
  *   browserEnabled?: boolean;
  *   skipped?: boolean;
  *   fatalErrors?: string[];
+ *   resourceErrors?: string[];
  *   expectedWarns?: number;
  *   routes?: { route: string; ok: boolean }[];
  *   screenshots?: string[];
+ *   assertions?: { name: string; ok: boolean; detail?: string }[];
+ *   interaction?: { name: string; ok: boolean; detail?: string };
+ *   entryDestination?: string;
  *   seconds?: number;
  * }} run
  */
@@ -98,37 +122,87 @@ export function buildReport(run) {
     const resourceErrors = run.resourceErrors ?? [];
     const expectedWarns = run.expectedWarns ?? 0;
     const routes = run.routes ?? [];
+    // #83: the hard-assertion contract. Any failed screen/fallback/interaction
+    // assertion is recorded here and gates the run — assertion failures can no
+    // longer be swallowed into a passing report.
+    const assertions = run.assertions ?? [];
+    const failedAssertions = assertions.filter((a) => !a.ok);
+     // The one meaningful interaction the smoke proves (a state transition, not a
+    // bare URL load). Absent means "not yet proven", which fails the run.
+    const interaction = run.interaction ?? { name: 'no-interaction', ok: false, detail: 'no interaction recorded' };
     const path = run.path ?? 'manual';
     const skipped = Boolean(run.skipped);
     const failedRoutes = routes.filter((r) => !r.ok);
-    // A run is PASS only when not skipped, no fatal errors, and no failed routes;
-    // on the manual path the fallback warn must have appeared (AC3). Resource-load
-    // failures are recorded but never gate (see classifyConsole).
+    // Which welcome viewports were proofed this run (the language selector only
+    // renders on /welcome; on a persisted-state landing the check is N/A).
+    const welcomeCoverage = run.welcomeCoverage ?? [];
+      // A run is PASS only when not skipped, no fatal errors, no failed routes, no
+      // failed assertions, a proven interaction, and (on the manual path) the
+      // fallback warn having appeared (AC3). Resource-load failures are recorded
+      // but never gate (see classifyConsole).
     let status = 'PASS';
     if (skipped) status = 'SKIP';
     else if (fatalErrors.length) status = 'FAIL';
     else if (failedRoutes.length) status = 'FAIL';
+    else if (failedAssertions.length) status = 'FAIL';
+    else if (!interaction.ok) status = 'FAIL';
     else if (path === 'manual' && expectedWarns === 0) status = 'FAIL';
     return {
-        ...run,
+          ...run,
         path,
         skipped,
         resourceErrors,
+        assertions,
+        interaction,
+        entryDestination: run.entryDestination ?? null,
+        welcomeCoverage,
         status,
         ok: status === 'PASS',
-        summary: reportSummary({ path, skipped, status, fatalErrors, failedRoutes, expectedWarns, routes, resourceErrors }),
-    };
+        summary: reportSummary({
+            path,
+            skipped,
+            status,
+            fatalErrors,
+            failedRoutes,
+            failedAssertions,
+            interaction,
+            entryDestination: run.entryDestination ?? null,
+            welcomeCoverage,
+            expectedWarns,
+            routes,
+            resourceErrors,
+          }),
+      };
 }
 
-function reportSummary({ path, skipped, status, fatalErrors, failedRoutes, expectedWarns, routes, resourceErrors }) {
+function reportSummary({
+    path,
+    skipped,
+    status,
+    fatalErrors,
+    failedRoutes,
+    failedAssertions,
+    interaction,
+    entryDestination,
+    welcomeCoverage,
+    expectedWarns,
+    routes,
+    resourceErrors,
+ }) {
     const parts = [`M4-4 e2e:web smoke (asserts the ${path} path)`];
     if (skipped) parts.push('browser pass skipped — no Chromium/Playwright (in-sandbox ceiling)');
     parts.push(`status: ${status}`);
+    if (entryDestination) parts.push(`entry destination: ${entryDestination}`);
     parts.push(`routes: ${routes.filter((r) => r.ok).length}/${routes.length} ok`);
     parts.push(`fatal console/pageerror: ${fatalErrors.length}`);
     parts.push(`expected fallback warns: ${expectedWarns}`);
     parts.push(`resource-load failures (non-fatal): ${(resourceErrors ?? []).length}`);
     if (failedRoutes.length) parts.push(`failed routes: ${failedRoutes.map((r) => r.route).join(', ')}`);
+    if (failedAssertions.length) parts.push(`failed assertions: ${failedAssertions.map((a) => a.name).join(', ')}`);
+    parts.push(
+     `welcome language selector: ${welcomeCoverage.length ? `proofed at ${welcomeCoverage.join(', ')}` : 'N/A (not on /welcome)'}`,
+    );
+    parts.push(`interaction: ${interaction.ok ? 'proven' : 'NOT proven'} — ${interaction.name}`);
     return parts.join('\n');
 }
 
@@ -186,33 +260,116 @@ if (import.meta.url === `file://${process.argv[1]}` || process.argv.includes('--
     // report outcomes — skip stays green; manual needs the warn; fatal/fail routes fail.
     check('buildReport skip status', buildReport({ path: 'manual', skipped: true }).status, 'SKIP');
     check('buildReport skip summary has SKIP', buildReport({ path: 'manual', skipped: true }).summary.includes('SKIP'), true);
-    check(
-        'buildReport manual pass',
-        buildReport({ path: 'manual', fatalErrors: [], routes: [{ route: '/studio', ok: true }], expectedWarns: 1 }).status,
-        'PASS',
-    );
-    check(
-        'buildReport manual no-warn fails',
-        buildReport({ path: 'manual', fatalErrors: [], routes: [{ route: '/studio', ok: true }], expectedWarns: 0 }).status,
-        'FAIL',
-    );
+     check(
+         'buildReport manual pass',
+        buildReport({
+           path: 'manual',
+           fatalErrors: [],
+           routes: [{ route: '/studio', ok: true }],
+           expectedWarns: 1,
+           interaction: { name: 'save-share', ok: true },
+           assertions: [makeAssertion('studio-state', true)],
+           entryDestination: EXPECTED_ENTRY_DESTINATION,
+         }).status,
+         'PASS',
+      );
+     check(
+         'buildReport manual no-warn fails',
+        buildReport({
+          path: 'manual',
+          fatalErrors: [],
+          routes: [{ route: '/studio', ok: true }],
+          expectedWarns: 0,
+          interaction: { name: 'save-share', ok: true },
+          assertions: [makeAssertion('studio-state', true)],
+         }).status,
+         'FAIL',
+      );
     check(
         'buildReport fatal fails',
         buildReport({ path: 'manual', fatalErrors: ['pageerror boom'], routes: [{ route: '/wardrobe', ok: true }], expectedWarns: 1 }).status,
         'FAIL',
     );
-    check(
+     check(
         'buildReport failed route fails',
         buildReport({ path: 'manual', fatalErrors: [], routes: [{ route: '/wardrobe', ok: false }], expectedWarns: 1 }).status,
         'FAIL',
-    );
-    // artifact round-trip — the JSON report a CI step can parse (AC4).
+     );
+      // #83 hard-assertion contract: a failed required assertion gates the run and
+      // surfaces in the summary (swallowing is no longer possible).
+    check(
+        'buildReport failed assertion fails',
+        buildReport(
+           {
+              path: 'manual',
+              fatalErrors: [],
+              routes: [{ route: '/studio', ok: true }],
+              expectedWarns: 1,
+              interaction: { name: 'save-share', ok: true },
+              assertions: [makeAssertion('studio-state', false, 'banner missing')],
+           },
+        ).status,
+        'FAIL',
+     );
+    check(
+        'buildReport failed assertion names itself',
+        buildReport(
+           {
+              path: 'manual',
+              assertions: [makeAssertion('entry-landing', false, 'not /welcome')],
+              interaction: { name: 'save-share', ok: true },
+              expectedWarns: 1,
+           },
+        ).summary.includes('entry-landing'),
+        true,
+     );
+    // #83 AC3: a run with no proven interaction fails even when everything else is green.
+    check(
+        'buildReport no-interaction fails',
+        buildReport({
+           path: 'manual',
+           fatalErrors: [],
+           routes: [{ route: '/studio', ok: true }],
+           expectedWarns: 1,
+           assertions: [makeAssertion('studio-state', true)],
+        }).status,
+        'FAIL',
+     );
+    // #83: a full happy path (assertions + interaction + warn) passes.
+    check(
+        'buildReport all-proven passes',
+        buildReport({
+           path: 'manual',
+           fatalErrors: [],
+           routes: [{ route: '/wardrobe', ok: true }, { route: '/studio', ok: true }],
+           expectedWarns: 1,
+           interaction: { name: 'save-share', ok: true },
+           assertions: [
+            makeAssertion('entry-landing', true),
+            makeAssertion('wardrobe-content', true),
+            makeAssertion('studio-state', true),
+           ],
+           entryDestination: EXPECTED_ENTRY_DESTINATION,
+        }).status,
+        'PASS',
+     );
+    check('EXPECTED_ENTRY_DESTINATION', EXPECTED_ENTRY_DESTINATION, '/welcome');
+    check('ENTRY_DESTINATIONS has wardrobe', ENTRY_DESTINATIONS.includes('/wardrobe'), true);
+      // artifact round-trip — the JSON report a CI step can parse (AC4).
     const goodManual = buildReport({
         path: 'manual',
         fatalErrors: [],
-        routes: [{ route: '/studio', ok: true }],
+        routes: [{ route: '/wardrobe', ok: true }, { route: '/studio', ok: true }],
         expectedWarns: 1,
-    });
+        interaction: { name: 'save-share', ok: true },
+        assertions: [
+             makeAssertion('entry-landing', true),
+             makeAssertion('wardrobe-content', true),
+             makeAssertion('studio-state', true),
+             makeAssertion('screenshot', true),
+            ],
+        entryDestination: EXPECTED_ENTRY_DESTINATION,
+      });
     check('reportJson round-trip', JSON.parse(reportJson(goodManual)).status, 'PASS');
     check('renderReport has summary', renderReport(goodManual).includes('PASS'), true);
 

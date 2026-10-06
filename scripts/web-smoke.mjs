@@ -35,6 +35,9 @@ import {
     buildReport,
     renderReport,
     reportJson,
+    makeAssertion,
+    EXPECTED_ENTRY_DESTINATION,
+    ENTRY_DESTINATIONS,
 } from './web-smoke-path.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -155,6 +158,7 @@ function startExpoWeb() {
 // label leaves the selector (the active locale is excluded) and 'English' (the
 // now-inactive locale) appears — i.e. the welcome copy/selector changed.
 async function checkWelcomeLanguages(browser, baseUrl, fatalErrors) {
+     const proofed = [];
      for (const vp of WELCOME_LANG_VIEWPORTS) {
          const context = await browser.newContext({ viewport: { width: vp.width, height: vp.height } });
          try {
@@ -212,11 +216,13 @@ async function checkWelcomeLanguages(browser, baseUrl, fatalErrors) {
                  console.log(`[e2e:web] welcome ${vp.name} (${vp.width}x${vp.height}): FAIL — ${problems.join('; ')}`);
              } else {
                  console.log(`[e2e:web] welcome ${vp.name} (${vp.width}x${vp.height}): 8 options visible + selectable, no clip/overflow`);
+                 proofed.push(`${vp.name} ${vp.width}x${vp.height}`);
              }
         } finally {
             await context.close();
         }
     }
+    return proofed;
 }
 
 // #63 — assert the Me tab's About & feedback section renders all four actions and
@@ -308,7 +314,11 @@ async function main() {
         if (!ready) throw new Error(`expo web dev server never became ready at ${baseUrl()}`);
 
         browser = await chromium.launch();
-        const page = await browser.newPage();
+        // #83: a FRESH context (no persisted localStorage) so the entry route
+        // resolves deterministically — has_seen_welcome bootstraps '0', so the gate
+        // lands on /welcome regardless of any developer's persistent browser DB.
+        const context = await browser.newContext({ viewport: { width: 1024, height: 768 } });
+        const page = await context.newPage();
 
         // Fatal-error gate (AC "no fatal console errors"). A pageerror or any
         // console.error breaks the happy path; the pose-fallback warn is expected
@@ -331,11 +341,33 @@ async function main() {
         page.on('pageerror', (e) => record({ kind: 'pageerror', text: String(e) }));
         page.on('console', (m) => record({ kind: 'console', type: m.type(), text: m.text() }));
 
-        // 1. Expo web startup: the entry route boots and redirects (index.tsx).
+        // #83: hard assertions proved by this browser pass. Any { ok: false } here
+        // gates the run (buildReport) — no required check can be swallowed into a pass.
+        const assertions = [];
+
+        // 1. Entry route (AC1): boot `/` and prove the gate redirects to the expected
+        //    screen. On a fresh context has_seen_welcome bootstraps '0', so welcomeGate
+        //    lands on /welcome (EXPECTED_ENTRY_DESTINATION). Wait for the path to leave
+        //    `/` (the Redirect fires after hydration), then assert the landed pathname —
+        //    a real screen, not a bare 200.
         await page.goto(baseUrl() + '/', { waitUntil: 'domcontentloaded' });
-        // 2. Route loads for wardrobe + studio (AC2). WaitFor the tab labels the
-        //    studio/wardrobe render, with a generous timeout; on timeout we report
-        //    but do not hard-fail before writing the artifact.
+        await page
+            .waitForFunction(() => window.location.pathname !== '/', { timeout: 60000 })
+            .catch(() => {});
+        const entryDestination = new URL(page.url()).pathname;
+        assertions.push(
+            makeAssertion(
+                'entry-landing',
+                entryDestination === EXPECTED_ENTRY_DESTINATION && ENTRY_DESTINATIONS.includes(entryDestination),
+                `landed on ${entryDestination}; expected ${EXPECTED_ENTRY_DESTINATION}`,
+            ),
+        );
+        console.log(`[e2e:web] entry redirected to ${entryDestination} (expected ${EXPECTED_ENTRY_DESTINATION})`);
+
+        // 2. Route loads for wardrobe + studio (AC2): each must load AND render its own
+        //    visible content, not merely return a response. The per-route content
+        //    locator below is asserted as hard, route-specific proof.
+        const ROUTE_CONTENT = { wardrobe: 'Record your own clothes' };
         const routes = [];
         for (const route of ROUTES) {
             try {
@@ -347,49 +379,120 @@ async function main() {
                 routes.push({ route: '/' + route, ok: false });
                 console.log(`[e2e:web] route /${route}: ${e.message}`);
              }
+            // Route-specific visible-content proof (AC2): a 200 is not enough — the
+            // screen's own text must render. Recorded as a hard assertion.
+            const needle = ROUTE_CONTENT[route];
+            if (needle) {
+                let contentOk = false;
+                let contentDetail = '';
+                try {
+                    await page.getByText(needle, { exact: false }).first().waitFor({ timeout: 30000 });
+                    contentOk = true;
+                } catch (e) {
+                    contentDetail = e.message;
+                }
+                assertions.push(
+                    makeAssertion(
+                        `${route}-content`,
+                        contentOk,
+                        contentOk ? `rendered "${needle}"` : `missing "${needle}" (${contentDetail})`,
+                    ),
+                );
+                console.log(`[e2e:web] route /${route} content "${needle}": ${contentOk ? 'rendered' : 'MISSING'}`);
+            }
         }
 
-        // 3 + 4. Studio manual-fallback path (AC3): the M2-4 banner renders when the
-        // model is absent. On the auto path we instead assert the auto-status.
+        // 3. Studio state (AC3): assert the expected status/banner is actually
+        //    visible — a HARD assertion now, not a caught-and-logged wait. On the
+        //    manual path (model absent, the PR-CI default) the M2-4 fallback banner
+        //    must render; on the auto path the auto-placed status must. A missing
+        //    banner/status fails the run instead of passing silently.
         const expectedText =
             path === 'auto'
                  ? 'Auto-placed from detected pose'
                 : 'Auto-drape unavailable here — adjusting manually.';
+        let studioOk = false;
+        let studioDetail = '';
         try {
-            await page.getByText(expectedText, { exact: false }).waitFor({ timeout: 90000 });
+            await page.getByText(expectedText, { exact: false }).first().waitFor({ timeout: 90000 });
+            studioOk = true;
         } catch (e) {
-            console.log(`[e2e:web] status wait: ${e.message}`);
-         }
+            studioDetail = e.message;
+        }
+        assertions.push(
+            makeAssertion(
+                'studio-state',
+                studioOk,
+                studioOk ? `${path}: "${expectedText}"` : `missing "${expectedText}" (${studioDetail})`,
+            ),
+        );
+        console.log(`[e2e:web] studio ${path} state "${expectedText}": ${studioOk ? 'shown' : 'MISSING'}`);
 
-// Assert the expected fallback warn appeared on the manual path (AC3).
-        const expectedWarns = warnings.filter((w) => EXPECTED_WARN_RE.test(w)).length;
+        // 4. A meaningful interaction / state transition (AC "not only direct URL
+        //    loads"): tap Save & share and prove the save notice appears. On web the
+        //    composite is exported and offered as a download, so the success notice is
+        //    "Look saved — downloaded image."; an error notice ("Export failed" /
+        //    "Share failed") makes the interaction fail with that detail.
+        let interaction = makeAssertion('save-share', false, 'not attempted');
+        try {
+            const saveBtn = page.getByText('Save & share', { exact: false }).first();
+            await saveBtn.waitFor({ timeout: 20000 });
+            await saveBtn.click();
+            try {
+                await page.getByText('Look saved', { exact: false }).first().waitFor({ timeout: 30000 });
+                interaction = makeAssertion('save-share', true, 'save notice "Look saved…" shown after tap');
+            } catch (e) {
+                const errNotice = await page
+                    .getByText(/Export failed|Share failed/i)
+                    .first()
+                    .textContent()
+                    .catch(() => null);
+                interaction = makeAssertion(
+                    'save-share',
+                    false,
+                    errNotice ? `error notice: ${errNotice}` : `no save notice (${e.message})`,
+                );
+            }
+        } catch (e) {
+            interaction = makeAssertion('save-share', false, `Save & share not actionable: ${e.message}`);
+        }
+        console.log(`[e2e:web] interaction save-share: ${interaction.ok ? 'proven' : 'NOT proven'} — ${interaction.detail}`);
 
-          // #65 welcome language-selector coverage: all eight non-active native-language
-          // options render unclipped and are selectable at desktop + narrow viewports.
-          // Failures are folded into fatalErrors so they gate the run like a route break.
-         await checkWelcomeLanguages(browser, baseUrl, fatalErrors);
-
-            // #63 Me About & feedback section: load /me and assert all four actions
-            // render and target the canonical URLs — without clicking (reading the
-            // href keeps the smoke on /me). Folded into fatalErrors like a route.
-         try {
-             await page.goto(baseUrl() + '/me', { waitUntil: 'domcontentloaded' });
-             await checkMeFeedbackLinks(page, fatalErrors);
-         } catch (e) {
-             fatalErrors.push(`[me feedback] ${e.message}`);
-             console.log(`[e2e:web] me feedback: ${e.message}`);
-          }
-
-            // Capture the screenshot artifact.
-
+        // Capture the screenshot artifact HERE, on /studio, so the PNG proves the
+        // asserted path (the save notice still on screen) before navigating on to the
+        // welcome/me coverage checks. A screenshot failure is a HARD assertion
+        // (AC "required screenshot failures cannot be swallowed into a passing report").
         ensureShotsDir();
         const out = join(SHOTS_DIR, `web-${path}-${stamp()}.png`);
+        let screenshotOk = false;
         try {
             await page.screenshot({ path: out, fullPage: true });
+            screenshotOk = true;
             console.log(`[e2e:web] screenshot -> ${out} (via ${path} path)`);
         } catch (e) {
             console.log(`[e2e:web] screenshot: ${e.message}`);
-         }
+        }
+        assertions.push(makeAssertion('screenshot', screenshotOk, screenshotOk ? out : 'screenshot capture failed'));
+
+        // Assert the expected fallback warn appeared on the manual path (AC3).
+        const expectedWarns = warnings.filter((w) => EXPECTED_WARN_RE.test(w)).length;
+
+        // #65 welcome language-selector coverage: all eight non-active native-language
+        // options render unclipped and are selectable at desktop + narrow viewports.
+        // Failures are folded into fatalErrors so they gate the run like a route break;
+        // the proofed viewports are reported via welcomeCoverage.
+        const welcomeCoverage = await checkWelcomeLanguages(browser, baseUrl, fatalErrors);
+
+        // #63 Me About & feedback section: load /me and assert all four actions render
+        // and target the canonical URLs — without clicking (reading the href keeps the
+        // smoke on /me). Folded into fatalErrors like a route.
+        try {
+            await page.goto(baseUrl() + '/me', { waitUntil: 'domcontentloaded' });
+            await checkMeFeedbackLinks(page, fatalErrors);
+        } catch (e) {
+            fatalErrors.push(`[me feedback] ${e.message}`);
+            console.log(`[e2e:web] me feedback: ${e.message}`);
+        }
 
         const report = buildReport({
             path,
@@ -401,7 +504,11 @@ async function main() {
             resourceErrors,
             expectedWarns,
             routes,
-         screenshots: out ? [out] : [],
+            assertions,
+            interaction,
+            entryDestination,
+            welcomeCoverage,
+            screenshots: screenshotOk ? [out] : [],
             seconds: now(),
          });
         writeArtifacts(report);

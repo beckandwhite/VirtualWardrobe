@@ -2,21 +2,63 @@
   "path": "manual",
   "modelUrl": null,
   "modelPresent": true,
-  "browserEnabled": false,
-  "skipped": true,
+  "browserEnabled": true,
+  "skipped": false,
+  "fatalErrors": [],
+  "resourceErrors": [
+    "Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+    "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  ],
+  "expectedWarns": 1,
   "routes": [
     {
       "route": "/wardrobe",
-      "ok": false
+      "ok": true
     },
     {
       "route": "/studio",
-      "ok": false
+      "ok": true
     }
   ],
-  "seconds": 0,
-  "status": "SKIP",
-  "ok": false,
-  "summary": "M4-4 e2e:web smoke (asserts the manual path)\nbrowser pass skipped — no Chromium/Playwright (in-sandbox ceiling)\nstatus: SKIP\nroutes: 0/2 ok\nfatal console/pageerror: 0\nexpected fallback warns: 0\nfailed routes: /wardrobe, /studio",
-  "generatedAt": "2026-09-22T10:31:37.059Z"
+  "assertions": [
+    {
+      "name": "entry-landing",
+      "ok": true,
+      "detail": "landed on /welcome; expected /welcome"
+    },
+    {
+      "name": "wardrobe-content",
+      "ok": true,
+      "detail": "rendered \"Record your own clothes\""
+    },
+    {
+      "name": "studio-state",
+      "ok": true,
+      "detail": "manual: \"Auto-drape unavailable here — adjusting manually.\""
+    },
+    {
+      "name": "screenshot",
+      "ok": true,
+      "detail": "/Users/I778444/VirtualWardrobe/docs/screenshots/web-manual-2026-10-06T15-33-01-861Z.png"
+    }
+  ],
+  "interaction": {
+    "name": "save-share",
+    "ok": true,
+    "detail": "save notice \"Look saved…\" shown after tap"
+  },
+  "entryDestination": "/welcome",
+  "welcomeCoverage": [
+    "desktop 1024x768",
+    "narrow 375x812"
+  ],
+  "screenshots": [
+    "/Users/I778444/VirtualWardrobe/docs/screenshots/web-manual-2026-10-06T15-33-01-861Z.png"
+  ],
+  "seconds": 5,
+  "status": "PASS",
+  "ok": true,
+  "summary": "M4-4 e2e:web smoke (asserts the manual path)\nstatus: PASS\nentry destination: /welcome\nroutes: 2/2 ok\nfatal console/pageerror: 0\nexpected fallback warns: 1\nresource-load failures (non-fatal): 3\nwelcome language selector: proofed at desktop 1024x768, narrow 375x812\ninteraction: proven — save-share",
+  "generatedAt": "2026-10-06T15:33:02.720Z"
 }

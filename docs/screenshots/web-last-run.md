@@ -1,8 +1,11 @@
 M4-4 e2e:web smoke (asserts the manual path)
-browser pass skipped — no Chromium/Playwright (in-sandbox ceiling)
-status: SKIP
-routes: 0/2 ok
+status: PASS
+entry destination: /welcome
+routes: 2/2 ok
 fatal console/pageerror: 0
-expected fallback warns: 0
-failed routes: /wardrobe, /studio
-Wall time: 0s
+expected fallback warns: 1
+resource-load failures (non-fatal): 3
+welcome language selector: proofed at desktop 1024x768, narrow 375x812
+interaction: proven — save-share
+Screenshot: /Users/I778444/VirtualWardrobe/docs/screenshots/web-manual-2026-10-06T15-33-01-861Z.png
+Wall time: 5s
