@@ -80,3 +80,6 @@ public/pose/**/weights*
 # Playwright MCP verification artifacts (whole dir)
 .playwright-mcp/
 six-tab-bar.png
+
+# Transient per-run web smoke screenshots (web-last-run.md/.json stay tracked)
+docs/screenshots/web-manual-*.png
