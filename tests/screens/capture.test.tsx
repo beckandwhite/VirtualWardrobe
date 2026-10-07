@@ -54,7 +54,6 @@ const mockRouter = router as jest.Mocked<typeof router>;
 const mockInsertItem = r.insertItem as jest.Mock;
 const mockUseCapture = captureModule.useCapture as jest.Mock;
 const mockProcessCapture = captureModule.processCaptureImage as jest.Mock;
-const mockDiscardImage = captureModule.discardImage as jest.Mock;
 const mockResolveReviewChoice = captureModule.resolveReviewChoice as jest.Mock;
 
 // ── tests ─────────────────────────────────────────────────────────────────────

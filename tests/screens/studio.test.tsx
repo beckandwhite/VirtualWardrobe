@@ -12,7 +12,7 @@
  * avoids the worklet runner that the official /mock entry requires.
  */
 import React from 'react';
-import { render, fireEvent, waitFor, act } from '@testing-library/react-native';
+import { render, fireEvent, waitFor } from '@testing-library/react-native';
 
 // ── module-level mocks ────────────────────────────────────────────────────────
 
