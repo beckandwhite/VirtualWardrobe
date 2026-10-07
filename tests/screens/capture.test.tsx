@@ -30,11 +30,14 @@ jest.mock('@/capture', () => ({
 
 jest.mock('@/capture/FilePickerButton', () => {
   const { TouchableOpacity, Text } = require('react-native');
-  return ({ children, onPick, disabled }: any) => (
-    <TouchableOpacity testID="file-picker" disabled={disabled} onPress={() => onPick('blob:///test-uri')}>
-      <Text>{children}</Text>
-    </TouchableOpacity>
-  );
+  function FilePickerButtonMock({ children, onPick, disabled }: any) {
+    return (
+      <TouchableOpacity testID="file-picker" disabled={disabled} onPress={() => onPick('blob:///test-uri')}>
+        <Text>{children}</Text>
+      </TouchableOpacity>
+    );
+  }
+  return FilePickerButtonMock;
 });
 
 jest.mock('@/i18n/useI18n', () => ({

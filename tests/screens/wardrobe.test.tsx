@@ -35,7 +35,8 @@ jest.mock('@/i18n/useI18n', () => ({
 // CatalogSection is a heavy async component; replace it with a no-op in unit tests.
 jest.mock('@/catalog/CatalogSection', () => {
   const { View } = require('react-native');
-  return () => <View testID="catalog-section" />;
+  function CatalogSectionMock() { return <View testID="catalog-section" />; }
+  return CatalogSectionMock;
 });
 
 // ── imports after mocks ───────────────────────────────────────────────────────

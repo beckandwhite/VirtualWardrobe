@@ -33,7 +33,8 @@ jest.mock('@/i18n/useI18n', () => ({
 
 jest.mock('@/i18n/LanguageSwitcher', () => {
   const { View } = require('react-native');
-  return () => <View testID="lang-switcher" />;
+  function LanguageSwitcherMock() { return <View testID="lang-switcher" />; }
+  return LanguageSwitcherMock;
 });
 
 // ── imports after mocks ───────────────────────────────────────────────────────
