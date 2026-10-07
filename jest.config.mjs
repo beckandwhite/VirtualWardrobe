@@ -1,5 +1,32 @@
 /** @type {import('jest').Config} */
 export default {
+  // Full production coverage denominator: every TS/TSX file under src/, app/, and
+  // modules/ is counted whether or not a test imports it.  Exclusions are narrow
+  // and documented:
+  //   *.d.ts  — ambient type declarations only; no executable statements.
+  // Platform variants (*.web.ts/tsx) are kept in scope: they are production code
+  // for the web target and their uncovered state is visible rather than hidden.
+  // Native-language sources (Swift/Kotlin) are tracked separately (see #84).
+  collectCoverageFrom: [
+    'src/**/*.{ts,tsx}',
+    'app/**/*.{ts,tsx}',
+    'modules/**/*.ts',
+    '!**/*.d.ts',
+  ],
+
+  // Thresholds set 1-2 % below the measured baseline (2026-10-07):
+  //   statements 40.03 → 38, branches 49.74 → 48,
+  //   functions  38.73 → 37, lines   45.44 → 43.
+  // Raise these as new tests are added; never lower them.
+  coverageThreshold: {
+    global: {
+      statements: 38,
+      branches: 48,
+      functions: 37,
+      lines: 43,
+    },
+  },
+
   projects: [
     {
       // Existing pure logic tests (unchanged behavior).
