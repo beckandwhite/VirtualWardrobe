@@ -47,7 +47,7 @@ Expo + TypeScript + Expo Router · Reanimated ·
 - [`docs/feedback.md`](docs/feedback.md) — how to report bugs or request features.
 - [`docs/dev-setup.md`](docs/dev-setup.md) — deeper local setup notes for the pose model and environment.
 - [`docs/ci.md`](docs/ci.md) — hosted CI checks, artifacts, reruns, and branch protection.
-- [`infra/runner/README.md`](infra/runner/README.md) — optional private Docker runner setup and teardown.
+- [`infra/runner/README.md`](infra/runner/README.md) — pointer to the optional private runner setup maintained in [homelab](https://github.com/beckandwhite/homelab/tree/main/github-actions/runners/virtualwardrobe).
 
 ## Roadmap (MVP)
 - **M0 Foundations** — scaffold, abstractions, local storage, onboarding.
