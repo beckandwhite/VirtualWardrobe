@@ -82,7 +82,7 @@ Pick the top issue in **Ready to pickup**. Before writing any code:
      --field-id PVTSSF_lAHOA6-ZGM4BkOSPzhi_onA --single-select-option-id 47fc9ee4
    ```
 2. Tag the issue with a unique run label so the card shows which agent/model owns it.
-   Format `<run-id>-<model-id>`, e.g. `D72NQ7W67L-Qwen3.8-27b`. Create it if missing, then add it:
+   Format `<hostname>-<model-id>`, e.g. `D72NQ7W67L-Qwen3.8-27b`. Create it if missing, then add it:
    ```bash
    RUN_LABEL="D72NQ7W67L-Qwen3.8-27b"
    gh label create "$RUN_LABEL" --repo beckandwhite/VirtualWardrobe --color 5319e7 \
@@ -116,14 +116,13 @@ gh pr checks $PR --repo beckandwhite/VirtualWardrobe --watch
 
 - **All checks green → the work is ready: merge and close it.** Squash-merge, delete the branch,
   confirm the item closed (close it explicitly if `Closes #` did not), move the card to **Done**,
-  and drop the run label:
+:
   ```bash
   gh pr merge $PR --repo beckandwhite/VirtualWardrobe --squash --delete-branch
   gh issue view $ISSUE --repo beckandwhite/VirtualWardrobe --json state   # expect CLOSED
   gh issue close $ISSUE --repo beckandwhite/VirtualWardrobe 2>/dev/null || true
   gh project item-edit --id "$(item_id $ISSUE)" --project-id PVT_kwHOA6-ZGM4BkOSP \
     --field-id PVTSSF_lAHOA6-ZGM4BkOSPzhi_onA --single-select-option-id 98236657
-  gh issue edit $ISSUE --repo beckandwhite/VirtualWardrobe --remove-label "$RUN_LABEL"
   ```
 - **Any check failing → do NOT merge. Hand it to a human.** Add the `HUMAN!!!` label, leave the
   card in **In Progress**, and stop:
