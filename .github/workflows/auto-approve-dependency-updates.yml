@@ -1,0 +1,39 @@
+name: Auto-approve dependency updates
+
+on:
+  pull_request_target:
+    branches: [main]
+    types: [opened, reopened, synchronize, ready_for_review]
+
+permissions:
+  contents: read
+  checks: read
+  statuses: read
+  pull-requests: write
+
+jobs:
+  approve:
+    if: >-
+      ${{
+        !github.event.pull_request.draft &&
+        contains(
+          fromJSON('["app/dependabot","app/renovate","dependabot[bot]","renovate[bot]"]'),
+          github.event.pull_request.user.login
+        )
+      }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Wait for all checks to pass
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPOSITORY: ${{ github.repository }}
+        run: gh pr checks "$PR_NUMBER" --repo "$REPOSITORY" --watch
+
+      - name: Approve dependency update
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPOSITORY: ${{ github.repository }}
+        run: gh pr review "$PR_NUMBER" --repo "$REPOSITORY" --approve --body "Automated approval after all pull request checks passed."
