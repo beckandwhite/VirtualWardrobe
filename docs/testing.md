@@ -10,6 +10,59 @@ npm test
 
 This executes Jest across the project.
 
+## Coverage
+
+### Run with coverage
+
+```bash
+npm test -- --coverage --runInBand
+```
+
+Or to see only the summary line:
+
+```bash
+npm test -- --coverage --runInBand 2>&1 | grep "^All files"
+```
+
+### Coverage denominator
+
+The `collectCoverageFrom` config in `jest.config.mjs` sets the denominator to every
+production TypeScript/TSX file under `src/`, `app/`, and `modules/`. Files that no
+test imports are included as 0% entries so they cannot inflate the headline.
+
+**Exclusions** (documented in `jest.config.mjs`):
+
+| Pattern | Reason |
+|---------|--------|
+| `**/*.d.ts` | Ambient type declarations — no executable statements |
+
+Platform variants (`*.web.ts`, `*.web.tsx`) remain in scope: they are production code
+for the web target and their uncovered state should be visible, not hidden.
+Native-language sources (Swift/Kotlin) are tracked via the separate native
+verification workstream (issue #84).
+
+### Thresholds
+
+`coverageThreshold` in `jest.config.mjs` enforces minimums on the **full production
+surface**. CI fails when any threshold regresses. The table below shows the initial
+baseline (measured 2026-10-07) and the enforced threshold for each metric:
+
+| Metric | Measured baseline | Enforced threshold |
+|--------|------------------:|-------------------:|
+| Statements | 40.03 % | 38 % |
+| Branches | 49.74 % | 48 % |
+| Functions | 38.73 % | 37 % |
+| Lines | 45.44 % | 43 % |
+
+Raise a threshold whenever it drifts more than a point or two below the current
+measured value. Never lower it.
+
+### CI coverage summary
+
+The **"Jest tests and coverage"** GitHub Actions job appends a coverage table (all
+four metrics, covered / total counts) to the workflow step summary for every push and
+pull request.
+
 ## Type checking
 
 ```bash

@@ -22,6 +22,20 @@ module.exports = [
        languageOptions: { globals: { ...globals.node } },
        rules: { 'import/no-unresolved': 'off' },
       },
+      // Jest screen tests use two patterns that conflict with standard lint rules:
+      // 1. require() inside jest.mock() factories — import is not allowed in factory
+      //    functions; synchronous require() is the only option.
+      // 2. Imports after jest.mock() calls — babel-jest-hoist requires jest.mock()
+      //    before module imports; then the mocked modules are imported afterwards to
+      //    get typed references to their mock instances.
+      {
+        name: 'vw/test-screens',
+        files: ['tests/screens/**/*.{ts,tsx}'],
+        rules: {
+          '@typescript-eslint/no-require-imports': 'off',
+          'import/first': 'off',
+        },
+      },
     {
       ignores: [
         'node_modules/**',

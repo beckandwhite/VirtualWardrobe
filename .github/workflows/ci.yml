@@ -74,7 +74,7 @@ jobs:
       - name: Run Jest with coverage and JSON results
         run: |
           mkdir -p artifacts
-          npm test -- --coverage --runInBand --json --outputFile=artifacts/jest-results.json
+          npm test -- --coverage --coverageReporters=json-summary --coverageReporters=text --runInBand --json --outputFile=artifacts/jest-results.json
 
       - name: Add test summary
         if: always()
@@ -96,6 +96,22 @@ jobs:
             `- Runtime: ${result.startTime ? `${((Date.now() - result.startTime) / 1000).toFixed(1)}s` : 'unknown'}`,
             '',
           ];
+
+          const covPath = 'coverage/coverage-summary.json';
+          if (fs.existsSync(covPath)) {
+            const cov = JSON.parse(fs.readFileSync(covPath, 'utf8'));
+            const t = cov.total;
+            lines.push('### Coverage (full production surface)');
+            lines.push('');
+            lines.push('| Metric | % | Covered / Total |');
+            lines.push('|--------|---|-----------------|');
+            for (const [key, label] of [['statements','Statements'],['branches','Branches'],['functions','Functions'],['lines','Lines']]) {
+              const m = t[key];
+              lines.push(`| ${label} | ${m.pct.toFixed(2)} % | ${m.covered} / ${m.total} |`);
+            }
+            lines.push('');
+          }
+
           fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, lines.join('\n'));
           NODE
 

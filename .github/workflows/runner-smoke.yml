@@ -1,5 +1,8 @@
 name: Private runner smoke
 
+# Runner provisioning and operations are documented in the homelab repository:
+# https://github.com/beckandwhite/homelab/tree/main/github-actions/runners/virtualwardrobe
+
 on:
   workflow_dispatch:
 
