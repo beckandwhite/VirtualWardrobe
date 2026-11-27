@@ -1,0 +1,11 @@
+pull_request_rules:
+  - name: auto-merge autonomous PRs when CI passes
+    conditions:
+      - label=autonomous-pr
+      - check-success=Quality and dependency security
+      - check-success=Jest tests and coverage
+      - "#approved-reviews-by=0"
+    actions:
+      merge:
+        method: squash
+        commit_message_template: "{{ title }} (#{{ number }})"
