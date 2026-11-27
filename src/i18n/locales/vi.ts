@@ -101,6 +101,7 @@ export const vi: Dict = {
   'item.label.color': 'Màu',
   'item.label.tags': 'Thẻ (phân tách bằng dấu phẩy)',
   'item.tags.placeholder': 'ví dụ: thường ngày, mùa hè',
+  'item.action.failed': 'Đã có lỗi. Thử lại.',
   'studio.status.autoPlaced': 'Tự động đặt theo tư thế đã phát hiện',
   'studio.status.manual': 'Không thể tự động khoác — đang điều chỉnh thủ công',
   'studio.banner.manual':

@@ -98,6 +98,7 @@ export const zhCN: Dict = {
   'item.label.color': '颜色',
   'item.label.tags': '标签（用逗号分隔）',
   'item.tags.placeholder': '例如：休闲、夏季',
+  'item.action.failed': '出错了，请重试。',
   'studio.status.autoPlaced': '已根据检测到的姿势自动放置',
   'studio.status.manual': '无法自动贴合——正在手动调整',
   'studio.banner.manual': '此处无法自动贴合——正在手动调整。',

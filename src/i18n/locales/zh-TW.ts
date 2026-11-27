@@ -98,6 +98,7 @@ export const zhTW: Dict = {
   'item.label.color': '顏色',
   'item.label.tags': '標籤（以逗號分隔）',
   'item.tags.placeholder': '例如：休閒、夏季',
+  'item.action.failed': '出錯了，請重試。',
   'studio.status.autoPlaced': '已根據偵測到的姿勢自動擺放',
   'studio.status.manual': '無法自動貼合——正在手動調整',
   'studio.banner.manual': '此處無法自動貼合——正在手動調整。',

@@ -102,6 +102,7 @@ export const fr: Dict = {
   'item.label.color': 'Couleur',
   'item.label.tags': 'Étiquettes (séparées par des virgules)',
   'item.tags.placeholder': 'ex. décontracté, été',
+  'item.action.failed': 'Une erreur est survenue. Réessayez.',
   'studio.status.autoPlaced': 'Placé automatiquement selon la pose détectée',
   'studio.status.manual': 'Drapé automatique indisponible — ajustement manuel',
   'studio.banner.manual':

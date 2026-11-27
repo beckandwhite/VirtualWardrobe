@@ -101,6 +101,7 @@ export const it: Dict = {
   'item.label.color': 'Colore',
   'item.label.tags': 'Tag (separati da virgola)',
   'item.tags.placeholder': 'es. casual, estate',
+  'item.action.failed': 'Qualcosa è andato storto. Riprova.',
   'studio.status.autoPlaced': 'Posizionato automaticamente dalla posa rilevata',
   'studio.status.manual':
     'Drappeggio automatico non disponibile — regolazione manuale',

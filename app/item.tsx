@@ -49,6 +49,12 @@ export default function ItemScreen() {
   const [color, setColor] = useState('unknown');
   const [tagsText, setTagsText] = useState('');
   const [busy, setBusy] = useState(false);
+  // Two-step delete (safety): the delete button arms a confirm bar; a second tap
+  // on "Delete" cascades the item's TryOn rows via deleteItem. Cancel dismisses
+  // the bar without touching the store. `notice` surfaces a save/delete failure
+  // inline instead of navigating away on error.
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [notice, setNotice] = useState<string | null>(null);
 
   // Seed local state once the item arrives (item loads async, so it can't seed
   // initial state directly). Keyed on item.id so re-editing a different item reseeds.
@@ -103,6 +109,7 @@ export default function ItemScreen() {
       leave();
     } catch (e) {
       console.error('item save failed', e);
+      setNotice(t('item.action.failed'));
       setBusy(false);
     }
   };
@@ -114,6 +121,7 @@ export default function ItemScreen() {
       leave();
     } catch (e) {
       console.error('item delete failed', e);
+      setNotice(t('item.action.failed'));
       setBusy(false);
     }
   };
@@ -176,6 +184,8 @@ export default function ItemScreen() {
         autoCorrect={false}
       />
 
+      {notice ? <Text style={styles.notice}>{notice}</Text> : null}
+
       <View style={styles.actions}>
         <TouchableOpacity
           style={[styles.button, styles.primary, busy ? styles.busy : null]}
@@ -187,15 +197,43 @@ export default function ItemScreen() {
             {busy ? t('common.saving') : t('common.save')}
           </Text>
         </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.button, busy ? styles.busy : null]}
-          disabled={busy}
-          activeOpacity={0.8}
-          onPress={remove}
-        >
-          <Text style={styles.deleteText}>{t('common.delete')}</Text>
-        </TouchableOpacity>
+        {!confirmDelete ? (
+          <TouchableOpacity
+            style={[styles.button, busy ? styles.busy : null]}
+            disabled={busy}
+            activeOpacity={0.8}
+            onPress={() => setConfirmDelete(true)}
+          >
+            <Text style={styles.deleteText}>{t('common.delete')}</Text>
+          </TouchableOpacity>
+        ) : null}
       </View>
+
+      {confirmDelete ? (
+        <View style={styles.confirm}>
+          <View style={styles.actions}>
+            <TouchableOpacity
+              style={[styles.button, busy ? styles.busy : null]}
+              disabled={busy}
+              activeOpacity={0.8}
+              onPress={() => setConfirmDelete(false)}
+            >
+              <Text style={styles.cancelText}>{t('common.dismiss')}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.button, busy ? styles.busy : null]}
+              disabled={busy}
+              activeOpacity={0.8}
+              onPress={async () => {
+                setConfirmDelete(false);
+                await remove();
+              }}
+            >
+              <Text style={styles.deleteText}>{t('common.delete')}</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      ) : null}
     </ScrollView>
   );
 }
@@ -266,4 +304,7 @@ const styles = StyleSheet.create({
   deleteText: { color: '#c53434', fontSize: 15, fontWeight: '700' },
   back: { paddingVertical: 10, paddingHorizontal: 16 },
   backText: { color: '#06c', fontSize: 15 },
+  notice: { color: '#c53434', fontSize: 13, marginTop: 4 },
+  confirm: { marginTop: 4 },
+  cancelText: { color: '#333', fontSize: 15, fontWeight: '600' },
 });
