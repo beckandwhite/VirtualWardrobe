@@ -74,9 +74,10 @@ waits for before shooting, which is what makes each capture deterministic.
 
 ## Native / device evidence — iOS Simulator (M1-1)
 
-The app now boots and runs on the **iOS 27 Simulator** (Expo Go, SDK 57). The three
-`ios-*.png` captures below are from that real native runtime — not the web build —
-and evidence the native-specific capture behavior that the web images can't:
+The three `ios-*.png` captures below document a native run on the **iOS 27 Simulator**
+(Expo Go, SDK 57), before the SDK 58 upgrade. They are from a real native runtime —
+not the web build — and evidence the native-specific capture behavior that the web
+images can't:
 
 | File | Screen | Native-only signal |
 |------|--------|--------------------|

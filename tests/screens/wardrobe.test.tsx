@@ -66,62 +66,62 @@ describe('WardrobeScreen', () => {
     jest.clearAllMocks();
   });
 
-  it('shows the empty state when the wardrobe is empty', () => {
-    const { getByText } = renderWardrobe([]);
+  it('shows the empty state when the wardrobe is empty', async () => {
+    const { getByText } = await renderWardrobe([]);
     expect(getByText('wardrobe.empty')).toBeTruthy();
   });
 
-  it('renders item names in the grid', () => {
+  it('renders item names in the grid', async () => {
     const items = [makeItem(1, 'Blue Jeans'), makeItem(2, 'White Tee')];
-    const { getByText } = renderWardrobe(items);
+    const { getByText } = await renderWardrobe(items);
     expect(getByText('Blue Jeans')).toBeTruthy();
     expect(getByText('White Tee')).toBeTruthy();
   });
 
-  it('toggles a category chip and shows filtered-empty state when nothing matches', () => {
+  it('toggles a category chip and shows filtered-empty state when nothing matches', async () => {
     // One 'bottom' item; pressing the 'top' chip should leave zero visible.
     const items = [makeItem(1, 'Black Pants', 'bottom')];
-    const { getByText } = renderWardrobe(items);
-    fireEvent.press(getByText('category.top'));
+    const { getByText } = await renderWardrobe(items);
+    await fireEvent.press(getByText('category.top'));
     expect(getByText('wardrobe.emptyFiltered')).toBeTruthy();
   });
 
-  it('clears filters via the "Clear filters" button', () => {
+  it('clears filters via the "Clear filters" button', async () => {
     const items = [makeItem(1, 'Black Pants', 'bottom')];
-    const { getByText, queryByText } = renderWardrobe(items);
+    const { getByText, queryByText } = await renderWardrobe(items);
     // Apply a filter that matches nothing.
-    fireEvent.press(getByText('category.top'));
+    await fireEvent.press(getByText('category.top'));
     expect(getByText('wardrobe.emptyFiltered')).toBeTruthy();
     // Clear the filter.
-    fireEvent.press(getByText('wardrobe.clearFilters'));
+    await fireEvent.press(getByText('wardrobe.clearFilters'));
     expect(queryByText('wardrobe.emptyFiltered')).toBeNull();
     expect(getByText('Black Pants')).toBeTruthy();
   });
 
-  it('filters by search query and hides non-matching items', () => {
+  it('filters by search query and hides non-matching items', async () => {
     const items = [makeItem(1, 'Blue Jeans'), makeItem(2, 'Red Dress')];
-    const { getByText, queryByText, getByPlaceholderText } = renderWardrobe(items);
-    fireEvent.changeText(getByPlaceholderText('wardrobe.search'), 'jeans');
+    const { getByText, queryByText, getByPlaceholderText } = await renderWardrobe(items);
+    await fireEvent.changeText(getByPlaceholderText('wardrobe.search'), 'jeans');
     expect(getByText('Blue Jeans')).toBeTruthy();
     expect(queryByText('Red Dress')).toBeNull();
   });
 
-  it('shows the count badge when a filter is active', () => {
+  it('shows the count badge when a filter is active', async () => {
     const items = [
       makeItem(1, 'Blue Jeans', 'bottom'),
       makeItem(2, 'Red Dress', 'dress'),
     ];
-    const { getByText } = renderWardrobe(items);
-    fireEvent.press(getByText('category.dress'));
+    const { getByText } = await renderWardrobe(items);
+    await fireEvent.press(getByText('category.dress'));
     // Our i18n mock formats the count as "N of M".
     expect(getByText('1 of 2')).toBeTruthy();
   });
 
-  it('navigates to capture screen when the FAB is pressed', () => {
-    const { getAllByRole } = renderWardrobe([]);
+  it('navigates to capture screen when the FAB is pressed', async () => {
+    const { getAllByRole } = await renderWardrobe([]);
     // The FAB has accessibilityLabel = 'wardrobe.addItem'.
     const fab = getAllByRole('button', { name: 'wardrobe.addItem' })[0];
-    fireEvent.press(fab);
+    await fireEvent.press(fab);
     expect(mockPush).toHaveBeenCalledWith('/capture');
   });
 });

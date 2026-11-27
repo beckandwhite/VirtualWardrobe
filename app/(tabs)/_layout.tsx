@@ -27,7 +27,15 @@ export default function WardrobeGroup() {
             title: t(tab.titleKey),
             tabBarAccessibilityLabel: t(tab.titleKey),
             tabBarIcon: ({ color, size }) => (
-              <Ionicons name={tab.icon} size={size} color={color} />
+              <Ionicons
+                name={tab.icon}
+                size={size}
+                color={
+                  typeof color === 'number'
+                    ? `#${(color >>> 0).toString(16).slice(-6)}`
+                    : color ?? undefined
+                }
+              />
             ),
           }}
         />

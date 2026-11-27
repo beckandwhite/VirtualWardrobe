@@ -4,17 +4,12 @@
     "slug": "virtual-wardrobe",
     "version": "0.0.1",
     "orientation": "portrait",
-     "scheme": "virtualwardrobe",
-       "icon": "./assets/icon.png",
-       "splash": {
-         "image": "./assets/splash-icon.png",
-         "backgroundColor": "#E6F4FE",
-         "resizeMode": "contain"
-       },
-       "userInterfaceStyle": "light",
-     "experiments": {
-       "typedRoutes": true
-     },
+    "scheme": "virtualwardrobe",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "experiments": {
+      "typedRoutes": true
+    },
     "ios": {
       "bundleIdentifier": "com.beckandwhite.virtualwardrobe",
       "supportsTablet": true
@@ -29,14 +24,24 @@
       },
       "predictiveBackGestureEnabled": false
     },
-      "web": {
-        "bundler": "metro",
-        "favicon": "./assets/favicon.png"
-      },
+    "web": {
+      "bundler": "metro",
+      "favicon": "./assets/favicon.png"
+    },
     "plugins": [
       "expo-router",
       "expo-sqlite",
-      "./modules/vw-background-removal/app.plugin.js"
+      "./modules/vw-background-removal/app.plugin.js",
+      "expo-sharing",
+      "expo-status-bar",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "backgroundColor": "#E6F4FE",
+          "resizeMode": "contain"
+        }
+      ]
     ]
   }
 }

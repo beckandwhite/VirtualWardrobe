@@ -1229,3 +1229,14 @@ and the skippable `e2e:web` all green.
   GitHub sign-in requirement, and redacted-photo guidance; the stale "nonexistent template" section is
   removed. No web-hosted service, telemetry, or route was added.
 
+## 2026-11-27 — Expo SDK 58 upgrade
+
+- **D64: Align the app to the latest Expo SDK, 58.1.0, and its bundled React Native, React, Expo
+  modules, and Jest toolchain versions.** Move `requireOptionalNativeModule` to Expo's public
+  entrypoint and remove the direct `expo-modules-core` dependency.
+- **Config migration:** Configure the existing splash image through `expo-splash-screen`; write the
+  Android minimum SDK floor through Gradle properties so the config remains schema-valid and keeps
+  any higher configured floor.
+- **Test migration:** Await React Native Testing Library 14 renders/events and keep the Reanimated
+  test shared values stable across renders, matching hook identity in the app.
+

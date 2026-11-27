@@ -1,4 +1,8 @@
-const { withInfoPlist, createRunOncePlugin } = require('expo/config-plugins');
+const {
+  withGradleProperties,
+  withInfoPlist,
+  createRunOncePlugin,
+} = require('expo/config-plugins');
 
 /**
  * Config plugin for vw-background-removal.
@@ -33,15 +37,34 @@ function withIosUsageStrings(config) {
 }
 
 /**
- * Android: ensure the effective minSdkVersion is at least 24. We only raise it;
- * we never lower a higher value already set by the app.
+ * Android: ensure the Gradle minSdkVersion property is at least 24 while
+ * preserving any higher value already configured.
  */
 function withAndroidMinSdk(config) {
-  const existing = config.android?.minSdkVersion ?? 0;
-  if (existing < MIN_SDK_VERSION) {
-    config.android = { ...(config.android ?? {}), minSdkVersion: MIN_SDK_VERSION };
-  }
-  return config;
+  return withGradleProperties(config, (cfg) => {
+    const minSdkProperties = cfg.modResults.filter(
+      (property) =>
+        property.type === 'property' && property.key === 'android.minSdkVersion',
+    );
+    const minSdkVersion = Math.max(
+      MIN_SDK_VERSION,
+      ...minSdkProperties.map((property) => Number(property.value) || 0),
+    );
+
+    if (minSdkProperties.length === 0) {
+      cfg.modResults.push({
+        type: 'property',
+        key: 'android.minSdkVersion',
+        value: String(minSdkVersion),
+      });
+    } else {
+      for (const property of minSdkProperties) {
+        property.value = String(minSdkVersion);
+      }
+    }
+
+    return cfg;
+  });
 }
 
 const withVwBackgroundRemoval = (config) => {

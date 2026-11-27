@@ -60,32 +60,32 @@ describe('WelcomeScreen', () => {
     (mockR.setSeenWelcome as jest.Mock).mockResolvedValue(undefined);
   });
 
-  it('renders the title and orientation steps', () => {
-    const { getByText } = renderWelcome(false, null);
+  it('renders the title and orientation steps', async () => {
+    const { getByText } = await renderWelcome(false, null);
     expect(getByText('welcome.title')).toBeTruthy();
     expect(getByText('welcome.step1.title')).toBeTruthy();
     expect(getByText('welcome.step4.title')).toBeTruthy();
   });
 
-  it('shows Continue button on first run (seenWelcome = false)', () => {
-    const { getByText } = renderWelcome(false, null);
+  it('shows Continue button on first run (seenWelcome = false)', async () => {
+    const { getByText } = await renderWelcome(false, null);
     expect(getByText('welcome.continue')).toBeTruthy();
   });
 
-  it('hides Continue button for a returning user (seenWelcome = true)', () => {
-    const { queryByText } = renderWelcome(true, null);
+  it('hides Continue button for a returning user (seenWelcome = true)', async () => {
+    const { queryByText } = await renderWelcome(true, null);
     expect(queryByText('welcome.continue')).toBeNull();
   });
 
-  it('hides Continue button while still loading (seenWelcome = null)', () => {
-    const { queryByText } = renderWelcome(null, null);
+  it('hides Continue button while still loading (seenWelcome = null)', async () => {
+    const { queryByText } = await renderWelcome(null, null);
     expect(queryByText('welcome.continue')).toBeNull();
   });
 
   it('routes to /me when no body photo is set on continue', async () => {
-    const { getByText } = renderWelcome(false, false);
+    const { getByText } = await renderWelcome(false, false);
     await act(async () => {
-      fireEvent.press(getByText('welcome.continue'));
+      await fireEvent.press(getByText('welcome.continue'));
     });
     await waitFor(() => {
       expect(mockR.setSeenWelcome).toHaveBeenCalledTimes(1);
@@ -94,9 +94,9 @@ describe('WelcomeScreen', () => {
   });
 
   it('routes to /wardrobe when body photo exists on continue', async () => {
-    const { getByText } = renderWelcome(false, true);
+    const { getByText } = await renderWelcome(false, true);
     await act(async () => {
-      fireEvent.press(getByText('welcome.continue'));
+      await fireEvent.press(getByText('welcome.continue'));
     });
     await waitFor(() => {
       expect(mockR.setSeenWelcome).toHaveBeenCalledTimes(1);

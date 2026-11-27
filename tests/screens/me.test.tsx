@@ -62,34 +62,34 @@ describe('MeScreen', () => {
     (mockLinking.openURL as jest.Mock).mockResolvedValue(undefined);
   });
 
-  it('shows empty-photo placeholder when no photo is set', () => {
-    const { getByText, queryByRole } = renderMe(null);
+  it('shows empty-photo placeholder when no photo is set', async () => {
+    const { getByText, queryByRole } = await renderMe(null);
     expect(getByText('me.photo.empty')).toBeTruthy();
     expect(queryByRole('image')).toBeNull();
   });
 
-  it('hides the empty placeholder and shows "Change photo" when a URI is persisted', () => {
-    const { queryByText, getByText } = renderMe('file:///photo.jpg');
+  it('hides the empty placeholder and shows "Change photo" when a URI is persisted', async () => {
+    const { queryByText, getByText } = await renderMe('file:///photo.jpg');
     expect(queryByText('me.photo.empty')).toBeNull();
     // 'me.photo.change' only renders when photo is truthy (the button label switches).
     expect(getByText('me.photo.change')).toBeTruthy();
   });
 
-  it('shows "Set photo" label when no photo is set', () => {
-    const { getByText } = renderMe(null);
+  it('shows "Set photo" label when no photo is set', async () => {
+    const { getByText } = await renderMe(null);
     expect(getByText('me.photo.set')).toBeTruthy();
   });
 
-  it('shows "Change photo" label when a photo exists', () => {
-    const { getByText } = renderMe('file:///photo.jpg');
+  it('shows "Change photo" label when a photo exists', async () => {
+    const { getByText } = await renderMe('file:///photo.jpg');
     expect(getByText('me.photo.change')).toBeTruthy();
   });
 
   it('persists the URI returned by takePhoto', async () => {
     mockTakePhoto.mockResolvedValue({ uri: 'file:///new.jpg', source: 'library' });
-    const { getByText } = renderMe(null);
+    const { getByText } = await renderMe(null);
     await act(async () => {
-      fireEvent.press(getByText('me.photo.set'));
+      await fireEvent.press(getByText('me.photo.set'));
     });
     await waitFor(() => {
       expect(mockR.setSetting).toHaveBeenCalledWith(PERSON_PHOTO_KEY, 'file:///new.jpg');
@@ -98,9 +98,9 @@ describe('MeScreen', () => {
 
   it('does not persist when takePhoto is cancelled (returns null)', async () => {
     mockTakePhoto.mockResolvedValue(null);
-    const { getByText } = renderMe(null);
+    const { getByText } = await renderMe(null);
     await act(async () => {
-      fireEvent.press(getByText('me.photo.set'));
+      await fireEvent.press(getByText('me.photo.set'));
     });
     // No store call expected even after settling.
     await new Promise((r) => setTimeout(r, 50));
@@ -109,11 +109,11 @@ describe('MeScreen', () => {
 
   it('shows link error text when a feedback link cannot open', async () => {
     (mockLinking.canOpenURL as jest.Mock).mockResolvedValue(false);
-    const { getAllByRole, getByText } = renderMe(null);
+    const { getAllByRole, getByText } = await renderMe(null);
     // Press any feedback link (About — first one in the FEEDBACK_ACTIONS list).
     const links = getAllByRole('link');
     await act(async () => {
-      fireEvent.press(links[0]);
+      await fireEvent.press(links[0]);
     });
     await waitFor(() => {
       expect(getByText('me.feedback.openFailed')).toBeTruthy();

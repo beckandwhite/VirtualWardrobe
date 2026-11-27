@@ -18,14 +18,14 @@ const OUTPUT_URI = 'file:///caches/vw-bg-removed-abc.png';
 
 /**
  * Re-import the bridge module after setting up the mock for
- * `expo-modules-core`.  `requireOptionalNativeModule` is replaced by a factory
+ * `expo`.  `requireOptionalNativeModule` is replaced by a factory
  * that returns `nativeImpl` (or `null` when called with `null`).
  */
 async function loadBridge(
   nativeImpl: { removeBackground: jest.Mock } | null,
 ): Promise<BridgeModule> {
   jest.resetModules();
-  jest.doMock('expo-modules-core', () => ({
+  jest.doMock('expo', () => ({
     requireOptionalNativeModule: () => nativeImpl,
   }));
   // eslint-disable-next-line @typescript-eslint/no-require-imports

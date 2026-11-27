@@ -184,7 +184,7 @@ export default function WardrobeScreen() {
                 <Text style={styles.addLink}>{t('wardrobe.addItem')}</Text>
               </TouchableOpacity>
             </View>
-          ) : null
+          ) : undefined
         }
         ListFooterComponent={<CatalogSection />}
         renderItem={({ item }) => (

@@ -35,7 +35,7 @@ whether the native module is linked into the current binary.
 ### Automated — JS bridge (CI)
 
 `tests/capture/backgroundRemoval.test.ts` runs in Node/Jest and covers the full
-bridge contract without a device. It mocks `expo-modules-core` to exercise:
+bridge contract without a device. It mocks `expo` to exercise:
 
 | Scenario | Expected result |
 |---|---|

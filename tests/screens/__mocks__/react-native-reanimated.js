@@ -3,8 +3,9 @@
 //   useSharedValue, useAnimatedStyle, useAnimatedReaction, withTiming, runOnJS, Animated.View.
 'use strict';
 const ReactNative = require('react-native');
+const React = require('react');
 
-const useSharedValue = (init) => ({ value: init });
+const useSharedValue = (init) => React.useRef({ value: init }).current;
 const useAnimatedStyle = (_fn) => ({});
 const useAnimatedReaction = (_deps, _effect) => {};
 const withTiming = (val) => val;

@@ -140,27 +140,27 @@ describe('StudioScreen', () => {
     mockPersistLook.mockResolvedValue({ id: 99 });
   });
 
-  it('shows the manual-mode banner on mount when no keypoints are detected', () => {
+  it('shows the manual-mode banner on mount when no keypoints are detected', async () => {
     // Banner initial state is open=true, dismissed=false — visible before any async work.
-    const { getByText } = render(<StudioScreen />);
+    const { getByText } = await render(<StudioScreen />);
     expect(getByText('studio.banner.manual')).toBeTruthy();
   });
 
-  it('dismisses the manual banner when the dismiss button is pressed', () => {
-    const { getByText, queryByText } = render(<StudioScreen />);
+  it('dismisses the manual banner when the dismiss button is pressed', async () => {
+    const { getByText, queryByText } = await render(<StudioScreen />);
     expect(getByText('studio.banner.manual')).toBeTruthy();
-    fireEvent.press(getByText('common.dismiss'));
+    await fireEvent.press(getByText('common.dismiss'));
     expect(queryByText('studio.banner.manual')).toBeNull();
   });
 
-  it('shows the manual status text when autoPlaced is false', () => {
+  it('shows the manual status text when autoPlaced is false', async () => {
     // autoPlaced starts false (no keypoints yet) → manual status shown immediately.
-    const { getByText } = render(<StudioScreen />);
+    const { getByText } = await render(<StudioScreen />);
     expect(getByText('studio.status.manual')).toBeTruthy();
   });
 
-  it('shows the save/share button', () => {
-    const { getByText } = render(<StudioScreen />);
+  it('shows the save/share button', async () => {
+    const { getByText } = await render(<StudioScreen />);
     expect(getByText('studio.saveShare')).toBeTruthy();
   });
 
@@ -168,10 +168,10 @@ describe('StudioScreen', () => {
     // Need a garment so persist() doesn't early-return null.
     (mockR.listItems as jest.Mock).mockResolvedValue([STUB_GARMENT_ITEM]);
     mockPersistLook.mockRejectedValue(new Error('disk full'));
-    const { getByText } = render(<StudioScreen />);
+    const { getByText } = await render(<StudioScreen />);
     // Wait until the pose effect fires (proxy for garment being loaded).
     await waitFor(() => expect(mockSafeEstimate).toHaveBeenCalled());
-    fireEvent.press(getByText('studio.saveShare'));
+    await fireEvent.press(getByText('studio.saveShare'));
     await waitFor(() => {
       expect(getByText('Export failed — try again.')).toBeTruthy();
     });
@@ -180,11 +180,11 @@ describe('StudioScreen', () => {
   it('dismisses the error notice when × is pressed', async () => {
     (mockR.listItems as jest.Mock).mockResolvedValue([STUB_GARMENT_ITEM]);
     mockPersistLook.mockRejectedValue(new Error('fail'));
-    const { getByText, queryByText } = render(<StudioScreen />);
+    const { getByText, queryByText } = await render(<StudioScreen />);
     await waitFor(() => expect(mockSafeEstimate).toHaveBeenCalled());
-    fireEvent.press(getByText('studio.saveShare'));
+    await fireEvent.press(getByText('studio.saveShare'));
     await waitFor(() => expect(getByText('Export failed — try again.')).toBeTruthy());
-    fireEvent.press(getByText('×'));
+    await fireEvent.press(getByText('×'));
     expect(queryByText('Export failed — try again.')).toBeNull();
   });
 });

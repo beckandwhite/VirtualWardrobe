@@ -335,8 +335,10 @@ dev build** via `expo-dev-client` + EAS. Expo Go stays valid for pure-JS/web wor
 
 ### What M5-4 added
 
-- `expo-dev-client` + `expo-modules-core` as direct dependencies (pinned `~57.0.19`
-  to match Expo SDK 57).
+- M5-4 originally introduced `expo-dev-client` and `expo-modules-core` for custom
+  dev builds. After the SDK 58 upgrade, `expo-dev-client` is pinned to `~58.0.22`,
+  and the background-removal bridge uses `expo`'s public `requireOptionalNativeModule`
+  export rather than depending directly on `expo-modules-core`.
 - `eas.json` with `development` / `preview` / `production` profiles.
 - `app.json` native identifiers: `ios.bundleIdentifier` and `android.package`
   (`com.beckandwhite.virtualwardrobe`).

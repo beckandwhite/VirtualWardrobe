@@ -70,22 +70,22 @@ describe('CaptureScreen', () => {
 
   // ── initial state ──────────────────────────────────────────────────────────
 
-  it('renders the title', () => {
-    const { getByText } = render(<CaptureScreen />);
+  it('renders the title', async () => {
+    const { getByText } = await render(<CaptureScreen />);
     expect(getByText('capture.title')).toBeTruthy();
   });
 
-  it('renders hint type chips', () => {
-    const { getByText } = render(<CaptureScreen />);
+  it('renders hint type chips', async () => {
+    const { getByText } = await render(<CaptureScreen />);
     expect(getByText('top')).toBeTruthy();
     expect(getByText('shoes')).toBeTruthy();
   });
 
-  it('toggles a hint chip on press and deselects on second press', () => {
-    const { getByText } = render(<CaptureScreen />);
+  it('toggles a hint chip on press and deselects on second press', async () => {
+    const { getByText } = await render(<CaptureScreen />);
     const chip = getByText('top');
-    fireEvent.press(chip);
-    fireEvent.press(chip);
+    await fireEvent.press(chip);
+    await fireEvent.press(chip);
     expect(getByText('top')).toBeTruthy();
   });
 
@@ -95,8 +95,8 @@ describe('CaptureScreen', () => {
     const mockTakePhoto = jest.fn().mockResolvedValue({ uri: 'file:///raw.jpg', source: 'library' });
     mockUseCapture.mockReturnValue({ cameraAvailable: false, takePhoto: mockTakePhoto });
     mockProcessCapture.mockResolvedValue({ uri: 'file:///raw.jpg', removed: false });
-    const { getByText } = render(<CaptureScreen />);
-    fireEvent.press(getByText('capture.photo'));
+    const { getByText } = await render(<CaptureScreen />);
+    await fireEvent.press(getByText('capture.photo'));
     await waitFor(() => {
       expect(getByText('capture.bg.failed')).toBeTruthy();
       expect(getByText('capture.bg.keepOriginal')).toBeTruthy();
@@ -108,8 +108,8 @@ describe('CaptureScreen', () => {
     const mockTakePhoto = jest.fn().mockResolvedValue({ uri: 'file:///raw.jpg', source: 'library' });
     mockUseCapture.mockReturnValue({ cameraAvailable: false, takePhoto: mockTakePhoto });
     mockProcessCapture.mockResolvedValue({ uri: 'file:///cutout.png', removed: true });
-    const { getByText } = render(<CaptureScreen />);
-    fireEvent.press(getByText('capture.photo'));
+    const { getByText } = await render(<CaptureScreen />);
+    await fireEvent.press(getByText('capture.photo'));
     await waitFor(() => {
       expect(getByText('capture.bg.removed')).toBeTruthy();
       expect(getByText('capture.bg.useCutout')).toBeTruthy();
@@ -122,8 +122,8 @@ describe('CaptureScreen', () => {
   it('stays on the capture screen when takePhoto is cancelled', async () => {
     const mockTakePhoto = jest.fn().mockResolvedValue(null);
     mockUseCapture.mockReturnValue({ cameraAvailable: false, takePhoto: mockTakePhoto });
-    const { getByText, queryByText } = render(<CaptureScreen />);
-    fireEvent.press(getByText('capture.photo'));
+    const { getByText, queryByText } = await render(<CaptureScreen />);
+    await fireEvent.press(getByText('capture.photo'));
     await new Promise((r) => setTimeout(r, 50));
     expect(queryByText('capture.bg.keepOriginal')).toBeNull();
     expect(getByText('capture.photo')).toBeTruthy();
@@ -137,10 +137,10 @@ describe('CaptureScreen', () => {
     mockUseCapture.mockReturnValue({ cameraAvailable: false, takePhoto: mockTakePhoto });
     mockProcessCapture.mockResolvedValue({ uri: 'file:///raw.jpg', removed: false });
     mockResolveReviewChoice.mockReturnValue({ keptUri: 'file:///raw.jpg', discardUri: null });
-    const { getByText } = render(<CaptureScreen />);
-    fireEvent.press(getByText('capture.photo'));
+    const { getByText } = await render(<CaptureScreen />);
+    await fireEvent.press(getByText('capture.photo'));
     await waitFor(() => expect(getByText('capture.bg.keepOriginal')).toBeTruthy());
-    fireEvent.press(getByText('capture.bg.keepOriginal'));
+    await fireEvent.press(getByText('capture.bg.keepOriginal'));
     await waitFor(() => expect(mockInsertItem).toHaveBeenCalledTimes(1));
     expect(mockRouter.replace).toHaveBeenCalledWith('/wardrobe');
   });
@@ -150,10 +150,10 @@ describe('CaptureScreen', () => {
     mockUseCapture.mockReturnValue({ cameraAvailable: false, takePhoto: mockTakePhoto });
     mockProcessCapture.mockResolvedValue({ uri: 'file:///cutout.png', removed: true });
     mockResolveReviewChoice.mockReturnValue({ keptUri: 'file:///cutout.png', discardUri: 'file:///raw.jpg' });
-    const { getByText } = render(<CaptureScreen />);
-    fireEvent.press(getByText('capture.photo'));
+    const { getByText } = await render(<CaptureScreen />);
+    await fireEvent.press(getByText('capture.photo'));
     await waitFor(() => expect(getByText('capture.bg.useCutout')).toBeTruthy());
-    fireEvent.press(getByText('capture.bg.useCutout'));
+    await fireEvent.press(getByText('capture.bg.useCutout'));
     await waitFor(() => expect(mockInsertItem).toHaveBeenCalledTimes(1));
     const inserted = mockInsertItem.mock.calls[0][0];
     expect(inserted.imagePath).toBe('file:///cutout.png');
