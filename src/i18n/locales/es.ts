@@ -101,6 +101,7 @@ export const es: Dict = {
   'item.label.color': 'Color',
   'item.label.tags': 'Etiquetas (separadas por comas)',
   'item.tags.placeholder': 'p. ej. casual, verano',
+  'item.action.failed': 'Algo salió mal. Inténtalo de nuevo.',
   'studio.status.autoPlaced':
     'Colocada automáticamente según la pose detectada',
   'studio.status.manual':

@@ -101,6 +101,7 @@ export const hu: Dict = {
   'item.label.color': 'Szín',
   'item.label.tags': 'Címkék (vesszővel elválasztva)',
   'item.tags.placeholder': 'pl. hétköznapi, nyári',
+  'item.action.failed': 'Valami hiba történt. Próbáld újra.',
   'studio.status.autoPlaced': 'Automatikusan elhelyezve az észlelt póz alapján',
   'studio.status.manual':
     'Az automatikus ráigazítás nem érhető el — kézi beállítás',

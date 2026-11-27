@@ -132,6 +132,7 @@ export const en: Dict = {
   'item.label.color': 'Color',
   'item.label.tags': 'Tags (comma separated)',
   'item.tags.placeholder': 'e.g. casual, summer',
+  'item.action.failed': 'Something went wrong. Try again.',
 
   // Studio screen
   'studio.status.autoPlaced': 'Auto-placed from detected pose',

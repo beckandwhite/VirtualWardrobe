@@ -102,6 +102,7 @@ export const de: Dict = {
   'item.label.color': 'Farbe',
   'item.label.tags': 'Tags (durch Kommas getrennt)',
   'item.tags.placeholder': 'z. B. leger, sommerlich',
+  'item.action.failed': 'Etwas ist schiefgelaufen. Bitte erneut versuchen.',
   'studio.status.autoPlaced': 'Automatisch anhand der erkannten Pose platziert',
   'studio.status.manual':
     'Automatischer Faltenwurf nicht verfügbar — manuelle Anpassung',
